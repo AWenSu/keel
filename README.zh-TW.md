@@ -1,179 +1,179 @@
 # unified-dev-skills
 
-**給 Claude Code 用的五階段開發流程——每階段一個 skill，每個角色都有具名 subagent，關鍵處設硬性關卡。**
+**給 Claude Code 用的五階段開發流程。每個階段配一個 skill，每個角色都叫得出名字，關鍵地方卡關卡，不讓你亂衝。**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-skills-blueviolet)](https://code.claude.com/docs/en/skills)
 [![No dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)](#安裝)
 
-[Read this in English](README.md)
+[English version](README.md)
 
 ```
 ┌──────────────┐   ┌──────────┐   ┌─────────────────┐   ┌─────────────┐   ┌────────────┐
 │ dev-discover │──▶│ dev-plan │──▶│ dev-plan-review │──▶│ dev-execute │──▶│ dev-finish │
-│  想法 → spec │   │ spec →   │   │  只審大案/風險   │   │  編排式或   │   │ 證據閘門   │
-│  （設閘門）   │   │ 產出物   │   │      高的案子     │   │  inline 皆可│   │ +合併      │
+│  想法→spec   │   │ spec→計畫│   │  只審大案/高風險 │   │  可編排可   │   │  查證據、  │
+│（卡核准關）   │   │          │   │                 │   │  inline 兩用│   │  才准合併  │
 └──────────────┘   └──────────┘   └─────────────────┘   └─────────────┘   └────────────┘
         ▲                                  │                     │
         └──────────── dev-discover ◀───────┘   dev-plan ◀────────┘   dev-debug ◀── dev-finish
-                （第3輪仍未決）           （與計畫矛盾）        （產不出證據）
+                （吵三輪還吵不完）        （跟計畫對不上）        （拿不出證據）
 ```
 
-`dev-workflow` 是五階段之上的路由器：判斷請求屬於哪個階段、派出對應 skill，還做到大多數路由器漏掉的一件事——**知道何時該把工作送回上一階段**，當後面階段發現前面階段其實錯了。
+`dev-workflow` 是五個階段之上的總機：判斷這次的請求該進哪個階段、派對應的 skill 去做，還幹了一件大部分路由器懶得做的事——**知道什麼時候該把工作退回去**，因為後面的階段常常會發現，前面那階段其實搞錯了。
 
-## 為什麼做這個
+## 為什麼要搞這套
 
-一個裝備齊全的 Claude Code 環境，規劃類 skill 會越積越多：superpowers 的生命週期鏈、gstack 的重量級審查套件、planning-with-files 的持久化層、自訂 planner agent。每一個都很好——但重疊本身有代價：**四種「做計畫」的方式，沒有一條明顯的主線，還得記路由表。**
+Claude Code 裝備齊全一點，規劃類的 skill 就會越堆越多：superpowers 一整條生命週期鏈、gstack 重量級審查套件、planning-with-files 的持久化機制、還有各種自訂 planner。每一個單獨拿出來都不錯，但擺在一起就麻煩了：**「做計畫」有四種做法，沒有一條主線，還得背路由規則才知道現在要用哪個。**
 
-這個 repo 堅持**每階段一個 skill**。每個 skill 吸收了值得留下的機制——硬性關卡、證據規則、決策分類法、進度帳本、驗證鐵律——並丟掉沒證明自己的部分（外部 CLI 依賴、遙測、重複的散文）。每個 skill 都是單一自包含的 `SKILL.md`：不需建置、不需 hook，除了檔案本身什麼都不用裝。
+這個 repo 只留**每階段一個 skill**。有用的機制才留下——硬性關卡、證據規則、決策分類、進度帳本、驗證鐵律；沒用的就砍（外部 CLI 依賴、遙測、重複的廢話）。每個 skill 就一份自包含的 `SKILL.md`，不用建置、不用掛 hook，除了檔案本身什麼都不用裝。
 
-**自第一版以來的變化：** 這條 pipeline 不再把工作派給匿名的 `general-purpose` subagent。每個角色——implementer、規格審查者、品質審查者、四種審查視角、兩層對抗式懷疑者、fixer、研究票——都是有名字的 agent 定義，各自釘死模型、各自有工具權限範圍。你看著一次執行過程，光看名字就知道誰在做什麼。詳見〈[Subagent 名冊](#subagent-名冊)〉。
+**跟第一版比，這次改了什麼：** pipeline 不再把工作丟給一個沒名字的 `general-purpose` subagent 打混。implementer、規格審查、品質審查、四種審查視角、兩層懷疑者、fixer、研究票——每個角色都是獨立命名的 agent，模型釘死、工具權限也鎖死。你盯著畫面看誰在跑，光看名字就知道現在誰在幹嘛，不用猜。細節看下面〈[Subagent 名冊](#subagent-名冊)〉。
 
-## 五個階段
+## 五個階段在幹嘛
 
-| # | Skill | 做什麼 | 骨幹來源 | 關鍵移植 |
-|---|-------|--------|---------|---------|
-| 1 | [`dev-discover`](skills/dev-discover/SKILL.md) | 模糊想法 → 使用者已核准、有證據根據的 spec。硬性關卡：核准前不寫任何程式碼。 | superpowers:brainstorming | gstack spec 的程式碼證據鐵律（先給 `path:line` 再問問題）、五問開場、範圍鎖定、在不同約束下平行「設計兩遍」 |
-| 2 | [`dev-plan`](skills/dev-plan/SKILL.md) | spec → 一份零背景工程師也能照做的計畫。分級指南、`Interfaces:` 區塊、禁用佔位詞。 | superpowers:writing-plans | planner agent 的風險分級；每個 task 的 `Skills:` 欄位指名要呼叫的領域 skill |
-| 3 | [`dev-plan-review`](skills/dev-plan-review/SKILL.md) | 多視角自動審查（CEO/Design/Eng/DX），強制先驗網路掃描——例行判斷自動決、只把真正需要判斷的事升級問人，並在信任自己的發現前先自我對抗反駁。 | gstack autoplan 的決策系統 | doubt-driven 反駁、Mechanical / Taste / User-Challenge 三分類、6 條自動決策原則、兩層懷疑者升級機制 |
-| 4 | [`dev-execute`](skills/dev-execute/SKILL.md) | 審過的計畫 → 能跑的程式碼。每個 task 派新的 implementer + 兩個**獨立**審查者（規格軸、品質軸——絕不合併成單一裁決），配崩潰安全的進度帳本。subagent 不可用時有 inline 備援。 | superpowers:subagent-driven-development | executing-plans 的 inline 模式；planning-with-files 的「檔案系統即記憶」 |
-| 5 | [`dev-finish`](skills/dev-finish/SKILL.md) | 在宣稱「完成」之前：為每個宣稱找新鮮證據、把真實流程整條走一遍、彙整這次執行過程中散落的所有未決事項，再整合分支。 | superpowers:verification-before-completion | 宣稱→證據對照表、紅綠回歸鐵律、分支整合選項 |
+| # | Skill | 做什麼 | 骨幹抄哪來 | 從哪嫁接了什麼 |
+|---|-------|--------|-----------|---------------|
+| 1 | [`dev-discover`](skills/dev-discover/SKILL.md) | 模糊想法 → 使用者點頭認可、有憑有據的 spec。規矩很硬：沒核准就不准動一行程式碼。 | superpowers:brainstorming | gstack spec 那套「先甩證據再問問題」、開場五問、範圍先鎖死、同一個問題在不同限制下平行想兩套做法 |
+| 2 | [`dev-plan`](skills/dev-plan/SKILL.md) | spec → 一份就算完全不懂這個 codebase 的工程師也能照做的計畫。分大小的指南、`Interfaces:` 區塊、禁止空話佔位。 | superpowers:writing-plans | planner agent 的風險分級；每個 task 上的 `Skills:` 欄位，先講清楚該叫哪些領域 skill |
+| 3 | [`dev-plan-review`](skills/dev-plan-review/SKILL.md) | 四個視角（CEO/Design/Eng/DX）自動輪流審，還會主動上網查有沒有人早就做過或早就撞牆。例行的自己拍板，真的要人判斷的才丟回來問，而且丟出結論前自己先反駁自己一輪。 | gstack autoplan 的決策系統 | 自我懷疑反駁法、Mechanical / Taste / User-Challenge 三分法、6 條自動拍板原則、兩層懷疑者升級機制 |
+| 4 | [`dev-execute`](skills/dev-execute/SKILL.md) | 審完的計畫 → 能跑的程式碼。每個 task 都是新開一個 implementer，配兩個**互相看不到彼此**的審查者（規格對不對、寫得好不好——兩軸絕不混成一個裁決）。進度帳本掉線也不會丟資料。subagent 用不了時還有 inline 備援。 | superpowers:subagent-driven-development | executing-plans 的 inline 模式；planning-with-files 那套「檔案系統就是記憶體」 |
+| 5 | [`dev-finish`](skills/dev-finish/SKILL.md) | 敢說「完成」之前：每個宣稱都要有剛查出來的新鮮證據、真的把整條流程走一遍、把這次過程中散落各處的未決事項全部收攏，最後才合併分支。 | superpowers:verification-before-completion | 宣稱對照證據表、紅燈變綠燈的回歸鐵律、分支整合怎麼選 |
 
-**內建跳過規則。** 小任務（單檔、可逆、<30 分鐘）整個跳過 1–3 階段；只有大案或高風險案才走審查。規劃開銷不該超過任務本身的 ~20%。
+**內建跳過規則。** 小事（改一個檔、可逆、30 分鐘內搞定）直接跳過 1–3 階段。只有大案或風險高的案子才走完整審查。規劃花的時間不該超過任務本身的兩成。
 
 ## 安裝
 
-把 `skills/` 和 `agents/` 複製到任何 Claude Code 會載入的位置：
+把 `skills/` 跟 `agents/` 丟到 Claude Code 會讀的地方：
 
 ```bash
-# 專案內
+# 只裝這個專案用
 cp -R skills/* your-repo/.claude/skills/
 cp -R agents/* your-repo/.claude/agents/
 
-# 或全域
+# 或全域裝一次到處用
 cp -R skills/* ~/.claude/skills/
 cp -R agents/* ~/.claude/agents/
 ```
 
-`agents/` 是選配但強烈建議裝——沒裝的話 pipeline 仍能跑，但每次 subagent 派工都會默默降級成 Claude Code 內建的通用 `general-purpose` agent：沒有釘死的模型、沒有限縮的工具權限、進度畫面上也看不到名字告訴你哪個角色在跑。
+`agents/` 這包選裝，但強烈建議裝——不裝，pipeline 一樣能跑，只是每次派工都會偷偷降級成內建的 `general-purpose`：模型沒釘死、工具權限沒鎖、進度畫面也看不出現在跑的是誰。
 
-安裝完重啟一次 Claude Code（新的 skill/agent 目錄只在 session 啟動時載入）。之後每個 skill 都可直接用——`/dev-discover`、`/dev-plan`、`/dev-plan-review`、`/dev-execute`、`/dev-finish`——或透過路由器 `/dev-workflow`。
+裝完重開一次 Claude Code（新的 skill/agent 目錄要重啟才會吃進去）。之後每個 skill 都能直接叫——`/dev-discover`、`/dev-plan`、`/dev-plan-review`、`/dev-execute`、`/dev-finish`，或是交給總機 `/dev-workflow` 自己判斷。
 
-## 用法
+## 怎麼用
 
 ```text
-# 從模糊想法開始
+# 從一個模糊的想法開始
 /dev-discover 我想幫公開 API 加 rate limiting
 
-# 需求已經清楚
+# 需求已經很清楚了
 /dev-plan 幫報表頁加 CSV 匯出，spec 在 docs/specs/...
 
-# 計畫很大或動到正式環境資料
+# 計畫很大，或動到正式環境的資料
 /dev-plan-review
 
-# 準備動工
+# 東西都準備好了，開工
 /dev-execute
 
-# 說「完成」之前
+# 講「做完了」之前先跑這個
 /dev-finish
 
-# 或直接描述任務，讓路由器判斷該走哪個階段
+# 或懶得判斷，直接講任務，讓總機自己分流
 /dev-workflow 幫管理後台加 OAuth 登入
 ```
 
-每個階段會宣告下一步並交接——你只在**具名關卡**介入，不是每一步都要你點頭。每個 subagent 一回傳，就立刻播報（裁決、一條有出處的發現、下一步）——你不會盯著一條靜默的 pipeline 猜四個 agent 在幹嘛。
+每個階段做完會自己宣告下一站、直接交接——你只在**幾個具名關卡**才會被叫住，不是每走一步都要你點頭。子代理一回來，馬上播報結果（裁決、一條有出處的發現、接下來要幹嘛）——不會讓你盯著一片安靜的畫面猜四個 agent 到底在忙什麼。
 
-### 四個關卡——僅有的、會停下來等你回答的點
+### 四個關卡——唯一會停下來等你回答的地方
 
-pipeline 其他所有地方都不會問你要不要繼續。這四個永遠會問：
+除了這四個，pipeline 其他地方都不會停下來問你要不要繼續：
 
-| 關卡 | 階段 | 問什麼 |
-|------|------|--------|
-| **G1** | `dev-plan-review`，Step 0 | 「這份計畫假設了 X、Y、Z——對嗎？」永遠會問的前提檢查；前提錯了，下游每個發現都沒意義。 |
-| **G2** | `dev-plan-review`，Step 5 | 每個活下來的 Taste 決定和 User Challenge，**一次問一題**，附完整脈絡+選項+後果。絕不批次彙總。 |
-| **G3** | `dev-execute`，pre-flight | 批次問完計畫矛盾的問題，在 Task 1 開始前問一次——不是任務跑到一半才問。 |
-| **G4** | `dev-execute`，每個 task 審查 | 發現與計畫原文本身矛盾（`PLAN-CONFLICT`）——絕不自動解決、絕不自動套用。 |
+| 關卡 | 在哪個階段 | 問什麼 |
+|------|-----------|--------|
+| **G1** | `dev-plan-review` Step 0 | 「這計畫假設 X、Y、Z 對不對？」——永遠會問的前提確認，前提錯了，後面查再多也白搭。 |
+| **G2** | `dev-plan-review` Step 5 | 每個活下來的 Taste 決定、每個 User Challenge，**一次一題**，附完整脈絡、選項、後果，不會打包成摘要一次丟給你。 |
+| **G3** | `dev-execute` pre-flight | 計畫矛盾的問題先打包，Task 1 開工前一次問完——不是做到一半才冒出來煩你。 |
+| **G4** | `dev-execute` 每個 task 審查 | 發現跟計畫原文對不上（`PLAN-CONFLICT`）——絕不自己決定怎麼修，也不自己套。 |
 
-### 回退路由——後面階段發現前面錯了
+### 回退路由——後面發現前面錯了怎麼辦
 
-| 觸發條件 | 從 | 退回到 |
-|---------|-----|--------|
-| 執行時發現計畫與現況矛盾（超出單一 task 能修的範圍） | `dev-execute` | `dev-plan` |
-| 計畫審查第 3 輪仍有未決決定——計畫在跟 spec 打架 | `dev-plan-review` | `dev-discover` |
-| `dev-finish` 的證據閘門產不出某個宣稱的證明 | `dev-finish` | `dev-debug` |
-| debug 後結論是需求本身錯了 | `dev-debug` | `dev-discover` |
+| 發生什麼 | 從哪個階段 | 退回哪個階段 |
+|---------|-----------|-------------|
+| 執行時發現計畫跟現況不合，而且不是改一個 task 就能收尾的 | `dev-execute` | `dev-plan` |
+| 計畫審查吵到第 3 輪還沒共識——代表計畫在跟 spec 打架 | `dev-plan-review` | `dev-discover` |
+| `dev-finish` 查證據時，某個宣稱怎麼都拿不出證明 | `dev-finish` | `dev-debug` |
+| debug 到最後發現，根本是需求本身就錯了 | `dev-debug` | `dev-discover` |
 
-### 建議路由（`dev-workflow` 判斷依據）
+### 建議路由（`dev-workflow` 怎麼判斷）
 
-| 訊號 | 路由到 |
-|------|--------|
-| 想法模糊、需求不清 | `dev-discover` |
-| spec 已存在、後面是多步驟工作 | `dev-plan` |
-| 計畫大/風險高（>8 檔、新架構、正式環境資料） | `dev-plan-review` |
-| 計畫已就緒且直觀 | `dev-execute` |
-| 準備宣稱完成 / 開 PR | `dev-finish` |
-| bug 或測試失敗 | 你的 debug skill——這條 pipeline 是給「建造」用的 |
-| UI/視覺工作 | 你的設計 skill 路由器 |
+| 看到什麼訊號 | 走哪 |
+|------------|------|
+| 想法很模糊、需求還沒講清楚 | `dev-discover` |
+| spec 已經有了，後面是好幾步的活 | `dev-plan` |
+| 計畫規模大或風險高（超過 8 個檔案、動新架構、碰正式環境資料） | `dev-plan-review` |
+| 計畫寫好了而且直觀好懂 | `dev-execute` |
+| 準備說做完了、要開 PR 了 | `dev-finish` |
+| bug 或測試掛掉 | 交給你自己的 debug skill，這條 pipeline 是拿來蓋東西的，不是抓蟲的 |
+| UI / 視覺相關工作 | 交給你自己的設計 skill 路由 |
 
-### 各專案類型的預設值
+### 不同專案類型該怎麼配
 
-哪些階段要跑、哪些審查視角要開、以及該疊加什麼——涵蓋 **web app、API、CLI、MCP server、serverless、文件 repo、爬蟲**：見 **[PROJECT-TYPE-GUIDE.md](PROJECT-TYPE-GUIDE.md)**。
+哪些階段要跑、哪些審查視角要開、上面還要疊什麼——**web app、API、CLI、MCP server、serverless、文件 repo、爬蟲**都有講：見 **[PROJECT-TYPE-GUIDE.md](PROJECT-TYPE-GUIDE.md)**。
 
-### 領域 skill 分層
+### 領域 skill 怎麼疊上去
 
-skill 的選用發生在**規劃時**，那時才有全局脈絡：`dev-plan` 產出物裡每個 task 都帶一個 `Skills:` 欄位，指名它的 implementer 必須呼叫哪些領域 skill（視覺任務對應 UI 設計 skill、平台任務對應 Workers/MCP 慣例的平台 skill）。`dev-execute` 會把這個欄位傳進每個 implementer 的工作說明。
+要用哪個領域 skill，這件事在**規劃階段**就該定好，因為那時候才看得到全局。`dev-plan` 產出的每個 task 都帶一個 `Skills:` 欄位，寫清楚 implementer 動工前該先叫哪些領域 skill（視覺相關的任務對應 UI 設計 skill、平台相關的任務對應 Cloudflare/MCP 那類平台 skill）。`dev-execute` 會把這欄直接塞進每個 implementer 的工作說明裡，不用臨場現找。
 
 ## Subagent 名冊
 
-這條 pipeline 每次派工都指名具體的 `subagent_type`——絕不落到通用的 `general-purpose`。名字本身就告訴你階段和角色；frontmatter 釘死模型、鎖住工具權限，讓這個決定不會像散文指示（「記得這裡要用 opus」）那樣悄悄漂掉。
+這條 pipeline 每次派工都指名道姓，指定具體的 `subagent_type`——絕不丟給通用的 `general-purpose` 打混。名字本身就講清楚是哪個階段、哪個角色；模型跟工具權限都寫死在 frontmatter 裡，不會像散文式的提醒（「這裡記得用 opus」）那樣講一講就被忘光。
 
-**唯讀是宣告出來的。** 下面每個審查者、視角、懷疑者、研究者都被限制成 `Read, Grep, Glob, Bash`（加上指名的檢索工具）——只能描述怎麼修，不能自己動手改。只有 implementer 和 fixer 有寫入權限。這讓「審查者不得改自己在審的程式碼」變成結構性保證，而不是一句可能被忽略的提示詞。
+**唯讀是明文規定的，不是靠自律。** 下面每個審查者、視角、懷疑者、研究者，工具都只給 `Read, Grep, Glob, Bash`（加上各自需要的檢索工具）——它們只能講該怎麼改，不能自己動手。只有 implementer 跟 fixer 有寫入權限。這樣「審查的人不准動自己在審的程式碼」就是規則卡死的，不是提示詞寫寫就算了。
 
-| subagent_type | 階段 | 角色 | model | 工具 |
+| subagent_type | 階段 | 幹嘛的 | model | 工具權限 |
 |---|---|---|---|---|
-| `dev-discover-designer` | 1 探索 | 3 個平行方案之一，各自受不同約束 | sonnet | 唯讀 |
-| `dev-plan-lens-ceo` | 3 審查 | 這件事該不該做——加上強制先驗網路掃描 | **opus** | 唯讀 + tavily, exa, context7 |
-| `dev-plan-lens-design` | 3 審查 | 使用者可見的每個狀態是否都指名了（條件式：UI 密集計畫才開） | sonnet | 唯讀 |
-| `dev-plan-lens-eng` | 3 審查 | 照寫的方式能不能做出來——加上對照即時文件的 API 時效查核 | sonnet | 唯讀 + context7, Ref |
-| `dev-plan-lens-dx` | 3 審查 | 開發者上手成本（條件式：面向 API/CLI/SDK 的計畫才開） | sonnet | 唯讀 + context7 |
-| `dev-plan-skeptic` | 3 審查 | 反駁一條 High finding——單點證據查核 | sonnet | 唯讀，**不給檢索工具** |
-| `dev-plan-skeptic-critical` | 3 審查 | 反駁一條 Critical／安全／跨檔推理的 finding | **opus** | 唯讀，**不給檢索工具** |
-| `dev-exec-implementer` | 4 執行 | 實作一個 task，測試先行強制執行 | sonnet | 完整 |
-| `dev-exec-reviewer-spec` | 4 執行 | 只看規格符合度 | sonnet | 唯讀 |
-| `dev-exec-reviewer-quality` | 4 執行 | 只看程式碼品質 | sonnet | 唯讀 |
-| `dev-exec-fixer` | 4 執行 | 只修拿到的 findings | sonnet | 完整 |
-| `dev-wayfind-researcher` | 前置階段 | 解一張能靠外部世界解答的研究票 | sonnet | 唯讀 + 完整檢索 |
+| `dev-discover-designer` | 1 探索 | 三個平行方案之一，各自守著不同限制想 | sonnet | 唯讀 |
+| `dev-plan-lens-ceo` | 3 審查 | 這件事到底該不該做，還要上網先查有沒有人做過、有沒有人撞過牆 | **opus** | 唯讀 + tavily、exa、context7 |
+| `dev-plan-lens-design` | 3 審查 | 使用者看得到的每個狀態都想到了沒（只在 UI 相關計畫才會開） | sonnet | 唯讀 |
+| `dev-plan-lens-eng` | 3 審查 | 照這樣寫真的做得出來嗎，還要查一下用到的 API 是不是早就被棄用了 | sonnet | 唯讀 + context7、Ref |
+| `dev-plan-lens-dx` | 3 審查 | 開發者要花多少力氣才能上手（只在面向 API/CLI/SDK 的計畫才會開） | sonnet | 唯讀 + context7 |
+| `dev-plan-skeptic` | 3 審查 | 挑一條 High 等級的發現來反駁——單點查證就搞得定的那種 | sonnet | 唯讀，**不給它上網查** |
+| `dev-plan-skeptic-critical` | 3 審查 | 反駁 Critical 等級、碰到安全/資料遺失/不可逆操作、或要跨檔案推理才能判斷的發現 | **opus** | 唯讀，**不給它上網查** |
+| `dev-exec-implementer` | 4 執行 | 把一個 task 做出來，強制測試先行 | sonnet | 完整權限 |
+| `dev-exec-reviewer-spec` | 4 執行 | 只看有沒有照規格做 | sonnet | 唯讀 |
+| `dev-exec-reviewer-quality` | 4 執行 | 只看寫得好不好 | sonnet | 唯讀 |
+| `dev-exec-fixer` | 4 執行 | 只修拿到手的那幾條發現，不順手改別的 | sonnet | 完整權限 |
+| `dev-wayfind-researcher` | 前置階段 | 解一張能靠外部資料查出答案的研究票 | sonnet | 唯讀 + 完整檢索工具 |
 
-另外還有三個既有名稱的通用專家，pipeline 會在發現需要時直接以原名派出：`security-auditor`、`test-engineer`、`silent-failure-hunter`。`dev-execute` 結束時的整分支審查用 `code-reviewer`，且**不覆寫模型**——它繼承這次 session 最強的模型，因為這是 `dev-finish` 前的最後一道防線。
+另外還有三個現成的通用專家，pipeline 該用的時候會直接用原名派出去：`security-auditor`、`test-engineer`、`silent-failure-hunter`。`dev-execute` 收尾時的整分支審查用 `code-reviewer`，而且**故意不去指定它的模型**——讓它自己繼承這次 session 裡最強的那顆模型，因為這是 `dev-finish` 之前的最後一道防線，不能省。
 
-### 為什麼是兩層懷疑者，而不是一個 model 參數
+### 為什麼是兩隻懷疑者，不是一個 model 參數就搞定
 
-讓「懷疑者」在簡單發現上便宜一點的直覺做法，是照嚴重度在派工時傳一個 `model` 覆寫參數。這條 pipeline 刻意**不**這麼做——用 model 參數做路由，是一個埋在函式呼叫裡的決定，進度畫面上看不見，時間壓力下很容易被忘記（這條 pipeline 早期版本正好有過這種「記得做 X」的散文規則，稽核發現它從沒被真的遵守過）。
+想讓懷疑者省點力氣、簡單的發現用便宜模型審，最直覺的做法是照嚴重度在派工時傳個 `model` 參數去覆寫。這條 pipeline 就是刻意不這麼幹——用參數決定模型，這個決定會埋在一行函式呼叫裡，進度畫面上完全看不出來，時間一趕就容易被忘記。（這條 pipeline 早期版本剛好就有過這種「記得要做 X」的散文規則，事後稽核發現根本沒有人真的照做過。）
 
-改成讓層級選擇**就是**agent 選擇：
+所以改成讓「用哪一層」直接等於「派哪個 agent」：
 
-- `dev-plan-skeptic`（sonnet）處理單點查核就能定案的發現——引用的那一行是否存在、是否真如所稱。
-- `dev-plan-skeptic-critical`（opus）處理 Critical 嚴重度、任何觸及安全／資料遺失／不可逆操作的發現，或需要跨檔案推理的發現（追蹤呼叫者、找既有防護、估影響半徑）。
-- 標準層可以回傳 `ESCALATE`，而不是硬猜超出自己深度的判斷——控制器會改派重案層。`ESCALATE` 永遠不當作裁決。
-- **不確定就升級。** 這裡的代價不對稱是真的：懷疑者誤判殺掉一個真的 Critical 發現，等於讓一個缺陷直接穿過執行階段跑到正式環境才現形；懷疑者誤判放過一個弱發現，只多花一輪修復-審查。pipeline 預設的偏向（「證據不足就反駁」）本身已經偏向殺掉發現——model 層級是攔在這個偏向和真正的錯誤之間的唯一防線。
+- `dev-plan-skeptic`（sonnet）處理單點查一下就能定案的發現——引用的那行到底存不存在、講的是不是真的那回事。
+- `dev-plan-skeptic-critical`（opus）處理 Critical 等級、碰到安全/資料遺失/不可逆操作的發現，或者需要跨檔案推理才能判斷的（追蹤呼叫者、找有沒有既有防護、估影響範圍多大）。
+- 標準層可以直接回一個 `ESCALATE`，不硬撐超出自己能力範圍的判斷——控制器收到就會改派重案層去查。`ESCALATE` 本身絕不算一個裁決。
+- **不確定就升級，別猶豫。** 這裡代價不對等：懷疑者誤殺一條真的很重要的發現，等於讓一個缺陷直接闖過執行階段跑到正式環境；懷疑者誤放過一條弱發現，頂多多花一輪修復再審。pipeline 骨子裡本來就偏向「證據不夠就反駁掉」，model 層級是攔在這個偏向跟真正犯錯之間唯一的防線。
 
-### 先驗掃描——在動工前抓到「這早就有人解決過了」
+### 先驗掃描——動工前先查有沒有人早就做過、早就撞過牆
 
-CEO 視角（`dev-plan-lens-ceo`）在做任何內部推理之前，先強制跑一輪外部掃描：用網路搜尋找現成產品/函式庫、用深度研究找已知失敗模式和棄用通知、用文件查詢確認某個點名的框架是否早就內建這個功能。它輸出三個段落——現成方案、已知撞牆、以及一個能證明「即便如此仍值得做」的**具體差異點**。
+CEO 視角（`dev-plan-lens-ceo`）動任何內部推理之前，先強制上網掃一輪：搜尋看有沒有現成的產品或函式庫、查有沒有人早就踩過這個坑、翻文件確認某個框架是不是本來就內建這功能。輸出分三段——現成方案、已知撞牆、還有一個能講出「即便如此還是值得做」的**具體差異點**。
 
-第三段刻意設成硬性關卡：一條先驗發現如果說不出跟我們情境的具體差異，信心上限就會被壓低，而且永遠不能單靠它砍掉一個計畫或升級成 User Challenge。表面上的名稱撞衫不算重複，靠一個膚淺的比對就殺掉正當的工作，會是這個視角能犯的最貴的錯誤。
+第三段刻意設成硬性關卡：一條先驗發現如果講不出跟我們情況具體差在哪，信心分數就會被壓低，而且**永遠不能單靠這條就砍掉整個計畫**，也不能升級成 User Challenge。名字聽起來撞衫不代表真的重複，如果只憑一個表面比對就殺掉一個正當的計畫，那會是這個視角能犯的最貴的錯。
 
-Eng 視角（`dev-plan-lens-eng`）跑平行的 API 時效查核——對照現行文件，確認計畫點名的每個框架/函式庫/API 自計畫寫成以來沒有被棄用或移除。
+Eng 視角（`dev-plan-lens-eng`）跑另一輪平行檢查，對照現行文件確認計畫裡點名的每個框架/函式庫/API，從寫計畫到現在有沒有被棄用或砍掉。
 
-**每條外部發現都要求 URL、取用日期、逐字引文**——跟 pipeline 對內部 `file:line` 引用一貫的證據標準相同。抓取回來的內容一律視為不可信輸入：內嵌在搜尋結果或文件頁面裡的指令一律忽略，只萃取事實性主張。
+**每條外部發現都要附 URL、查證日期、逐字引用**——跟這條 pipeline 對內部 `file:line` 引用一直以來的要求一樣嚴。抓回來的網頁內容一律當成不可信的東西：裡面藏的任何指令一概不理，只挑事實出來用。
 
-### 扇出上界
+### 扇出上限
 
-沒有任何階段會無限制派出 agent。上限是**每階段 ≤8 併發、≤16 總量**；若實際工作量超過，pipeline 會按嚴重度排序、覆蓋前 N 條，並**必須**印出 `SKIPPED: <n> — <原因>`。靜默截斷視為 bug——一個階段悄悄只覆蓋 60% 的發現卻回報得像覆蓋了 100%，比一開始就沒跑還糟。
+沒有哪個階段可以無限開 agent。上限是**每階段最多 8 個同時跑、總量最多 16 個**；真的超過的話，pipeline 會按嚴重度排序，先蓋前面幾條，剩下的**一定要**印出 `SKIPPED: <幾條> — <原因>`。悄悄少做卻不講，這條 pipeline 當成 bug 處理——一個階段偷偷只查了六成卻回報得像查了十成，比一開始就沒跑還糟糕。
 
-## 來源與上游同步
+## 來源出處與跟上游同步
 
-這些是**合成，不是 fork**——上游還在持續演進。每個 SKILL.md 的 frontmatter 都記錄了來源與版本。合成時的快照（2026-07-14；subagent 名冊與先驗掃描於 2026-07-30 加入）：
+這是**合成出來的東西，不是 fork**——上游還在持續改。每個 SKILL.md 的 frontmatter 都寫了來源跟版本號。合成時的版本快照（2026-07-14 合成；2026-07-30 加了 subagent 名冊跟先驗掃描）：
 
 | 上游 | 版本 | Repo |
 |------|------|------|
@@ -181,25 +181,25 @@ Eng 視角（`dev-plan-lens-eng`）跑平行的 API 時效查核——對照現�
 | gstack | 1.60.1.0 | [garrytan/gstack](https://github.com/garrytan/gstack) |
 | planning-with-files | 3.5.0 | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) |
 
-要跟上游同步：
+要跟上游同步的話：
 
-1. 對照上表版本，檢查上游有沒有新版。
-2. 讀它們的 changelog，只找**機制**變更（新關卡、新協定）。純散文改寫、以及本 repo 刻意丟掉的機制的修復（Codex hook、遙測、mockup board）都不用管。
-3. 把機制變更移植進受影響的階段 skill；在該 skill 的 frontmatter 裡把版本號往上調。
+1. 對照上表版本號，看上游是不是出新版了。
+2. 讀它們的 changelog，只挑**機制**上的改動來看（新關卡、新流程之類）。純粹改寫文字、或是修這個 repo 本來就刻意丟掉的東西（Codex hook、遙測、mockup board），不用理。
+3. 把機制上的改動搬進受影響的那個階段 skill，順手把它 frontmatter 裡的版本號往上調。
 
-如果你同時裝著上游原版 skill，在額外機制真的值回成本時優先用重量級原版——例如超過 15 檔的大計畫用 gstack `/autoplan`（雙模型共識）、輸出要開成 GitHub issue 用 gstack `spec`。
+如果你手上同時裝著上游原版，該用重量級原版的時候就用——比如超過 15 個檔案的大計畫，用 gstack `/autoplan`（雙模型互相對照）；要開 GitHub issue 的話用 gstack `spec`。
 
 ## 設計原則
 
-- **蒸餾，不是串接**——一個機制能被留下，是因為它扛得住重量，不是因為它本來就存在。
-- **關卡神聖不可侵犯，產出物可以縮小**——時間壓力下可以寫小一點的 spec；但絕不能跳過核准。
-- **證據優先於報告**——subagent 說「成功」、一次過期的測試結果、「應該可以」，都不是證據；diff 和剛跑出來的指令輸出才是。
-- **檔案系統優先於 context window**——任何需要撐過壓縮的東西都寫進檔案。
-- **具名 agent 優先於散文提醒**——如果一條規則很重要（「這裡要用強模型」「這隻不能寫檔案」），把它編進被派工 agent 的 frontmatter，而不是寫成一句寄望被記住的句子。
+- **是蒸餾，不是硬拼在一起**——一個機制能留下來，是因為它真的扛得住重量，不是因為它本來就存在。
+- **關卡是神聖不可侵犯的，產出物可以縮水**——時間趕的時候可以把 spec 寫短一點，但核准這一步絕不能跳過。
+- **證據比報告可信**——subagent 說「成功了」、一次過期的測試結果、「應該沒問題」，這些都不算證據；diff 跟剛跑出來的指令輸出才算。
+- **檔案系統比 context window 靠得住**——只要是要撐過壓縮還在的東西，就寫進檔案裡。
+- **具名 agent 比散文提醒可靠**——規則真的重要的話（「這裡要用強模型」、「這隻不准寫檔」），就寫死在被派工那隻 agent 的 frontmatter 裡，不要只寫一句話指望以後有人會記得。
 
-## 貢獻
+## 想貢獻的話
 
-歡迎 issue 和 PR——尤其是回報這個 repo 還沒移植的上游機制變更，或是實務上發現某個階段/關卡/agent 其實沒扛住重量。貢獻前記得參照上面的設計原則：貢獻該是蒸餾，不是給 pipeline 已經有的功能再開一條第四種做法。
+歡迎開 issue、發 PR——特別是回報這個 repo 還沒跟上的上游機制變化，或是實際用下來發現某個階段/關卡/agent 其實沒撐住的情況。動手前先看一眼上面的設計原則：貢獻應該是蒸餾出更好的東西，不是幫 pipeline 已經有的功能再開一條第四種做法。
 
 ## 授權
 
