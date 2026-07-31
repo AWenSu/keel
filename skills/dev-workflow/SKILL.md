@@ -109,6 +109,23 @@ ceiling, sort by severity, take the top N, and emit
 `SKIPPED: <n> — <id + reason>` at the stage's end. Silent truncation reads as
 full coverage when it isn't.
 
+**Pre-dispatch self-check (mandatory, every dispatch).** Naming the rule above
+is not enough on its own — a `general-purpose` dispatch can still slip through
+under context pressure since nothing forces the tool call's `subagent_type`
+field to match. Immediately before every Task/Agent tool call in this
+pipeline, state the intended `subagent_type` on its own line, copied verbatim
+from the roster table, e.g.:
+
+```
+派工: dev-exec-reviewer-spec（規格軸，stage 4）
+```
+
+Then make the call with that exact string. If the string you're about to
+state isn't a row in the roster table above, stop — the roster is missing a
+role (report `BLOCKED: roster 缺 <role>` and ask before improvising) or the
+task doesn't belong in this pipeline. Never silently fall back to
+`general-purpose` to avoid stopping.
+
 ## Progress broadcast (mandatory)
 
 Every subagent return is announced **immediately** — never batched to the end
