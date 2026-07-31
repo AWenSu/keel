@@ -13,6 +13,12 @@ provenance:
 
 # dev-discover — Requirements Discovery & Spec
 
+```
+INPUT   a raw idea or request, plus access to the real codebase
+OUTPUT  a user-approved spec: scope locked, test seams agreed, every
+        requirement grounded in evidence rather than recollection
+```
+
 Turn "I want X" into a written, approved spec. Nothing downstream (plan, review,
 execution) can be better than the spec it started from.
 
@@ -106,9 +112,12 @@ say why. Always include the minimal-viable option — the user must see what
 
 **Design it twice (from mattpocock codebase-design)** — when the work
 centers on a new interface or module boundary (not for straightforward
-changes): spawn 3 parallel fresh-context subagents, each designing under a
-*different* constraint — "minimize the interface, 1-3 entry points max" /
-"maximize flexibility" / "optimize for the most common caller". Each returns
+changes): spawn 3 parallel `dev-discover-designer` subagents (never
+`general-purpose`, no model override — the agent pins its own), each designing
+under a *different* constraint — "minimize the interface, 1-3 entry points max"
+/ "maximize flexibility" / "optimize for the most common caller". Name the
+constraint in each dispatch and broadcast each proposal as it returns, so the
+divergence is visible before you compare. Each returns
 interface + usage example + what's hidden + trade-offs. Compare by depth,
 locality, and seam placement (design.md terms), then present a strong
 recommendation, not a menu. Approaches from one context correlate — they

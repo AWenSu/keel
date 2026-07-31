@@ -16,6 +16,13 @@ Write the plan for an engineer with zero context for this codebase and
 questionable taste. Every ambiguity you leave is a decision they will make
 wrong.
 
+```
+INPUT   an approved spec (dev-discover) or requirements clear enough to name
+        exact file paths
+OUTPUT  a plan file: header (Goal, Global Constraints) + tasks each carrying
+        Delivers / Files / Interfaces / Skills, no placeholder phrases
+```
+
 ## When to skip
 
 Single-file reversible changes don't need a plan file. Medium tasks
@@ -23,6 +30,14 @@ Single-file reversible changes don't need a plan file. Medium tasks
 `planner` agent for a one-shot plan you review in-conversation, skip the
 artifact. This skill's full artifact is for work that will be executed over
 multiple sessions or by subagents.
+
+**The lightweight path still owes the four fields.** `dev-execute` consumes
+`Delivers:` (spec-axis review + staleness relocation), `Files:` (brief
+extraction + staleness check), `Interfaces:` (downstream task briefs), and
+`Skills:` (domain-skill invocation). State the required shape in the `planner`
+dispatch, and check the return. Any field missing → the shortcut is void; write
+the full artifact here. A plan that omits them doesn't fail loudly at
+execution — it silently disables three of that stage's safety mechanisms.
 
 ## Sizing guide (from planner)
 

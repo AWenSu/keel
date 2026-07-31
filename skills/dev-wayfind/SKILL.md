@@ -134,8 +134,12 @@ research tickets excepted (they may run in parallel as background subagents).
    exit to dev-discover directly.
 3. **Create** `MAP.md` and the tickets you can state sharply now, numbered
    in dependency order, `Blocked by` wired. Everything else → fog sections.
-4. **Fire research subagents** for any research tickets; wire their
-   Resolutions in as they land.
+4. **Fire `dev-wayfind-researcher` subagents** for any research tickets (never
+   `general-purpose`, no model override); wire their Resolutions in as they
+   land, and broadcast each as it returns. Cap concurrent researchers at 8.
+   A ticket that turns out to need the user's preference rather than an
+   external fact was mis-typed — retype it as HITL, don't let a researcher
+   guess an answer that then reads as fact in later sessions.
 5. Stop. Charting is one session's work.
 
 ### Work the map (every later session)

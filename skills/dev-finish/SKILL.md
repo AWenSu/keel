@@ -12,6 +12,13 @@ provenance:
 
 # dev-finish — Verification & Branch Integration
 
+```
+INPUT   implementation complete on a non-main branch; the plan's success
+        criteria; the ledger at .dev-pipeline/progress.md
+OUTPUT  every claim backed by fresh evidence from this session; open items
+        reconciled (Part 2b); branch integrated by the user's chosen option
+```
+
 <IRON-LAW>
 NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE.
 If you haven't run the verification command in this session, in this state
@@ -82,7 +89,31 @@ report mismatches — don't rename code at this stage. Same check for ADRs:
 a decision this work locked that is hard to reverse + surprising without
 context + a real trade-off → offer a one-paragraph ADR before integrating.
 
+## Part 2b: Open-items reconciliation
+
+Loose ends live in three places that never talk to each other. Pull all three
+into ONE list before integrating, because a decision that exists in only one of
+them is a decision nobody will find again:
+
+| Source | Where |
+|--------|-------|
+| Unresolved decisions | the plan's `REVIEW REPORT` section (dev-plan-review) |
+| Deferred work | `TODOS.md` entries added during review |
+| Flagged concerns | every `DONE_WITH_CONCERNS` in `.dev-pipeline/progress.md` and the task report files |
+
+Every item gets one of two dispositions: **resolved** (with the evidence) or
+**explicitly deferred** (with its `TODOS.md` line number). **An item with
+neither blocks completion.** Present the reconciled list in the final summary
+even when everything is clean — "nothing outstanding" is a claim, and like
+every other claim here it needs to show its work.
+
 ## Part 3: Integrate the branch
+
+**Never merge, rebase, push, or force-push into `main`/`master` without
+explicit user consent** — the rule is defined in dev-workflow and binds this
+stage exactly as it binds dev-execute. Integration is where the pipeline's
+work becomes irreversible; the branch protection does not lapse at the finish
+line.
 
 All boxes checked, evidence fresh — present the user exactly these options:
 

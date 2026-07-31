@@ -44,23 +44,37 @@ overhead should never exceed ~20% of the task itself.
 
 ## Install
 
-Copy `skills/` into any location Claude Code loads skills from:
+Copy `skills/` and `agents/` into any location Claude Code loads them from:
 
 ```bash
 # per-project
 cp -R skills/* your-repo/.claude/skills/
+cp -R agents/* your-repo/.claude/agents/
 
 # or global
 cp -R skills/* ~/.claude/skills/
+cp -R agents/* ~/.claude/agents/
 ```
+
+`agents/` is optional but recommended — without it, the pipeline still runs,
+but every subagent dispatch falls back to Claude Code's generic
+`general-purpose` agent instead of a named, tool-scoped, model-pinned one.
 
 Restart Claude Code once after installing (new skill directories are only
 watched from session start), then each skill is available as
 `/dev-discover` … `/dev-finish`.
 
-**Optional router.** Pair with a thin `dev-workflow` router skill that detects
-the current stage and dispatches — see the [Protocol](#suggested-routing)
-below for the routing table.
+**Router included.** [`dev-workflow`](skills/dev-workflow/SKILL.md) detects the
+current stage and dispatches — see [Suggested routing](#suggested-routing)
+below for the table, or just invoke it and let it route.
+
+**Subagent roster.** [`agents/`](agents/) ships 11 purpose-built subagent
+definitions the pipeline dispatches by name — `dev-plan-lens-ceo`,
+`dev-exec-reviewer-spec`, `dev-plan-skeptic-critical`, and so on. Each pins its
+own model and tool access in frontmatter (reviewers/lenses/skeptics are
+read-only; only implementers and fixers write) so the pipeline never falls back
+to an unlabeled `general-purpose` dispatch. Copy `agents/*` into
+`~/.claude/agents/` (or your project's `.claude/agents/`) alongside `skills/`.
 
 ## Usage
 

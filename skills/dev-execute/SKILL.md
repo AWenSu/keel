@@ -15,6 +15,18 @@ provenance:
 
 # dev-execute — Plan Execution
 
+```
+INPUT   a plan file whose every task carries Delivers / Files / Interfaces /
+        Skills; if it came from dev-plan-review, a REVIEW REPORT ending in
+        NO UNRESOLVED DECISIONS
+OUTPUT  all tasks committed and reviewed on a non-main branch; ledger complete
+        in .dev-pipeline/progress.md; final whole-branch review passed
+```
+
+Missing INPUT → `BLOCKED: 缺 <field> → 退回 dev-plan`. A plan without those
+fields silently disables brief extraction, the staleness check, and the
+spec-compliance axis — three of this stage's four safety mechanisms.
+
 Two modes, one decision at the top:
 
 ```
@@ -25,7 +37,16 @@ Tasks tightly coupled with shared evolving state? → INLINE, or go re-split the
 ```
 
 **Universal rules (both modes):**
-- Never start on main/master without explicit user consent — branch first.
+- Never start on main/master without explicit user consent — branch first
+  (the rule itself lives in dev-workflow; this is a reference, not a redefinition).
+- **Controller context check before ORCHESTRATED mode:** past ~100k tokens,
+  write a handoff and fork to a fresh session first. The controller keeps
+  accumulating across the whole stage and will hit mid-stage compaction —
+  the exact failure the ledger exists to survive, not one to walk into.
+- **Pipeline artifacts are not code.** On first creating `.dev-pipeline/`,
+  ensure the repo `.gitignore` contains it and commit that separately. Every
+  reviewer diff excludes that path; mixing process artifacts into a task diff
+  makes reviewers grade the wrong thing.
 - **Continuous execution:** do not pause between tasks to ask "should I
   continue?" — checkpoint questions burn the user's time. Stop only at the
   plan's end or on a genuine blocker.
@@ -64,7 +85,7 @@ contradiction at Task 7 is not.
    (Goal, Global Constraints) plus the Interfaces blocks of completed tasks
    it consumes. Pass briefs as *file paths*, never pasted into the prompt —
    pasted history bloats every downstream dispatch.
-2. **Dispatch a fresh implementer subagent** with the brief. If the task
+2. **Dispatch a fresh `dev-exec-implementer`** with the brief. If the task
    names domain skills (its `Skills:` field), the implementer invokes them
    before writing code. It implements, tests, commits, and reports status.
    **Staleness rule:** before editing, the implementer verifies the task's
@@ -79,15 +100,23 @@ contradiction at Task 7 is not.
    test evidence, concerns) to `.dev-pipeline/task-N-report.md`; its final
    message is ≤15 lines — status, commits, one-line test summary, concerns.
    Full reports flowing back inline is how controller contexts blow up.
-3. **Review the diff** with a fresh reviewer subagent. Diff base is the
-   commit before the task started — **never `HEAD~1`**, which silently drops
-   all but the last commit of a multi-commit task. The reviewer returns TWO
-   verdicts: (a) spec compliance — does it do what the task's `Delivers:`
-   says: missing behavior, scope creep, implemented-but-wrong; (b) code
-   quality — repo standards first, plus the smell baseline in
-   [smells.md](smells.md) and the design vocabulary/judgment tools in
-   `dev-discover/design.md` (include both paths in the brief). Both must
+3. **Review the diff with two independent reviewers** — one per axis, both
+   read-only by declaration (they describe fixes; only the fixer writes):
+   (a) `dev-exec-reviewer-spec` — does it do what the task's `Delivers:` says:
+   missing behavior, scope creep, implemented-but-wrong, interface drift;
+   (b) `dev-exec-reviewer-quality` — repo standards first, plus the smell
+   baseline in [smells.md](smells.md) and the design vocabulary/judgment tools
+   in `dev-discover/design.md` (include both paths in the brief). Both must
    pass.
+   Give each the **base commit explicitly** — the commit before the task
+   started, **never `HEAD~1`**, which silently drops all but the last commit
+   of a multi-commit task. A reviewer with no stated base returns BLOCKED
+   rather than guessing. Both diffs exclude `.dev-pipeline/`.
+   Splitting the axes across two agents is what makes the no-merge rule below
+   structural rather than aspirational: neither reviewer can see, and so
+   cannot be swayed by, the other's verdict.
+   **Broadcast both verdicts the moment they land** — axis, PASS/FAIL, the
+   single worst issue with its `file:line` anchor, and what you do next.
    **Never merge or rerank across the two axes** — each axis reports its own
    findings and its own worst issue, no single winner (from mattpocock
    code-review: a change can follow every standard and build the wrong
@@ -102,8 +131,26 @@ contradiction at Task 7 is not.
    the plan line side by side and ask which wins. Never dismiss it because
    "the plan says so" — the plan's authorship does not grade its own work —
    and never dispatch a fix that contradicts the plan without asking.
-4. **Fix loop:** Critical/Important findings → one fix subagent → re-review.
-5. **Ledger append** (see below), then next task.
+4. **Fix loop:** Critical/Important findings → one `dev-exec-fixer` →
+   re-review. The fixer touches only the listed findings; anything else it
+   changes enters the next review as unreviewed risk. `PLAN-CONFLICT`
+   findings are never handed to the fixer — they go to the user (gate G4).
+5. **Ledger append** (see below), update `.dev-pipeline/state.md`, next task.
+
+### Fan-out ceiling
+
+≤8 concurrent and ≤16 total agents per task loop. If findings exceed what the
+fix loop can carry, sort by severity, handle the top N, and emit
+`SKIPPED: <n> — <id + reason>`. Silent truncation reads as full coverage when
+it isn't.
+
+### Dispatch discipline
+
+Name the `subagent_type` on every dispatch — a `general-purpose` agent inside
+this stage is a bug, and the type name is what tells the user which stage and
+which role is currently running. Do **not** pass a `model` override: each agent
+file pins its own model and tool set, and overriding re-introduces the silent
+model-inheritance problem those pins exist to prevent.
 
 ### Implementer status protocol
 
@@ -118,15 +165,27 @@ Anything a subagent reports that you cannot verify from artifacts (diff,
 test output) — resolve personally before marking the task complete.
 "Agent said success" is not evidence; the diff is.
 
-### Model selection (cost routing)
+### Model selection — pinned, not chosen per dispatch
 
-- **Cheapest tier:** transcription-style tasks — the plan text already
-  contains the exact code to write
-- **Mid tier (floor for all reviewers):** ordinary implementation
-- **Most capable:** final whole-branch review, gnarly debugging
-- Always specify the model explicitly; an omitted model silently inherits
-  your session's (expensive) one. Turn count beats token price — a cheap
-  model that takes 4 retries costs more than a good one that takes 1.
+Model choice lives in each agent's frontmatter, not in this prose. That is
+deliberate: the previous rule ("always specify the model explicitly") was
+prose, and prose rules drift — every dispatch silently inherited the session's
+expensive model instead.
+
+| Agent | model | Why |
+|-------|-------|-----|
+| `dev-exec-implementer` | sonnet | Ordinary implementation |
+| `dev-exec-reviewer-spec` | sonnet | Checklist-shaped, high volume |
+| `dev-exec-reviewer-quality` | sonnet | Checklist-shaped, high volume |
+| `dev-exec-fixer` | sonnet | Scope is a given findings list |
+| `code-reviewer` (final branch) | inherit | Widest scope, last line of defence |
+
+Do not override these at the call site. If a task is pure transcription — the
+plan already contains the exact code — that is a signal the task is too small
+to dispatch, not a reason to hand-tune a model.
+
+Turn count beats token price: a cheap model that takes 4 retries costs more
+than a capable one that takes 1.
 
 ### Progress ledger — crash safety
 
@@ -144,8 +203,9 @@ a crashed session.
 
 ### Finish
 
-After all tasks: dispatch one final whole-branch reviewer (most capable
-model, diff from merge-base, same two-axis rules: spec axis against the plan's
+After all tasks: dispatch one final whole-branch `code-reviewer` (no model
+override — it inherits the strongest available; diff from merge-base, same
+two-axis rules: spec axis against the plan's
 Goal + Success Criteria, quality axis with [smells.md](smells.md), no merged
 ranking). The final reviewer additionally produces a **coverage diagram
 (from gstack)**: trace each entry point through its branches and error
