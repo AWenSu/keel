@@ -142,11 +142,12 @@ cp -R agents/* ~/.claude/agents/
 | `dev-exec-reviewer-spec` | 4 執行 | 只看有沒有照規格做 | sonnet | 唯讀 |
 | `dev-exec-reviewer-quality` | 4 執行 | 只看寫得好不好 | sonnet | 唯讀 |
 | `dev-exec-fixer` | 4 執行 | 只修拿到手的那幾條發現，不順手改別的 | sonnet | 完整權限 |
+| `dev-exec-fixer-critical` | 4 執行 | 只在修復迴圈第 4-5 輪出手——標準層卡了兩次才輪到它 | **opus** | 完整權限 |
 | `dev-wayfind-researcher` | 前置階段 | 解一張能靠外部資料查出答案的研究票 | sonnet | 唯讀 + 完整檢索工具 |
 
 另外還有三個現成的通用專家，pipeline 該用的時候會直接用原名派出去：`security-auditor`、`test-engineer`、`silent-failure-hunter`。`dev-execute` 收尾時的整分支審查用 `code-reviewer`，而且**故意不去指定它的模型**——讓它自己繼承這次 session 裡最強的那顆模型，因為這是 `dev-finish` 之前的最後一道防線，不能省。
 
-### 為什麼是兩隻懷疑者，不是一個 model 參數就搞定
+### 分層靠 agent 名字，不是靠 model 參數
 
 想讓懷疑者省點力氣、簡單的發現用便宜模型審，最直覺的做法是照嚴重度在派工時傳個 `model` 參數去覆寫。這條 pipeline 就是刻意不這麼幹——用參數決定模型，這個決定會埋在一行函式呼叫裡，進度畫面上完全看不出來，時間一趕就容易被忘記。（這條 pipeline 早期版本剛好就有過這種「記得要做 X」的散文規則，事後稽核發現根本沒有人真的照做過。）
 
@@ -156,6 +157,8 @@ cp -R agents/* ~/.claude/agents/
 - `dev-plan-skeptic-critical`（opus）處理 Critical 等級、碰到安全/資料遺失/不可逆操作的發現，或者需要跨檔案推理才能判斷的（追蹤呼叫者、找有沒有既有防護、估影響範圍多大）。
 - 標準層可以直接回一個 `ESCALATE`，不硬撐超出自己能力範圍的判斷——控制器收到就會改派重案層去查。`ESCALATE` 本身絕不算一個裁決。
 - **不確定就升級，別猶豫。** 這裡代價不對等：懷疑者誤殺一條真的很重要的發現，等於讓一個缺陷直接闖過執行階段跑到正式環境；懷疑者誤放過一條弱發現，頂多多花一輪修復再審。pipeline 骨子裡本來就偏向「證據不夠就反駁掉」，model 層級是攔在這個偏向跟真正犯錯之間唯一的防線。
+
+`dev-execute` 的修復迴圈用的是同一套邏輯（從 superpowers 6.2.0 移植過來）：第 1-3 輪都給標準層 `dev-exec-fixer`（sonnet）重試；到第 4-5 輪改派全新一次的 `dev-exec-fixer-critical`（opus）——同樣的脈絡、同樣的模型已經失敗兩次了，第三次照舊做法不會突然成功。撐到第 5 輪還有發現沒修完，斷路器就跳：會壞事的（破壞 Delivers 行為、安全、資料完整性）直接擋下來丟給使用者，無傷大雅的就記進帳本附裁決繼續往下走。這條 pipeline 裡沒有任何一處是靠傳 `model` 參數升級的——要升級，就開一個新名字的 agent。
 
 ### 先驗掃描——動工前先查有沒有人早就做過、早就撞過牆
 

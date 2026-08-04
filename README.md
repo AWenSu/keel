@@ -185,6 +185,7 @@ reviewing" a structural guarantee instead of a prompt that can be ignored.
 | `dev-exec-reviewer-spec` | 4 execute | Spec-compliance axis only | sonnet | read-only |
 | `dev-exec-reviewer-quality` | 4 execute | Code-quality axis only | sonnet | read-only |
 | `dev-exec-fixer` | 4 execute | Apply only the findings it was given | sonnet | full |
+| `dev-exec-fixer-critical` | 4 execute | Fix-loop rounds 4-5 only, after the standard tier stalls twice | opus | full |
 | `dev-wayfind-researcher` | pre-stage | Resolve one externally-answerable research ticket | sonnet | read-only + full search |
 
 Plus three general-purpose specialists this pipeline dispatches by their
@@ -194,7 +195,7 @@ end of `dev-execute` uses `code-reviewer` with **no model override** — it
 inherits whatever the strongest model in the session is, because it's the last
 line of defense before `dev-finish`.
 
-### Why two skeptic tiers instead of one model parameter
+### Tiering by agent identity, not by model parameter
 
 The naive way to make a "skeptic" cheaper on easy findings is to pass a
 `model` override at dispatch time based on severity. This pipeline
@@ -221,6 +222,15 @@ Instead, tier selection **is** agent selection:
   finding costs one extra fix-review round. The pipeline's default bias
   ("refute when evidence is weak") already leans toward killing findings — the
   model tier is the one thing standing between that bias and a real mistake.
+
+The same pattern governs `dev-execute`'s fix loop (ported from superpowers
+6.2.0): rounds 1-3 resume the standard `dev-exec-fixer` (sonnet); rounds 4-5
+switch to a fresh `dev-exec-fixer-critical` (opus) dispatch, because a fixer
+that failed twice with the same context and model isn't going to succeed a
+third time unchanged. At round 5, unresolved findings trip a circuit breaker
+— load-bearing ones block the task and go to the user, cosmetic ones get
+parked in the ledger with a ruling. No stage in this pipeline escalates by
+passing a `model` override; every escalation is a named agent.
 
 ### Prior-art scanning — catching "this is already solved" before it's built
 

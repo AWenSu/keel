@@ -92,6 +92,7 @@ is working. A `general-purpose` dispatch inside this pipeline is a bug.
 | `dev-exec-reviewer-spec` | 4 execute | Spec-compliance axis | sonnet |
 | `dev-exec-reviewer-quality` | 4 execute | Code-quality axis | sonnet |
 | `dev-exec-fixer` | 4 execute | Apply review findings | sonnet |
+| `dev-exec-fixer-critical` | 4 execute | Fix-loop round 4-5 — standard tier stalled | opus |
 | `dev-wayfind-researcher` | pre | Resolve one research ticket | sonnet |
 | `code-reviewer` | 4 execute | Final whole-branch review | inherit (strongest) |
 | `security-auditor` | 3/5 | Security-class findings | opus |

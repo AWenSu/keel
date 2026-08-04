@@ -4,7 +4,7 @@ description: Use when a reviewed plan is ready to implement — orchestrates sub
 provenance:
   synthesized: 2026-07-14
   sources:
-    - superpowers:subagent-driven-development @6.1.1 (orchestration spine, ledger, status protocol, model matrix, two-verdict review, BASE rule; report files, pre-flight plan review, plan-mandated arbitration added 2026-07-23)
+    - superpowers:subagent-driven-development @6.1.1 (orchestration spine, ledger, status protocol, model matrix, two-verdict review, BASE rule; report files, pre-flight plan review, plan-mandated arbitration added 2026-07-23); capped fix-loop with round-4 tier escalation and circuit-breaker adjudication ported from @6.2.0 2026-08-01 (routed to a named `dev-exec-fixer-critical` agent instead of a model-override parameter, to match this pipeline's model-pinning discipline)
     - superpowers:executing-plans @6.1.1 (inline fallback, stop conditions, branch rule)
     - superpowers:test-driven-development @6.1.1 (delete-code-before-test, testing anti-patterns in smells.md; added 2026-07-23)
     - planning-with-files @3.5.0 (filesystem-as-memory: findings/progress files, 2-action rule)
@@ -131,10 +131,24 @@ contradiction at Task 7 is not.
    the plan line side by side and ask which wins. Never dismiss it because
    "the plan says so" — the plan's authorship does not grade its own work —
    and never dispatch a fix that contradicts the plan without asking.
-4. **Fix loop:** Critical/Important findings → one `dev-exec-fixer` →
-   re-review. The fixer touches only the listed findings; anything else it
+4. **Fix loop (capped, from superpowers 6.2.0):** Critical/Important findings
+   → `dev-exec-fixer` → scoped re-review of only the findings just fixed →
+   repeat. The fixer touches only the listed findings; anything else it
    changes enters the next review as unreviewed risk. `PLAN-CONFLICT`
    findings are never handed to the fixer — they go to the user (gate G4).
+
+   **Round cap: 5.** Rounds 1–3 resume the same `dev-exec-fixer` dispatch.
+   Rounds 4–5 switch to `dev-exec-fixer-critical` (opus, fresh context, no
+   memory of the failed attempts) — tier by agent identity, same as the
+   skeptic split; **never** pass a `model` override to escalate the standard
+   fixer, that's the exact anti-pattern this pipeline's model-pinning rule
+   exists to prevent. A fixer that failed twice with the same context and
+   model is not going to succeed a third time unchanged.
+   At round 5, if findings remain: **circuit breaker trips.** Adjudicate each
+   remaining finding — load-bearing (breaks a Delivers: line, security, data
+   integrity) → `BLOCKED`, report to the user, do not mark the task done;
+   cosmetic/non-load-bearing → park in the ledger with the ruling and proceed.
+   Never loop past round 5 silently hoping the next attempt converges.
 5. **Ledger append** (see below), update `.dev-pipeline/state.md`, next task.
 
 ### Fan-out ceiling
@@ -178,6 +192,7 @@ expensive model instead.
 | `dev-exec-reviewer-spec` | sonnet | Checklist-shaped, high volume |
 | `dev-exec-reviewer-quality` | sonnet | Checklist-shaped, high volume |
 | `dev-exec-fixer` | sonnet | Scope is a given findings list |
+| `dev-exec-fixer-critical` | opus | Fix-loop rounds 4-5 only — standard tier stalled twice |
 | `code-reviewer` (final branch) | inherit | Widest scope, last line of defence |
 
 Do not override these at the call site. If a task is pure transcription — the
