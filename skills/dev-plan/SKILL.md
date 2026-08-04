@@ -6,7 +6,7 @@ provenance:
   sources:
     - superpowers:writing-plans @6.1.1 (plan artifact format, Interfaces block, No Placeholders, task right-sizing, type-consistency check)
     - ~/.claude/agents/planner.md (risk grading, sizing guide, success-criteria checklist)
-    - mattpocock/skills to-tickets + tdd @1.2.0 (Delivers behavior line, tests-only-at-confirmed-seams, expand–contract wide-refactor sequencing; added 2026-07-22)
+    - mattpocock/skills to-tickets + tdd @1.2.0 (Delivers behavior line, tests-only-at-confirmed-seams, expand–contract wide-refactor sequencing; added 2026-07-22); vertical-slice task framing and post-breakdown granularity/dependency quiz added 2026-08-01
   dropped: nothing significant — the sources composed cleanly
 ---
 
@@ -129,6 +129,13 @@ Rules that make plans executable:
   rollback step.
 - **Right-sizing:** split only where a reviewer could meaningfully reject one
   task while approving its neighbor. Smaller is not automatically better.
+- **Vertical slices, not horizontal (from mattpocock to-tickets).** A task
+  cuts a narrow but complete path through every layer it touches (schema,
+  API, UI, tests) — not "the DB layer" as one task and "the UI layer" as
+  another. A completed task is demoable or verifiable on its own; a
+  horizontal slice never is until every other layer's task also lands. The
+  wide-refactor exception in 3b is deliberate — that's the one case a
+  horizontal cut is correct.
 - **Tests only at confirmed seams.** Every "write failing test" step names
   the seam from the spec's **Test seams** section it exercises, and the test
   observes behavior through that interface only — no internals, no private
@@ -175,6 +182,22 @@ One pass, fix and move on:
 - **Type-consistency across tasks:** `clearLayers()` in Task 3 but
   `clearFullLayers()` in Task 7 is a bug you're planting now
 - Each phase leaves the system working (incremental, from planner)
+
+### 6. Quiz the user on the breakdown (from mattpocock to-tickets)
+
+Present the task list as titles + **Depends on** edges only (not the full
+plan) and ask two questions before exit:
+
+- Does the granularity feel right — any task too coarse to review as one
+  unit, or too fine to be worth a separate task?
+- Are the `Depends on` edges correct — does each task depend only on tasks
+  that genuinely gate it, no more and no less?
+
+This is the only human checkpoint most plans get on their task breakdown —
+**dev-plan-review is optional and skipped by most plans** (only large/risky
+ones route through it). Skip this quiz only when the plan is heading into
+dev-plan-review anyway; that stage re-examines the breakdown in more depth
+and asking twice wastes a round-trip.
 
 ## Exit
 

@@ -34,7 +34,7 @@ Claude Code 裝備齊全一點，規劃類的 skill 就會越堆越多：superpo
 | # | Skill | 做什麼 | 骨幹抄哪來 | 從哪嫁接了什麼 |
 |---|-------|--------|-----------|---------------|
 | 1 | [`dev-discover`](skills/dev-discover/SKILL.md) | 模糊想法 → 使用者點頭認可、有憑有據的 spec。規矩很硬：沒核准就不准動一行程式碼。 | superpowers:brainstorming | gstack spec 那套「先甩證據再問問題」、開場五問、範圍先鎖死、同一個問題在不同限制下平行想兩套做法 |
-| 2 | [`dev-plan`](skills/dev-plan/SKILL.md) | spec → 一份就算完全不懂這個 codebase 的工程師也能照做的計畫。分大小的指南、`Interfaces:` 區塊、禁止空話佔位。 | superpowers:writing-plans | planner agent 的風險分級；每個 task 上的 `Skills:` 欄位，先講清楚該叫哪些領域 skill |
+| 2 | [`dev-plan`](skills/dev-plan/SKILL.md) | spec → 一份就算完全不懂這個 codebase 的工程師也能照做的計畫。分大小的指南、`Interfaces:` 區塊、禁止空話佔位。 | superpowers:writing-plans | planner agent 的風險分級；每個 task 上的 `Skills:` 欄位，先講清楚該叫哪些領域 skill；mattpocock to-tickets 的垂直切片任務框架、拆完票先問粒度/依賴對不對的 quiz |
 | 3 | [`dev-plan-review`](skills/dev-plan-review/SKILL.md) | 四個視角（CEO/Design/Eng/DX）自動輪流審，還會主動上網查有沒有人早就做過或早就撞牆。例行的自己拍板，真的要人判斷的才丟回來問，而且丟出結論前自己先反駁自己一輪。 | gstack autoplan 的決策系統 | 自我懷疑反駁法、Mechanical / Taste / User-Challenge 三分法、6 條自動拍板原則、兩層懷疑者升級機制 |
 | 4 | [`dev-execute`](skills/dev-execute/SKILL.md) | 審完的計畫 → 能跑的程式碼。每個 task 都是新開一個 implementer，配兩個**互相看不到彼此**的審查者（規格對不對、寫得好不好——兩軸絕不混成一個裁決）。進度帳本掉線也不會丟資料。subagent 用不了時還有 inline 備援。 | superpowers:subagent-driven-development | executing-plans 的 inline 模式；planning-with-files 那套「檔案系統就是記憶體」 |
 | 5 | [`dev-finish`](skills/dev-finish/SKILL.md) | 敢說「完成」之前：每個宣稱都要有剛查出來的新鮮證據、真的把整條流程走一遍、把這次過程中散落各處的未決事項全部收攏，最後才合併分支。 | superpowers:verification-before-completion | 宣稱對照證據表、紅燈變綠燈的回歸鐵律、分支整合怎麼選 |
@@ -90,9 +90,11 @@ cp -R agents/* ~/.claude/agents/
 | 關卡 | 在哪個階段 | 問什麼 |
 |------|-----------|--------|
 | **G1** | `dev-plan-review` Step 0 | 「這計畫假設 X、Y、Z 對不對？」——永遠會問的前提確認，前提錯了，後面查再多也白搭。 |
-| **G2** | `dev-plan-review` Step 5 | 每個活下來的 Taste 決定、每個 User Challenge，**一次一題**，附完整脈絡、選項、後果，不會打包成摘要一次丟給你。 |
+| **G2** | `dev-plan-review` Step 5 | 每個活下來的 Taste 決定、每個 User Challenge，一條發現一題，**依決策依賴關係分批**（見下），附完整脈絡、選項、後果。 |
 | **G3** | `dev-execute` pre-flight | 計畫矛盾的問題先打包，Task 1 開工前一次問完——不是做到一半才冒出來煩你。 |
 | **G4** | `dev-execute` 每個 task 審查 | 發現跟計畫原文對不上（`PLAN-CONFLICT`）——絕不自己決定怎麼修，也不自己套。 |
+
+**G2 按依賴前緣分批，不是死板一次一題（借用 mattpocock batch-grill-me 的做法）。** 大部分發現彼此根本不相依賴，死板逐題只是安全但慢。改成先畫出哪個決定要等哪個決定先答（比如「用哪種登入方式」會決定「session 怎麼存」），再分輪處理。**前緣**指所有前提都已解決、現在就答得出來的發現——把整個前緣塞進**一次** `AskUserQuestion` 呼叫（它原生上限一次 4 題；前緣超過 4 條就拆成最少次數的呼叫）。每輪答完先套用到計畫檔再算下一輪前緣——一個答案常常會順便解掉或改變後面的問題。答案還依賴這輪某條未答問題的，就留到下一輪——分批的界線是依賴關係，不是圖方便。前緣清空就結束。
 
 ### 回退路由——後面發現前面錯了怎麼辦
 
@@ -183,6 +185,7 @@ Eng 視角（`dev-plan-lens-eng`）跑另一輪平行檢查，對照現行文件
 | superpowers | 6.1.1 | [obra/superpowers](https://github.com/obra/superpowers) |
 | gstack | 1.60.1.0 | [garrytan/gstack](https://github.com/garrytan/gstack) |
 | planning-with-files | 3.5.0 | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) |
+| mattpocock/skills | 沒版號的 monorepo——照 commit 對，不是照 tag | [mattpocock/skills](https://github.com/mattpocock/skills) |
 
 要跟上游同步的話：
 

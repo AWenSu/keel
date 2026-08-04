@@ -7,6 +7,7 @@ provenance:
     - gstack:autoplan @1.60.1.0 (6 decision principles, Mechanical/Taste/UserChallenge taxonomy, sequential lens order, scope-conditional lenses, exit gate)
     - doubt-driven-development (fresh-context adversarial refutation)
     - gstack plan-{eng,ceo,devex}-review sections/ @1.60.1.0 (evidence gate + confidence, regression iron rule, E2E/EVAL matrix, error registry, DX persona/TTHW/journey, cross-lens themes, TODOS.md; added 2026-07-23)
+    - mattpocock/skills batch-grill-me @in-progress (frontier-based question batching for Step 5; added 2026-08-01)
   dropped: Codex dual-voice (external CLI dep), telemetry, restore points, comparison-board mockups. For the full heavyweight version with dual-model consensus, use gstack /autoplan directly.
 ---
 
@@ -211,11 +212,22 @@ enough to just evaluate inline.
 
 Apply surviving **Mechanical** edits directly to the plan file.
 
-Then walk the user through every surviving **Taste** finding and **User
-Challenge** — **one question at a time, one finding per question** (use
-AskUserQuestion where available). Never batch them into a single summary
-question, and never proceed on an unanswered one. Each question carries full
-detail:
+Then work every surviving **Taste** finding and **User Challenge** as a
+**decision tree, in rounds** (from mattpocock batch-grill-me): map which
+findings depend on another's answer (e.g. "which auth pattern" gates "session
+storage format"). One finding is still one question — this changes how many
+questions go out *per round*, not how a single question is asked.
+
+- **Frontier** = every finding whose prerequisite decisions are already
+  settled — answerable right now without guessing an answer you haven't
+  heard yet.
+- Ask the whole frontier in **one AskUserQuestion call** (up to its 4-question
+  cap; a frontier over 4 splits across the fewest calls needed — never forced
+  down to one question per call just to be safe). A question whose answer
+  depends on another still open this round belongs to a **later** round, not
+  this one — batching is bounded by dependency, not by convenience.
+- Never proceed on an unanswered question. Each question still carries full
+  detail:
 
 - **Context** — which lens raised it, what part of the plan it touches
   (quote the plan line), and the evidence behind it
@@ -225,9 +237,10 @@ detail:
 - User Challenges additionally use the 5-field format above, with the
   user's stated direction as the default option
 
-Apply each answer to the plan file as it lands, before asking the next —
-answers often change what the next question should be; drop questions an
-earlier answer already settled.
+Apply every answer from a round to the plan file before computing the next
+round's frontier — an answer often resolves or reshapes what's still open;
+drop questions an earlier answer already settled. The session's Step 5 is
+done when the frontier is empty.
 
 After all questions are resolved, present ONE closing summary:
 

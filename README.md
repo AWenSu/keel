@@ -51,7 +51,7 @@ name alone, exactly who is doing what. See [Subagent roster](#subagent-roster).
 | # | Skill | What it does | Spine | Key grafts |
 |---|-------|--------------|-------|------------|
 | 1 | [`dev-discover`](skills/dev-discover/SKILL.md) | Vague idea → user-approved, evidence-grounded spec. Hard gate: no code before approval. | superpowers:brainstorming | gstack spec's code-evidence rule (`path:line` before questions), five-question intake, scope lock, parallel "design it twice" exploration under diverging constraints |
-| 2 | [`dev-plan`](skills/dev-plan/SKILL.md) | Spec → plan an engineer with zero context could execute. Sizing guide, `Interfaces:` blocks, banned placeholders. | superpowers:writing-plans | planner agent's risk grading; per-task `Skills:` field naming domain skills to invoke |
+| 2 | [`dev-plan`](skills/dev-plan/SKILL.md) | Spec → plan an engineer with zero context could execute. Sizing guide, `Interfaces:` blocks, banned placeholders. | superpowers:writing-plans | planner agent's risk grading; per-task `Skills:` field naming domain skills to invoke; mattpocock to-tickets' vertical-slice task framing and post-breakdown granularity/dependency quiz |
 | 3 | [`dev-plan-review`](skills/dev-plan-review/SKILL.md) | Multi-lens automated review (CEO/Design/Eng/DX) with a mandatory prior-art web scan — auto-decides routine choices, escalates only real judgment calls, adversarially refutes its own findings before trusting them. | gstack autoplan's decision system | doubt-driven refutation; Mechanical / Taste / User-Challenge taxonomy; 6 auto-decision principles; two-tier skeptic escalation |
 | 4 | [`dev-execute`](skills/dev-execute/SKILL.md) | Reviewed plan → working code. Fresh implementer + two **independent** reviewers per task (spec axis, quality axis — never merged into one verdict), crash-safe progress ledger. Inline fallback when subagents aren't available. | superpowers:subagent-driven-development | executing-plans inline mode; planning-with-files filesystem-as-memory |
 | 5 | [`dev-finish`](skills/dev-finish/SKILL.md) | Before any "done" claim: fresh verification evidence for every claim, drive the real flow end-to-end, reconcile every open item scattered across the run, then integrate the branch. | superpowers:verification-before-completion | claim→evidence table; red-green regression rule; branch integration options |
@@ -119,9 +119,22 @@ never do:
 | Gate | Stage | What it asks |
 |------|-------|--------------|
 | **G1** | `dev-plan-review`, Step 0 | "This plan assumes X, Y, Z — correct?" The one always-asked premise check; wrong premises make every downstream finding worthless. |
-| **G2** | `dev-plan-review`, Step 5 | Every surviving Taste decision and User Challenge, **one question at a time**, full context + options + consequence. Never batched into a summary. |
+| **G2** | `dev-plan-review`, Step 5 | Every surviving Taste decision and User Challenge, one finding per question, **batched by dependency frontier** (see below), full context + options + consequence. |
 | **G3** | `dev-execute`, pre-flight | Batched plan-contradiction questions, asked once before Task 1 — not mid-task. |
 | **G4** | `dev-execute`, per-task review | A finding that contradicts the plan's own text (`PLAN-CONFLICT`) — never auto-resolved, never auto-applied. |
+
+**G2 batches by dependency frontier, not one-at-a-time (from mattpocock
+batch-grill-me).** Strict one-question-serial is safe but slow when most
+findings don't actually depend on each other. Instead: map which findings
+depend on another's answer (choice of auth pattern gates session-storage
+format, say), then work it in rounds. The **frontier** is every finding whose
+prerequisites are already settled — ask the whole frontier in one
+`AskUserQuestion` call (its native cap is 4 questions; a bigger frontier
+splits across the fewest calls needed). Apply every answer before computing
+the next round — an answer often resolves or reshapes what's still open. A
+question whose answer depends on one still open this round waits for the
+next round; the constraint is dependency, never convenience. Done when the
+frontier is empty.
 
 ### Backward routes — when a later stage finds an earlier mistake
 
@@ -277,6 +290,7 @@ time (2026-07-14; subagent roster and prior-art scanning added 2026-07-30):
 | superpowers | 6.1.1 | [obra/superpowers](https://github.com/obra/superpowers) |
 | gstack | 1.60.1.0 | [garrytan/gstack](https://github.com/garrytan/gstack) |
 | planning-with-files | 3.5.0 | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) |
+| mattpocock/skills | unversioned monorepo — synced by commit, not tag | [mattpocock/skills](https://github.com/mattpocock/skills) |
 
 To sync with upstream:
 

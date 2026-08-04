@@ -182,7 +182,7 @@ Add `.dev-pipeline/` to the repo's `.gitignore` on first creation.
 | Gate | Where | What |
 |------|-------|------|
 | G1 | dev-plan-review Step 0 | Premise confirmation — the one always-asked question |
-| G2 | dev-plan-review Step 5 | Each surviving Taste / User Challenge, one per question |
+| G2 | dev-plan-review Step 5 | Each surviving Taste / User Challenge, asked one finding per question, batched by dependency frontier (never all at once, never forced serial past the frontier) |
 | G3 | dev-execute pre-flight | Batched plan-contradiction questions before Task 1 |
 | G4 | dev-execute per-task review | `PLAN-CONFLICT` finding arbitration |
 
