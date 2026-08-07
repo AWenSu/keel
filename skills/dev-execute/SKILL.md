@@ -10,6 +10,7 @@ provenance:
     - planning-with-files @3.5.0 (filesystem-as-memory: findings/progress files, 2-action rule)
     - mattpocock/skills code-review @1.2.0 (Fowler smell baseline in smells.md, two-axis no-merged-ranking rule, staleness/relocate-by-Delivers rule; added 2026-07-22)
     - gstack plan-eng-review sections @1.60.1.0 (evidence gate, coverage diagram; added 2026-07-23)
+    - 20260807 dev-pipeline-security-review-requirements 需求書 R3/R4/R5 (conditionally-triggered third review axis `dev-exec-reviewer-security`, opus-pinned, independent no-merge-ranking; added 2026-08-07)
   dropped: task-brief/review-package helper scripts (plugin-internal paths; inlined their intent as prompt rules)
 ---
 
@@ -100,28 +101,63 @@ contradiction at Task 7 is not.
    test evidence, concerns) to `.dev-pipeline/task-N-report.md`; its final
    message is ≤15 lines — status, commits, one-line test summary, concerns.
    Full reports flowing back inline is how controller contexts blow up.
-3. **Review the diff with two independent reviewers** — one per axis, both
-   read-only by declaration (they describe fixes; only the fixer writes):
+3. **Review the diff — spec/quality always, security when triggered** — read-only by
+   declaration (they describe fixes; only the fixer writes):
    (a) `dev-exec-reviewer-spec` — does it do what the task's `Delivers:` says:
    missing behavior, scope creep, implemented-but-wrong, interface drift;
    (b) `dev-exec-reviewer-quality` — repo standards first, plus the smell
    baseline in [smells.md](smells.md) and the design vocabulary/judgment tools
    in `dev-discover/design.md` (include both paths in the brief). Both must
-   pass.
-   Give each the **base commit explicitly** — the commit before the task
-   started, **never `HEAD~1`**, which silently drops all but the last commit
-   of a multi-commit task. A reviewer with no stated base returns BLOCKED
-   rather than guessing. Both diffs exclude `.dev-pipeline/`.
-   Splitting the axes across two agents is what makes the no-merge rule below
-   structural rather than aspirational: neither reviewer can see, and so
-   cannot be swayed by, the other's verdict.
-   **Broadcast both verdicts the moment they land** — axis, PASS/FAIL, the
+   pass, on every task, no trigger condition.
+   (c) `dev-exec-reviewer-security` — dispatched as a **third, independent
+   axis** only when at least one of these R4 conditions is met (check all
+   five before skipping). Findings tagged `plan-global` in
+   `dev-plan-lens-security`'s output don't belong to any single task — note
+   them once at the start of this step, not as a per-task trigger:
+   - the task's `Files:` line touches an authentication/authorization/session,
+     encryption, file-upload, outbound-call, or database-query-construction
+     path. This is judged **semantically against the task's `Delivers:`
+     content, not a literal filename/keyword match** — per dev-plan's
+     existing "Delivers is truth, Files is a hint" rule. A diff that changes
+     an existing data query's ownership filter still counts even if `Files:`
+     only says `services/order.py` with no "auth" string in it.
+   - the diff adds or modifies an externally-reachable endpoint
+   - `dev-plan` marked the task high-risk
+   - the plan-stage security lens (`dev-plan-lens-security`) previously
+     raised a finding against this task: determined by matching its
+     `FINDINGS:` entries by their `## Task N` tag against the current task's
+     number — a tag match means condition 4 is met, regardless of whether
+     that finding was later addressed. ("Previously raised," not "still
+     unresolved.")
+   - the diff matches a sensitive-string pattern: `password`, `secret`,
+     `token`, `api[_-]?key`, `BEGIN.*PRIVATE KEY`, or a connection-string
+     shape
+   New dependencies added to a package list (new package names, not version
+   bumps) do **not** trigger this axis on their own — that's dependency
+   existence verification and belongs to `dev-finish` Part 2c(3). A
+   pure dependency-list change that matches none of the five conditions
+   above skips this axis and cites that deferral in the ledger line below.
+   Not triggered → do not dispatch it; instead write to the ledger
+   `security axis skipped — <which of the five conditions was checked and
+   why none matched — for a pure dependency-list change, cite "deferred to
+   dev-finish Part 2c(3)">`, so the skip is an auditable decision, not a
+   silent omission.
+   Give each reviewer the **base commit explicitly** — the commit before the
+   task started, **never `HEAD~1`**, which silently drops all but the last
+   commit of a multi-commit task. A reviewer with no stated base returns
+   BLOCKED rather than guessing. All diffs exclude `.dev-pipeline/`.
+   Splitting the axes across separate agents is what makes the no-merge rule
+   below structural rather than aspirational: no reviewer can see, and so
+   cannot be swayed by, another's verdict.
+   **Broadcast every verdict the moment it lands** — axis, PASS/FAIL, the
    single worst issue with its `file:line` anchor, and what you do next.
-   **Never merge or rerank across the two axes** — each axis reports its own
-   findings and its own worst issue, no single winner (from mattpocock
-   code-review: a change can follow every standard and build the wrong
-   thing, or vice versa; one axis must not mask the other).
-   The reviewer reads the task brief and report as *file paths* and returns
+   **Never merge or rerank across axes** — each axis (spec, quality, and
+   security when triggered) reports its own findings and its own worst
+   issue, no single winner (from mattpocock code-review: a change can follow
+   every standard and build the wrong thing, or vice versa; one axis must
+   not mask another — a third axis does not change this rule, it just adds
+   a third independent voice).
+   Each reviewer reads the task brief and report as *file paths* and returns
    findings the same way when long — same inline-bloat rule as step 2.
    **Evidence gate:** every finding quotes the diff/code line that motivates
    it (file:line + verbatim text); no quotable line → confidence 4-5/10,
@@ -191,6 +227,7 @@ expensive model instead.
 | `dev-exec-implementer` | sonnet | Ordinary implementation |
 | `dev-exec-reviewer-spec` | sonnet | Checklist-shaped, high volume |
 | `dev-exec-reviewer-quality` | sonnet | Checklist-shaped, high volume |
+| `dev-exec-reviewer-security` | opus | R4-triggered third axis; higher-stakes judgment than the checklist-shaped axes |
 | `dev-exec-fixer` | sonnet | Scope is a given findings list |
 | `dev-exec-fixer-critical` | opus | Fix-loop rounds 4-5 only — standard tier stalled twice |
 | `code-reviewer` (final branch) | inherit | Widest scope, last line of defence |

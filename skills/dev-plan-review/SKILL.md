@@ -1,6 +1,6 @@
 ---
 name: dev-plan-review
-description: Use after dev-plan produces a plan for large or risky work — runs multi-lens automated review (business, engineering, plus design/DX when in scope) with adversarial verification, auto-deciding routine choices and escalating only genuine judgment calls. Stage 3 of the unified dev pipeline; hands off to dev-execute.
+description: Use after dev-plan produces a plan for large or risky work — runs multi-lens automated review (business, engineering, plus design/DX/security when in scope) with adversarial verification, auto-deciding routine choices and escalating only genuine judgment calls. Stage 3 of the unified dev pipeline; hands off to dev-execute.
 provenance:
   synthesized: 2026-07-14
   sources:
@@ -8,6 +8,7 @@ provenance:
     - doubt-driven-development (fresh-context adversarial refutation)
     - gstack plan-{eng,ceo,devex}-review sections/ @1.60.1.0 (evidence gate + confidence, regression iron rule, E2E/EVAL matrix, error registry, DX persona/TTHW/journey, cross-lens themes, TODOS.md; added 2026-07-23)
     - mattpocock/skills batch-grill-me @in-progress (frontier-based question batching for Step 5; added 2026-08-01)
+    - 20260807 資安審查缺口需求書 R1/R2/R7 (security lens integration; added 2026-08-07)
   dropped: Codex dual-voice (external CLI dep), telemetry, restore points, comparison-board mockups. For the full heavyweight version with dual-model consensus, use gstack /autoplan directly.
 ---
 
@@ -43,13 +44,18 @@ Always run: **CEO lens**, **Eng lens**.
 Conditionally add (2+ keyword hits in the plan):
 - **Design lens** — view/rendering/UI/component/screen vocabulary
 - **DX lens** — API/CLI/SDK/docs/MCP vocabulary (product is developer-facing)
+- **Security lens** — any ONE of: 2+ hits of auth/login/session/token/secret/
+  key/credential/permission/role/upload/個資/PII/payment/delete/export/
+  webhook/external API; the plan's Global Constraints or any task carries a
+  high-risk marker; the plan adds any externally reachable endpoint
 
 ## Step 2: Run lenses — sequential, fresh-context
 
-Run lenses **in strict order: CEO → Design → Eng → DX**. Each builds on the
-previous; never parallel. Each lens is a **fresh-context subagent** that
-receives ONLY the plan file and spec — no conversation history. Independence is
-the point: a reviewer marinated in your reasoning will agree with your mistakes.
+Run lenses **in strict order: CEO → Design → Eng → Security → DX**. Each
+builds on the previous; never parallel. Each lens is a **fresh-context
+subagent** that receives ONLY the plan file and spec — no conversation
+history. Independence is the point: a reviewer marinated in your reasoning
+will agree with your mistakes.
 
 Dispatch by name — never `general-purpose`, never a `model` override (each
 agent file pins its own model and read-only tool set):
@@ -59,12 +65,12 @@ agent file pins its own model and read-only tool set):
 | CEO | `dev-plan-lens-ceo` | always |
 | Design | `dev-plan-lens-design` | 2+ view/UI/component/screen keywords |
 | Eng | `dev-plan-lens-eng` | always |
+| Security | `dev-plan-lens-security` | 2+ security keywords／high-risk marker／new external endpoint |
 | DX | `dev-plan-lens-dx` | 2+ API/CLI/SDK/docs/MCP keywords |
 
-Optional specialist lenses, added when the plan warrants: `security-auditor`
-(auth, secrets, user data, irreversible operations), `test-engineer` (the plan
-proposes a new test strategy), `silent-failure-hunter` (the plan touches
-network/DB/file error paths).
+Optional specialist lenses, added when the plan warrants: `test-engineer`
+(the plan proposes a new test strategy), `silent-failure-hunter` (the plan
+touches network/DB/file error paths).
 
 **Announce the roster before dispatching**, naming which conditional lenses
 were skipped and why. Then broadcast each lens the moment it returns — score,
@@ -110,6 +116,9 @@ Lens briefs (give each subagent its brief + the plan):
   relevant.
 - **Design:** Every user-visible state named? Empty states, error states,
   loading. Specificity over vibes — "clean UI" is not a finding.
+- **Security (design-time STRIDE threat modeling, not code review):** see
+  `dev-plan-lens-security`'s own brief for the full methodology; code-level
+  review is `dev-exec-reviewer-security`'s job, not this lens's.
 - **DX (from gstack plan-devex-review, evidence before scores):** build a
   one-paragraph **persona card** (who uses this, their context, friction
   tolerance, what they expect); benchmark **time-to-hello-world** (<2 min
@@ -261,7 +270,7 @@ Append to the plan file:
 
 ```markdown
 ## REVIEW REPORT
-Lenses: CEO 7→9, Eng 6→9 [, Design, DX]
+Lenses: CEO 7→9, Eng 6→9 [, Design, Security, DX]
 Decisions: <list — auto-applied Mechanical + user-answered Taste/Challenges>
 NO UNRESOLVED DECISIONS   ← or list them; execution is blocked until none remain
 ```

@@ -8,6 +8,8 @@ provenance:
     - superpowers:finishing-a-development-branch @6.1.1 (integration options; typed discard confirmation added 2026-07-23)
     - built-in /verify concept (drive the real flow, not just the test suite)
     - gstack TODOS.md deferral + mattpocock ADR offer (added 2026-07-23)
+    - 20260807 dev-pipeline-security-review-requirements 需求書 R6 (security
+      exit gate section; added 2026-08-07)
 ---
 
 # dev-finish — Verification & Branch Integration
@@ -89,6 +91,56 @@ report mismatches — don't rename code at this stage. Same check for ADRs:
 a decision this work locked that is hard to reverse + surprising without
 context + a real trade-off → offer a one-paragraph ADR before integrating.
 
+## Part 2c: Security exit gate
+
+Runs every time, regardless of project type — even a plan that never
+triggered `dev-plan-lens-security` or `dev-exec-reviewer-security` still
+executes this section; "nothing to check" is a claim, and like every other
+claim in this file it needs to show its work. Same Iron Law as Part 1: every
+line below needs evidence produced **this session**, not a stale scan.
+
+Four checks (verbatim from the security requirements doc's R6):
+
+| # | Check | Evidence | Tool-absent handling |
+|---|-------|----------|----------------------|
+| 1 | Full-branch secrets scan | gitleaks/semgrep output, this session | No such tool installed → state "secrets scan: not executed — no gitleaks/semgrep available" explicitly; never blocks (see BLOCKED condition below). |
+| 2 | Execution-stage security axis findings closed | Every Critical/Important `dev-exec-reviewer-security` finding (dev-execute Step 3c, R4-triggered), pulled from `.dev-pipeline/progress.md`'s per-task ledger lines and each `task-N-report.md`, is either resolved (cite the fix commit) or has an explicit user risk-acceptance decision (format below) | n/a — always runs |
+| 3a | New-dependency CVE / maintenance-status scan | Scanner output if one is installed | Same tool-existence rule as (1): state "not executed" plainly if absent, never BLOCK on absence |
+| 3b | New-dependency **package-existence verification** (anti-slopsquatting) | For every new dependency name introduced on this branch, confirm against its registry that the name actually exists and resolves to the intended package — the same check `dev-exec-reviewer-security`'s checklist item 9 defines | Pure LLM + registry lookup, no external tool involved — **no "not executed" exemption; this one must actually run** |
+| 4 | Plan-stage security lens findings | If `dev-plan-lens-security` ran in `dev-plan-review` (visible in the plan's `REVIEW REPORT`), the disposition of every Critical finding it raised — matched by its `## Task N` tag, `plan-global`-tagged findings reconciled once, not per task — is resolved or explicitly risk-accepted | n/a — check only fires when the lens ran |
+
+### BLOCKED condition
+
+Any unresolved Critical finding from **(2), (3b), or (4)** with no explicit
+user risk-acceptance decision → dev-finish returns:
+
+```
+BLOCKED: 資安 finding 未關閉
+```
+
+and does not proceed to Part 3. (1) and (3a) do **not** trigger this BLOCKED
+path on their own — reporting "not executed" for those two IS the honest
+disclosure this file asks for everywhere else; it is a stated absence, not
+"pretending the check ran." The plan's Global Constraints rule out requiring
+an external/paid security service, and a hard requirement here would BLOCK
+every run in an environment without the tool, which is alarm fatigue, not
+signal — if a scanner IS installed, its real output upgrades that line past
+"not executed," but it is never required. Treating an unresolved Critical
+from (2)/(3b)/(4) as anything less than blocking is the failure this gate
+exists to prevent.
+
+### Risk-acceptance decisions
+
+When the user explicitly accepts a Critical finding instead of fixing it,
+record it the same way Part 2's deferred work is recorded: the repo's
+`TODOS.md`, using `dev-plan-review`'s existing entry format (What / Why
+deferred / Effort / Priority), plus the finding's `file:line` appended. No
+new ledger schema in `.dev-pipeline/progress.md` for this — in this
+single-user interactive pipeline the decider is always the user present at
+the time, and the timestamp is recoverable from the commit or the `TODOS.md`
+entry itself, so a dedicated "decider"/"time" field would be ceremony with no
+reader.
+
 ## Part 2b: Open-items reconciliation
 
 Loose ends live in three places that never talk to each other. Pull all three
@@ -114,6 +166,15 @@ explicit user consent** — the rule is defined in dev-workflow and binds this
 stage exactly as it binds dev-execute. Integration is where the pipeline's
 work becomes irreversible; the branch protection does not lapse at the finish
 line.
+
+When this stage dispatches the final whole-branch `code-reviewer` (per
+`dev-execute`'s Finish step), tell it which tasks already had a
+`dev-exec-reviewer-security` pass — read from the `.dev-pipeline/progress.md`
+ledger lines (`security axis skipped — ...` vs. an R4-triggered pass) — so it
+spends its budget on cross-task composition risk instead of re-scanning
+single tasks the security axis already covered. This changes only the
+context `dev-finish` hands to `code-reviewer` at dispatch time, not the
+`code-reviewer` agent definition itself.
 
 All boxes checked, evidence fresh — present the user exactly these options:
 

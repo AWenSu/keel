@@ -86,16 +86,18 @@ is working. A `general-purpose` dispatch inside this pipeline is a bug.
 | `dev-plan-lens-design` | 3 review | User-visible states (conditional) | sonnet |
 | `dev-plan-lens-eng` | 3 review | Buildable as written + API currency | sonnet |
 | `dev-plan-lens-dx` | 3 review | Developer onboarding cost (conditional) | sonnet |
+| `dev-plan-lens-security` | 3 review | STRIDE threat modeling (design-time, conditional) | opus |
 | `dev-plan-skeptic` | 3 review | Refute one High finding — single-point check | sonnet |
 | `dev-plan-skeptic-critical` | 3 review | Refute one Critical / security / cross-file finding | opus |
 | `dev-exec-implementer` | 4 execute | Build one task | sonnet |
 | `dev-exec-reviewer-spec` | 4 execute | Spec-compliance axis | sonnet |
 | `dev-exec-reviewer-quality` | 4 execute | Code-quality axis | sonnet |
+| `dev-exec-reviewer-security` | 4 execute | Third review axis (R4 conditional trigger) | opus |
 | `dev-exec-fixer` | 4 execute | Apply review findings | sonnet |
 | `dev-exec-fixer-critical` | 4 execute | Fix-loop round 4-5 — standard tier stalled | opus |
 | `dev-wayfind-researcher` | pre | Resolve one research ticket | sonnet |
 | `code-reviewer` | 4 execute | Final whole-branch review | inherit (strongest) |
-| `security-auditor` | 3/5 | Security-class findings | opus |
+| `security-auditor` | ad-hoc | `/security-review`／`/ship` only — not dispatched by dev-plan-review/dev-execute | opus |
 | `test-engineer` | 3 review | Test-strategy findings | sonnet |
 | `silent-failure-hunter` | 3 review | Swallowed-error audit | sonnet |
 | `build-error-resolver` | debug | Compile/build failures | sonnet |

@@ -53,7 +53,7 @@ name alone, exactly who is doing what. See [Subagent roster](#subagent-roster).
 | 1 | [`dev-discover`](skills/dev-discover/SKILL.md) | Vague idea → user-approved, evidence-grounded spec. Hard gate: no code before approval. | superpowers:brainstorming | gstack spec's code-evidence rule (`path:line` before questions), five-question intake, scope lock, parallel "design it twice" exploration under diverging constraints |
 | 2 | [`dev-plan`](skills/dev-plan/SKILL.md) | Spec → plan an engineer with zero context could execute. Sizing guide, `Interfaces:` blocks, banned placeholders. | superpowers:writing-plans | planner agent's risk grading; per-task `Skills:` field naming domain skills to invoke; mattpocock to-tickets' vertical-slice task framing and post-breakdown granularity/dependency quiz |
 | 3 | [`dev-plan-review`](skills/dev-plan-review/SKILL.md) | Multi-lens automated review (CEO/Design/Eng/DX) with a mandatory prior-art web scan — auto-decides routine choices, escalates only real judgment calls, adversarially refutes its own findings before trusting them. | gstack autoplan's decision system | doubt-driven refutation; Mechanical / Taste / User-Challenge taxonomy; 6 auto-decision principles; two-tier skeptic escalation |
-| 4 | [`dev-execute`](skills/dev-execute/SKILL.md) | Reviewed plan → working code. Fresh implementer + two **independent** reviewers per task (spec axis, quality axis — never merged into one verdict), crash-safe progress ledger. Inline fallback when subagents aren't available. | superpowers:subagent-driven-development | executing-plans inline mode; planning-with-files filesystem-as-memory |
+| 4 | [`dev-execute`](skills/dev-execute/SKILL.md) | Reviewed plan → working code. Fresh implementer + two-to-three **independent** reviewers per task (spec axis, quality axis, plus a conditional security axis when R4 triggers — never merged into one verdict), crash-safe progress ledger. Inline fallback when subagents aren't available. | superpowers:subagent-driven-development | executing-plans inline mode; planning-with-files filesystem-as-memory |
 | 5 | [`dev-finish`](skills/dev-finish/SKILL.md) | Before any "done" claim: fresh verification evidence for every claim, drive the real flow end-to-end, reconcile every open item scattered across the run, then integrate the branch. | superpowers:verification-before-completion | claim→evidence table; red-green regression rule; branch integration options |
 
 **Built-in skip rules.** Small tasks (single file, reversible, <30 min) bypass
@@ -192,21 +192,27 @@ reviewing" a structural guarantee instead of a prompt that can be ignored.
 | `dev-plan-lens-design` | 3 review | Every user-visible state named (conditional: UI-heavy plans) | sonnet | read-only |
 | `dev-plan-lens-eng` | 3 review | Buildable as written — plus an API-currency check against live docs | sonnet | read-only + context7, Ref |
 | `dev-plan-lens-dx` | 3 review | Developer onboarding cost (conditional: API/CLI/SDK-facing plans) | sonnet | read-only + context7 |
+| `dev-plan-lens-security` | 3 review | Design-time STRIDE threat modeling (conditional: 2+ security keywords, high-risk marker, or new external endpoint) | **opus** | read-only |
 | `dev-plan-skeptic` | 3 review | Refute one High finding — single-point evidence check | sonnet | read-only, **no search** |
 | `dev-plan-skeptic-critical` | 3 review | Refute one Critical / security / cross-file-reasoning finding | **opus** | read-only, **no search** |
 | `dev-exec-implementer` | 4 execute | Build one task, test-first enforced | sonnet | full |
 | `dev-exec-reviewer-spec` | 4 execute | Spec-compliance axis only | sonnet | read-only |
 | `dev-exec-reviewer-quality` | 4 execute | Code-quality axis only | sonnet | read-only |
+| `dev-exec-reviewer-security` | 4 execute | Security axis only, dispatched conditionally when an R4 trigger is hit | **opus** | read-only |
 | `dev-exec-fixer` | 4 execute | Apply only the findings it was given | sonnet | full |
 | `dev-exec-fixer-critical` | 4 execute | Fix-loop rounds 4-5 only, after the standard tier stalls twice | opus | full |
 | `dev-wayfind-researcher` | pre-stage | Resolve one externally-answerable research ticket | sonnet | read-only + full search |
 
-Plus three general-purpose specialists this pipeline dispatches by their
-existing names when a finding calls for them: `security-auditor`,
-`test-engineer`, `silent-failure-hunter`. A final whole-branch review at the
-end of `dev-execute` uses `code-reviewer` with **no model override** — it
-inherits whatever the strongest model in the session is, because it's the last
-line of defense before `dev-finish`.
+Plus two general-purpose specialists this pipeline dispatches by their
+existing names when a finding calls for them: `test-engineer`,
+`silent-failure-hunter`. `security-auditor` is a separate, ad-hoc specialist —
+it is invoked by `/security-review` or `/ship`, never dispatched by
+`dev-plan-review` or `dev-execute`; the pipeline's own security coverage in
+those two stages now lives in `dev-plan-lens-security` (stage 3) and
+`dev-exec-reviewer-security` (stage 4, third axis). A final whole-branch
+review at the end of `dev-execute` uses `code-reviewer` with **no model
+override** — it inherits whatever the strongest model in the session is,
+because it's the last line of defense before `dev-finish`.
 
 ### Tiering by agent identity, not by model parameter
 
@@ -291,6 +297,7 @@ time (2026-07-14; subagent roster and prior-art scanning added 2026-07-30):
 | gstack | 1.60.1.0 | [garrytan/gstack](https://github.com/garrytan/gstack) |
 | planning-with-files | 3.5.0 | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) |
 | mattpocock/skills | unversioned monorepo — synced by commit, not tag | [mattpocock/skills](https://github.com/mattpocock/skills) |
+| dev-pipeline-security-review requirements (2026-08-07) | internal doc, not a repo | sources: STRIDE threat modeling, OWASP Top 10:2025, Veracode 2025 GenAI report, slopsquatting research |
 
 To sync with upstream:
 
