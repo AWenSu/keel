@@ -91,6 +91,24 @@ report mismatches — don't rename code at this stage. Same check for ADRs:
 a decision this work locked that is hard to reverse + surprising without
 context + a real trade-off → offer a one-paragraph ADR before integrating.
 
+## Part 2b: Open-items reconciliation
+
+Loose ends live in three places that never talk to each other. Pull all three
+into ONE list before integrating, because a decision that exists in only one of
+them is a decision nobody will find again:
+
+| Source | Where |
+|--------|-------|
+| Unresolved decisions | the plan's `REVIEW REPORT` section (dev-plan-review) |
+| Deferred work | `TODOS.md` entries added during review |
+| Flagged concerns | every `DONE_WITH_CONCERNS` in `.dev-pipeline/progress.md` and the task report files |
+
+Every item gets one of two dispositions: **resolved** (with the evidence) or
+**explicitly deferred** (with its `TODOS.md` line number). **An item with
+neither blocks completion.** Present the reconciled list in the final summary
+even when everything is clean — "nothing outstanding" is a claim, and like
+every other claim here it needs to show its work.
+
 ## Part 2c: Security exit gate
 
 Runs every time, regardless of project type — even a plan that never
@@ -140,24 +158,6 @@ single-user interactive pipeline the decider is always the user present at
 the time, and the timestamp is recoverable from the commit or the `TODOS.md`
 entry itself, so a dedicated "decider"/"time" field would be ceremony with no
 reader.
-
-## Part 2b: Open-items reconciliation
-
-Loose ends live in three places that never talk to each other. Pull all three
-into ONE list before integrating, because a decision that exists in only one of
-them is a decision nobody will find again:
-
-| Source | Where |
-|--------|-------|
-| Unresolved decisions | the plan's `REVIEW REPORT` section (dev-plan-review) |
-| Deferred work | `TODOS.md` entries added during review |
-| Flagged concerns | every `DONE_WITH_CONCERNS` in `.dev-pipeline/progress.md` and the task report files |
-
-Every item gets one of two dispositions: **resolved** (with the evidence) or
-**explicitly deferred** (with its `TODOS.md` line number). **An item with
-neither blocks completion.** Present the reconciled list in the final summary
-even when everything is clean — "nothing outstanding" is a claim, and like
-every other claim here it needs to show its work.
 
 ## Part 3: Integrate the branch
 

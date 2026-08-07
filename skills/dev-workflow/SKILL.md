@@ -85,8 +85,8 @@ is working. A `general-purpose` dispatch inside this pipeline is a bug.
 | `dev-plan-lens-ceo` | 3 review | Should this exist + prior-art scan | opus |
 | `dev-plan-lens-design` | 3 review | User-visible states (conditional) | sonnet |
 | `dev-plan-lens-eng` | 3 review | Buildable as written + API currency | sonnet |
-| `dev-plan-lens-dx` | 3 review | Developer onboarding cost (conditional) | sonnet |
 | `dev-plan-lens-security` | 3 review | STRIDE threat modeling (design-time, conditional) | opus |
+| `dev-plan-lens-dx` | 3 review | Developer onboarding cost (conditional) | sonnet |
 | `dev-plan-skeptic` | 3 review | Refute one High finding — single-point check | sonnet |
 | `dev-plan-skeptic-critical` | 3 review | Refute one Critical / security / cross-file finding | opus |
 | `dev-exec-implementer` | 4 execute | Build one task | sonnet |
