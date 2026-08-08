@@ -104,7 +104,7 @@ cp -R agents/* ~/.claude/agents/
 | 計畫審查吵到第 3 輪還沒共識——代表計畫在跟 spec 打架 | `dev-plan-review` | `dev-discover` |
 | `dev-finish` 查證據時，某個宣稱怎麼都拿不出證明 | `dev-finish` | `dev-debug` |
 | debug 到最後發現，根本是需求本身就錯了 | `dev-debug` | `dev-discover` |
-| 計畫引用的 `Spec Version` 跟現行 spec 對不上 | `dev-workflow` | `dev-plan` |
+| 計畫引用的 `Spec Version` 跟現行 spec 對不上 | `dev-execute` | `dev-plan` |
 
 ### 建議路由（`dev-workflow` 怎麼判斷）
 

@@ -41,9 +41,9 @@ Evidence rule matters most here: current behavior claims need `path:line`,
 schema claims need the actual schema. When the plan involves a public or
 inter-service API, dev-plan should produce an OpenAPI/AsyncAPI spec as a
 standalone Task 0 first, and later `Interfaces:` blocks should reference
-that spec's path instead of re-writing signatures. Plan must risk-grade every migration
-task High with a named rollback. dev-plan-review's DX lens activates
-(API consumers are developers). Finish: contract/integration tests plus ONE
+that spec's path instead of re-writing signatures. Plan must risk-grade
+every migration task High with a named rollback. dev-plan-review's DX lens
+activates (API consumers are developers). Finish: contract/integration tests plus ONE
 real request against a running instance — unit tests lie about wiring.
 High-risk overlay (doubt-driven) on anything touching production data.
 

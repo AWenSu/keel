@@ -144,7 +144,7 @@ frontier is empty.
 | Plan review round 3 still has unresolved decisions — the plan is fighting the spec | `dev-plan-review` | `dev-discover` |
 | `dev-finish`'s evidence gate can't produce proof for a claim | `dev-finish` | `dev-debug` |
 | Debugging concludes the requirement itself is wrong | `dev-debug` | `dev-discover` |
-| The plan's `Spec Version` doesn't match the current spec | `dev-workflow` | `dev-plan` |
+| The plan's `Spec Version` doesn't match the current spec | `dev-execute` | `dev-plan` |
 
 ### Suggested routing (what `dev-workflow` detects)
 
