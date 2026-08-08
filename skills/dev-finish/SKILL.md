@@ -129,7 +129,7 @@ Four checks (verbatim from the security requirements doc's R6):
 
 | # | Check | Evidence | Tool-absent handling |
 |---|-------|----------|----------------------|
-| 1 | Full-branch secrets scan | gitleaks/semgrep output, this session | No such tool installed → state "secrets scan: not executed — no gitleaks/semgrep available" explicitly; never blocks (see BLOCKED condition below). |
+| 1 | Full-branch secrets scan | Run `gitleaks detect --source . -v` (or `semgrep` if that's what's installed) this session and paste the summary line (leak count, or "no leaks found") | No such tool installed → state "secrets scan: not executed — no gitleaks/semgrep available" explicitly; never blocks (see BLOCKED condition below). |
 | 2 | Execution-stage security axis findings closed | Every Critical/Important `dev-exec-reviewer-security` finding (dev-execute Step 3c, R4-triggered), pulled from `.dev-pipeline/progress.md`'s per-task ledger lines and each `task-N-report.md`, is either resolved (cite the fix commit) or has an explicit user risk-acceptance decision (format below) | n/a — always runs |
 | 3a | New-dependency CVE / maintenance-status scan | Scanner output if one is installed | Same tool-existence rule as (1): state "not executed" plainly if absent, never BLOCK on absence |
 | 3b | New-dependency **package-existence verification** (anti-slopsquatting) | For every new dependency name introduced on this branch, confirm against its registry that the name actually exists and resolves to the intended package — the same check `dev-exec-reviewer-security`'s checklist item 9 defines | Pure LLM + registry lookup, no external tool involved — **no "not executed" exemption; this one must actually run** |
