@@ -30,6 +30,14 @@ proceed with a known regression.
 | `03-spec-version-drift-routes-back.md` | spec drift check | `dev-execute/SKILL.md` |
 | `04-feature-matrix-trigger.md` | UI-heavy feature matrix | `dev-plan/SKILL.md` |
 | `05-adr-offer-trigger.md` | ADR offer criteria | `dev-finish/SKILL.md` |
+| `06-plan-contradicts-code-routes-back.md` | backward route: plan vs. code | `dev-workflow/SKILL.md` |
+| `07-review-round-3-unresolved-routes-to-discover.md` | backward route: round-3 unresolved | `dev-plan-review/SKILL.md` |
+| `08-finish-evidence-gap-routes-to-debug.md` | backward route: evidence gap | `dev-finish/SKILL.md` |
+| `09-debug-wrong-requirement-routes-to-discover.md` | backward route: wrong requirement | `dev-workflow/SKILL.md` |
+| `10-g4-gate-orchestrated.md` | G4 gate, ORCHESTRATED mode | `dev-execute/SKILL.md` |
+| `11-g4-gate-inline.md` | G4 gate, INLINE mode | `dev-execute/SKILL.md` |
+| `12-security-exit-gate-blocked.md` | Part 2c BLOCKED condition | `dev-finish/SKILL.md` |
+| `13-r4-security-axis-triggers.md` | R4 conditions (5 sub-scenarios) | `dev-execute/SKILL.md` |
 
 Adding a new SDD/pipeline rule that has a clear trigger/no-trigger boundary?
 Add a fixture here in the same format — that boundary is exactly what

@@ -18,26 +18,24 @@ listed as "partial," not "covered."
 | 2 | Spec-version drift during execution routes back to `dev-plan` | `dev-execute/SKILL.md:83-90` | `03` | covered |
 | 3 | Feature matrix required for UI-heavy plans (2+ keyword hits) | `dev-plan/SKILL.md:98-109` | `04` | covered |
 | 4 | ADR offer criteria (hard-to-reverse + surprising + real trade-off) | `dev-finish/SKILL.md:94-100` | `05` | covered |
-| 5 | Backward route: plan contradicts code beyond one task's fix | `dev-workflow/SKILL.md:34` | — | not covered |
-| 6 | Backward route: plan review round 3 still unresolved | `dev-workflow/SKILL.md:36` | — | not covered |
-| 7 | Backward route: dev-finish can't produce required evidence | `dev-workflow/SKILL.md:37` | — | not covered |
-| 8 | Backward route: debugging concludes the requirement is wrong | `dev-workflow/SKILL.md:38` | — | not covered |
-| 9 | R4 condition 1 — task touches auth/encryption/upload/outbound/DB-query (semantic, not filename match) | `dev-execute/SKILL.md:126-132` | — | not covered |
-| 10 | R4 condition 2 — diff adds/modifies externally-reachable endpoint | `dev-execute/SKILL.md:133` | — | not covered |
-| 11 | R4 condition 3 — dev-plan marked task high-risk | `dev-execute/SKILL.md:134` | — | not covered |
-| 12 | R4 condition 4 — plan-stage security lens previously flagged this task | `dev-execute/SKILL.md:135-140` | — | not covered |
-| 13 | R4 condition 5 — diff matches sensitive-string pattern | `dev-execute/SKILL.md:141-143` | — | not covered |
-| 14 | G4 gate, ORCHESTRATED — plan-conflicting finding goes to the user, never self-decided | `dev-execute/SKILL.md` Fix loop step 4 | — | not covered |
-| 15 | G4 gate, INLINE — same rule restated for the no-subagent path | `dev-execute/SKILL.md` INLINE mode step 3 | — | not covered |
-| 16 | dev-finish Part 2c BLOCKED — unresolved Critical from (2)/(3b)/(4) blocks integration | `dev-finish/SKILL.md:138-156` | — | not covered |
+| 5 | Backward route: plan contradicts code beyond one task's fix | `dev-workflow/SKILL.md:34` | `06` | covered |
+| 6 | Backward route: plan review round 3 still unresolved | `dev-workflow/SKILL.md:36` | `07` | covered |
+| 7 | Backward route: dev-finish can't produce required evidence | `dev-workflow/SKILL.md:37` | `08` | covered |
+| 8 | Backward route: debugging concludes the requirement is wrong | `dev-workflow/SKILL.md:38` | `09` | covered |
+| 9 | R4 condition 1 — task touches auth/encryption/upload/outbound/DB-query (semantic, not filename match) | `dev-execute/SKILL.md:126-132` | `13` (sub-scenario 1) | covered |
+| 10 | R4 condition 2 — diff adds/modifies externally-reachable endpoint | `dev-execute/SKILL.md:133` | `13` (sub-scenario 2) | covered |
+| 11 | R4 condition 3 — dev-plan marked task high-risk | `dev-execute/SKILL.md:134` | `13` (sub-scenario 3) | covered |
+| 12 | R4 condition 4 — plan-stage security lens previously flagged this task | `dev-execute/SKILL.md:135-140` | `13` (sub-scenario 4) | covered |
+| 13 | R4 condition 5 — diff matches sensitive-string pattern | `dev-execute/SKILL.md:141-143` | `13` (sub-scenario 5) | covered |
+| 14 | G4 gate, ORCHESTRATED — plan-conflicting finding goes to the user, never self-decided | `dev-execute/SKILL.md` Fix loop step 4 | `10` | covered |
+| 15 | G4 gate, INLINE — same rule restated for the no-subagent path | `dev-execute/SKILL.md` INLINE mode step 3 | `11` | covered |
+| 16 | dev-finish Part 2c BLOCKED — unresolved Critical from (2)/(3b)/(4) blocks integration | `dev-finish/SKILL.md:138-156` | `12` | covered |
 | 17 | Security lens dispatch trigger (2+ security keywords / high-risk marker / new endpoint) | `dev-plan-review/SKILL.md` Step 1 | — | not covered |
 
-**Current coverage: 4/17 rules (24%).** Rows 5-8 and 14-16 are the highest-value
-next additions — they're the ones most likely to silently regress from an
-unrelated wording edit nearby (same failure class as the Task 7
-README-drift finding this session caught). Rows 9-13 (R4 conditions) are
-lower priority individually since they share one dispatch mechanism; a
-single fixture with 5 sub-scenarios would cover all five economically.
+**Current coverage: 16/17 rules (94%).** Only row 17 (plan-review security
+lens dispatch trigger) remains — lower priority, its dispatch logic is a
+simple keyword-count check with low regression risk. Add a fixture for it
+when there's reason to believe it's changed or at risk.
 
 Update this table's `Fixture`/`Status` columns whenever a new
 `eval-fixtures/NN-*.md` file is added.
