@@ -80,6 +80,15 @@ question to the user, each item quoting the plan's text and asking which
 wins. Clean scan → proceed silently. Cheap once; discovering a plan
 contradiction at Task 7 is not.
 
+**Spec drift check:** if the plan header has a `Spec Version:` field and the
+spec file it references still exists in the repo, compare the spec file's
+current commit hash/timestamp against the one recorded in the plan header.
+Mismatch → the spec body changed after the plan was written; follow
+`dev-workflow`'s Backward routes entry for this case (route back to
+`dev-plan` to re-align) instead of starting Task 1. No `Spec Version:` field,
+or the referenced spec file can't be found → skip the check, don't block
+(same skip-if-missing spirit as the staleness rule below).
+
 ### Per task loop
 
 1. **Extract the task brief** — the task's own text plus the plan header
