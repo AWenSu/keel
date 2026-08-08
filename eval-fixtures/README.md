@@ -38,6 +38,7 @@ proceed with a known regression.
 | `11-g4-gate-inline.md` | G4 gate, INLINE mode | `dev-execute/SKILL.md` |
 | `12-security-exit-gate-blocked.md` | Part 2c BLOCKED condition | `dev-finish/SKILL.md` |
 | `13-r4-security-axis-triggers.md` | R4 conditions (5 sub-scenarios) | `dev-execute/SKILL.md` |
+| `14-security-lens-dispatch-trigger.md` | Security lens dispatch (OR of 3 conditions) | `dev-plan-review/SKILL.md` |
 
 Adding a new SDD/pipeline rule that has a clear trigger/no-trigger boundary?
 Add a fixture here in the same format — that boundary is exactly what

@@ -30,12 +30,9 @@ listed as "partial," not "covered."
 | 14 | G4 gate, ORCHESTRATED — plan-conflicting finding goes to the user, never self-decided | `dev-execute/SKILL.md` Fix loop step 4 | `10` | covered |
 | 15 | G4 gate, INLINE — same rule restated for the no-subagent path | `dev-execute/SKILL.md` INLINE mode step 3 | `11` | covered |
 | 16 | dev-finish Part 2c BLOCKED — unresolved Critical from (2)/(3b)/(4) blocks integration | `dev-finish/SKILL.md:138-156` | `12` | covered |
-| 17 | Security lens dispatch trigger (2+ security keywords / high-risk marker / new endpoint) | `dev-plan-review/SKILL.md` Step 1 | — | not covered |
+| 17 | Security lens dispatch trigger (2+ security keywords / high-risk marker / new endpoint) | `dev-plan-review/SKILL.md` Step 1 | `14` | covered |
 
-**Current coverage: 16/17 rules (94%).** Only row 17 (plan-review security
-lens dispatch trigger) remains — lower priority, its dispatch logic is a
-simple keyword-count check with low regression risk. Add a fixture for it
-when there's reason to believe it's changed or at risk.
+**Current coverage: 17/17 rules (100%).**
 
 Update this table's `Fixture`/`Status` columns whenever a new
 `eval-fixtures/NN-*.md` file is added.
