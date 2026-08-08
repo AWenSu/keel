@@ -53,12 +53,19 @@ name alone, exactly who is doing what. See [Subagent roster](#subagent-roster).
 | 1 | [`dev-discover`](skills/dev-discover/SKILL.md) | Vague idea → user-approved, evidence-grounded spec. Hard gate: no code before approval. | superpowers:brainstorming | gstack spec's code-evidence rule (`path:line` before questions), five-question intake, scope lock, parallel "design it twice" exploration under diverging constraints; spec carries a `Status: draft\|approved` gate, a `Spec Version` field, and Given-When-Then Success Criteria |
 | 2 | [`dev-plan`](skills/dev-plan/SKILL.md) | Spec → plan an engineer with zero context could execute. Sizing guide, `Interfaces:` blocks, banned placeholders. | superpowers:writing-plans | planner agent's risk grading; per-task `Skills:` field naming domain skills to invoke; mattpocock to-tickets' vertical-slice task framing and post-breakdown granularity/dependency quiz; UI-heavy plans get a mandatory `### 2b.` feature matrix |
 | 3 | [`dev-plan-review`](skills/dev-plan-review/SKILL.md) | Multi-lens automated review (CEO/Design/Eng/DX) with a mandatory prior-art web scan — auto-decides routine choices, escalates only real judgment calls, adversarially refutes its own findings before trusting them. | gstack autoplan's decision system | doubt-driven refutation; Mechanical / Taste / User-Challenge taxonomy; 6 auto-decision principles; two-tier skeptic escalation; Step 5 auto-emits a one-paragraph ADR when a decision clears the auto-decide bar |
-| 4 | [`dev-execute`](skills/dev-execute/SKILL.md) | Reviewed plan → working code. Fresh implementer + two-to-three **independent** reviewers per task (spec axis, quality axis, plus a conditional security axis when R4 triggers — never merged into one verdict), crash-safe progress ledger. Inline fallback when subagents aren't available. | superpowers:subagent-driven-development | executing-plans inline mode; planning-with-files filesystem-as-memory |
-| 5 | [`dev-finish`](skills/dev-finish/SKILL.md) | Before any "done" claim: fresh verification evidence for every claim, drive the real flow end-to-end, reconcile every open item scattered across the run, then integrate the branch. | superpowers:verification-before-completion | claim→evidence table; red-green regression rule; branch integration options; skips re-verifying a claim already covered by a Step-5 ADR, and Success Criteria are confirmed live by the user rather than re-derived |
+| 4 | [`dev-execute`](skills/dev-execute/SKILL.md) | Reviewed plan → working code. Fresh implementer + two-to-three **independent** reviewers per task (spec axis, quality axis, plus a conditional security axis when R4 triggers — never merged into one verdict), crash-safe progress ledger. Inline fallback when subagents aren't available. | superpowers:subagent-driven-development | executing-plans inline mode; planning-with-files filesystem-as-memory; pre-flight spec-drift check against a plan's recorded `Spec Version`; G4 plan-conflict gate restated for INLINE mode; Finish step reports `FIXTURE COVERAGE` against `eval-fixtures/RULE-INVENTORY.md` when a plan edits this repo's own skill files |
+| 5 | [`dev-finish`](skills/dev-finish/SKILL.md) | Before any "done" claim: fresh verification evidence for every claim, drive the real flow end-to-end, reconcile every open item scattered across the run, then integrate the branch. | superpowers:verification-before-completion | claim→evidence table; red-green regression rule; branch integration options; skips re-verifying a claim already covered by a Step-5 ADR, and Success Criteria are confirmed live by the user rather than re-derived; Part 2c's secrets-scan check names the exact `gitleaks detect` invocation to run when installed |
 
 **Built-in skip rules.** Small tasks (single file, reversible, <30 min) bypass
 stages 1–3 entirely; only large or risky plans go through review. Planning
 overhead should never exceed ~20% of the task itself.
+
+**Regression-testing this pipeline's own rules.** [`eval-fixtures/`](eval-fixtures/)
+holds hypothetical-scenario fixtures for every declared trigger/gate rule
+(spec approval gate, backward routes, G4 plan-conflict gate, R4 security-axis
+conditions, and more) — `RULE-INVENTORY.md` tracks which rules have a fixture.
+Run the relevant fixtures whenever you edit a skill file in this repo, before
+committing.
 
 ## Install
 
