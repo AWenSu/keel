@@ -272,8 +272,17 @@ ranking). The final reviewer additionally produces a **coverage diagram
 (from gstack)**: trace each entry point through its branches and error
 paths as an ASCII tree, grade each path [★★★ behavior+edge+error / ★★ /
 ★ smoke / GAP], and end with one line — `COVERAGE: N/M paths tested (X%)`.
-Coverage claims without the diagram are vibes. Then one fix pass for its
-findings → **dev-finish**.
+Coverage claims without the diagram are vibes.
+
+If this plan edited the pipeline's own skill/rule files (this repo, not a
+consumer repo) and `eval-fixtures/RULE-INVENTORY.md` exists: also report
+`FIXTURE COVERAGE: N/M rules verified (X%)` from that file's table, and list
+any rule this plan added or changed that the table doesn't yet have a row
+for — an unlisted new rule is the same silent-regression risk the inventory
+exists to catch, one release earlier. This is a report, not a gate: a plan
+may ship with fixture gaps, same as `COVERAGE` above never blocks on its own.
+
+Then one fix pass for its findings → **dev-finish**.
 
 ## INLINE mode
 

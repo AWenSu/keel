@@ -33,4 +33,7 @@ proceed with a known regression.
 
 Adding a new SDD/pipeline rule that has a clear trigger/no-trigger boundary?
 Add a fixture here in the same format — that boundary is exactly what
-silently breaks first when unrelated wording nearby gets edited.
+silently breaks first when unrelated wording nearby gets edited. Then add a
+row to `RULE-INVENTORY.md`, which tracks every declared rule (covered or
+not) as the denominator for the `FIXTURE COVERAGE: N/M` line `dev-execute`'s
+Finish step reports whenever a plan edits this repo's own skill files.
