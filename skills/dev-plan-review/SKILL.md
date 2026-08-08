@@ -251,6 +251,31 @@ round's frontier — an answer often resolves or reshapes what's still open;
 drop questions an earlier answer already settled. The session's Step 5 is
 done when the frontier is empty.
 
+**ADR checkpoint, per decision, right after it's applied:** the moment a
+decision — Mechanical, Taste, or User Challenge — is applied to the plan
+file, check it against the existing ADR criterion (verbatim from
+`dev-finish` Part 2): a decision this work locked that is hard to reverse +
+surprising without context + a real trade-off. Miss any condition → no ADR,
+move on to the next decision in the round. This is the same criterion
+dev-finish already applies at integration time, just checked at the moment
+the decision is made instead of later — it is not a new mandatory gate, and
+a decision that fails the check is not blocked or flagged, it simply
+produces no ADR. A decision meeting all three conditions gets a one-paragraph
+ADR appended to the plan file as a new `## ADR: <decision name>` section —
+the same one-paragraph form `dev-finish` Part 2 already offers before
+integrating, produced here instead, at the moment the decision is made.
+
+This section's presence in the plan file IS the "already produced" signal:
+`dev-finish` Part 2 checks whether the plan file already has a matching
+`## ADR: <decision name>` section for a given decision before offering to
+write one — found means skip, not found means offer, same trigger it always
+used.
+
+(`dev-discover/SKILL.md:170-176`'s ADR offer states this same three-part
+criterion comma-separated; `dev-finish/SKILL.md:91-92` separates it with
+"+". That wording split predates this task and isn't reconciled here — this
+checkpoint copies the dev-finish wording verbatim on purpose.)
+
 After all questions are resolved, present ONE closing summary:
 
 - Lens scores (before → after edits)

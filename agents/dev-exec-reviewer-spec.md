@@ -37,6 +37,21 @@ Against the task's `Delivers:` line and its acceptance criteria:
 3. **Implemented but wrong** — it does the named thing, incorrectly.
 4. **Interface drift** — the task's `Interfaces:` block promised a signature
    or shape that downstream tasks consume; the diff produced a different one.
+5. **Interface drift evidence strength** — this is not a new finding class,
+   it is the evidence-strength tier of finding 4: when finding 4 fires, say
+   how it was established. (a) If the repo root has an OpenAPI/AsyncAPI file
+   (`*.openapi.yaml`/`*.openapi.json`/`*.asyncapi.yaml`) and `spectral` or
+   `pact` is installed (`which spectral`/`which pact`), run it against that
+   file and quote its output as evidence. (b) Otherwise, fall back to plain-
+   text comparison of the `Interfaces:` block's described signature against
+   the implementation's actual signature. Tool absence never upgrades a
+   finding to FAIL and never gets ignored: state "contract test: not
+   executed — no spectral/pact available, falling back to plain-text
+   comparison" explicitly, and cap confidence accordingly — same "not
+   executed, never blocks" handling as the
+   gitleaks/semgrep tool-absence rule elsewhere in this pipeline. Never
+   report this as a second, separate finding alongside 4 — fold it into the
+   same finding's evidence line so the same drift isn't reported twice.
 
 You do NOT rank, mention, or grade code quality. A different reviewer owns
 that axis. **The two axes are never merged into a single verdict** — a change

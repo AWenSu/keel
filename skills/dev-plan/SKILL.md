@@ -23,6 +23,13 @@ OUTPUT  a plan file: header (Goal, Global Constraints) + tasks each carrying
         Delivers / Files / Interfaces / Skills, no placeholder phrases
 ```
 
+**If INPUT is the spec path**, the spec's `Status:` field must read
+`approved` before this skill proceeds; otherwise `BLOCKED: spec 未核准 →
+退回 dev-discover`. This check is scoped to an actual spec file — it does
+not apply to the "requirements clear enough to name exact file paths" path
+or the Medium-task lightweight shortcut below, neither of which has a spec
+file to check.
+
 ## When to skip
 
 Single-file reversible changes don't need a plan file. Medium tasks
@@ -77,12 +84,29 @@ Save to `docs/plans/YYYY-MM-DD-<feature>.md` with this header:
 
 **Goal:** <one sentence>
 **Spec:** <link to the dev-discover spec>
+**Spec Version:** <commit hash or timestamp copied from the spec's `Status:`
+  field at the moment it was approved>
 **Architecture:** <2-3 sentences, ASCII diagram if data flows>
 **Global Constraints:** <exact values copied verbatim from the spec —
   limits, formats, naming, versions. Never paraphrase.>
 **Success Criteria:** <checklist copied from the spec's "how will we know
-  it's done" — the final gate checks these boxes>
+  it's done" — the final gate checks these boxes. Format follows the spec's
+  Given-When-Then three-part form (scenario / condition / expected result),
+  not rewritten into prose>
 ```
+
+### 2b. Feature matrix for UI-heavy plans
+
+Reuse `dev-plan-lens-design`'s existing trigger, verbatim — do not invent a
+second keyword rule: it "runs only when the plan hits 2+
+view/rendering/UI/component/screen keywords." When this plan hits that same
+criterion, before writing tasks, produce a feature × state/role/platform
+matrix (table form) and save it under a new `## Feature Matrix` section in
+the plan file (or in `CONTEXT.md` if the project already has one, with the
+plan file linking to it).
+
+Plans that do not hit the criterion skip this step entirely — no matrix, no
+added planning overhead.
 
 ### 3. Write tasks
 
