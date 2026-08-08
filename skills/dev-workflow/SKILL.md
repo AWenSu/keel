@@ -32,6 +32,7 @@ truth, no inlined copies to go stale).
 | Trigger | From | Back to |
 |---------|------|---------|
 | Execution finds the plan contradicts the code as it now is (beyond one task's fix) | dev-execute | `dev-plan` |
+| Spec body changed during execution and no longer matches plan's recorded Spec Version | dev-execute | `dev-plan` |
 | Plan review round 3 still has unresolved decisions — the plan is fighting the spec | dev-plan-review | `dev-discover` |
 | dev-finish gate cannot produce the evidence a claim requires | dev-finish | `dev-debug` |
 | Debugging concludes the requirement itself is wrong | dev-debug | `dev-discover` |

@@ -50,11 +50,11 @@ name alone, exactly who is doing what. See [Subagent roster](#subagent-roster).
 
 | # | Skill | What it does | Spine | Key grafts |
 |---|-------|--------------|-------|------------|
-| 1 | [`dev-discover`](skills/dev-discover/SKILL.md) | Vague idea → user-approved, evidence-grounded spec. Hard gate: no code before approval. | superpowers:brainstorming | gstack spec's code-evidence rule (`path:line` before questions), five-question intake, scope lock, parallel "design it twice" exploration under diverging constraints |
-| 2 | [`dev-plan`](skills/dev-plan/SKILL.md) | Spec → plan an engineer with zero context could execute. Sizing guide, `Interfaces:` blocks, banned placeholders. | superpowers:writing-plans | planner agent's risk grading; per-task `Skills:` field naming domain skills to invoke; mattpocock to-tickets' vertical-slice task framing and post-breakdown granularity/dependency quiz |
-| 3 | [`dev-plan-review`](skills/dev-plan-review/SKILL.md) | Multi-lens automated review (CEO/Design/Eng/DX) with a mandatory prior-art web scan — auto-decides routine choices, escalates only real judgment calls, adversarially refutes its own findings before trusting them. | gstack autoplan's decision system | doubt-driven refutation; Mechanical / Taste / User-Challenge taxonomy; 6 auto-decision principles; two-tier skeptic escalation |
+| 1 | [`dev-discover`](skills/dev-discover/SKILL.md) | Vague idea → user-approved, evidence-grounded spec. Hard gate: no code before approval. | superpowers:brainstorming | gstack spec's code-evidence rule (`path:line` before questions), five-question intake, scope lock, parallel "design it twice" exploration under diverging constraints; spec carries a `Status: draft\|approved` gate, a `Spec Version` field, and Given-When-Then Success Criteria |
+| 2 | [`dev-plan`](skills/dev-plan/SKILL.md) | Spec → plan an engineer with zero context could execute. Sizing guide, `Interfaces:` blocks, banned placeholders. | superpowers:writing-plans | planner agent's risk grading; per-task `Skills:` field naming domain skills to invoke; mattpocock to-tickets' vertical-slice task framing and post-breakdown granularity/dependency quiz; UI-heavy plans get a mandatory `### 2b.` feature matrix |
+| 3 | [`dev-plan-review`](skills/dev-plan-review/SKILL.md) | Multi-lens automated review (CEO/Design/Eng/DX) with a mandatory prior-art web scan — auto-decides routine choices, escalates only real judgment calls, adversarially refutes its own findings before trusting them. | gstack autoplan's decision system | doubt-driven refutation; Mechanical / Taste / User-Challenge taxonomy; 6 auto-decision principles; two-tier skeptic escalation; Step 5 auto-emits a one-paragraph ADR when a decision clears the auto-decide bar |
 | 4 | [`dev-execute`](skills/dev-execute/SKILL.md) | Reviewed plan → working code. Fresh implementer + two-to-three **independent** reviewers per task (spec axis, quality axis, plus a conditional security axis when R4 triggers — never merged into one verdict), crash-safe progress ledger. Inline fallback when subagents aren't available. | superpowers:subagent-driven-development | executing-plans inline mode; planning-with-files filesystem-as-memory |
-| 5 | [`dev-finish`](skills/dev-finish/SKILL.md) | Before any "done" claim: fresh verification evidence for every claim, drive the real flow end-to-end, reconcile every open item scattered across the run, then integrate the branch. | superpowers:verification-before-completion | claim→evidence table; red-green regression rule; branch integration options |
+| 5 | [`dev-finish`](skills/dev-finish/SKILL.md) | Before any "done" claim: fresh verification evidence for every claim, drive the real flow end-to-end, reconcile every open item scattered across the run, then integrate the branch. | superpowers:verification-before-completion | claim→evidence table; red-green regression rule; branch integration options; skips re-verifying a claim already covered by a Step-5 ADR, and Success Criteria are confirmed live by the user rather than re-derived |
 
 **Built-in skip rules.** Small tasks (single file, reversible, <30 min) bypass
 stages 1–3 entirely; only large or risky plans go through review. Planning
@@ -144,6 +144,7 @@ frontier is empty.
 | Plan review round 3 still has unresolved decisions — the plan is fighting the spec | `dev-plan-review` | `dev-discover` |
 | `dev-finish`'s evidence gate can't produce proof for a claim | `dev-finish` | `dev-debug` |
 | Debugging concludes the requirement itself is wrong | `dev-debug` | `dev-discover` |
+| The plan's `Spec Version` doesn't match the current spec | `dev-workflow` | `dev-plan` |
 
 ### Suggested routing (what `dev-workflow` detects)
 
@@ -161,7 +162,9 @@ frontier is empty.
 
 Which stages to run, which review lenses fire, and what to layer on top for
 **web apps, APIs, CLIs, MCP servers, serverless, docs repos, and scrapers**:
-see **[PROJECT-TYPE-GUIDE.md](PROJECT-TYPE-GUIDE.md)**.
+see **[PROJECT-TYPE-GUIDE.md](PROJECT-TYPE-GUIDE.md)**. Backend API projects
+now get a contract-first OpenAPI/AsyncAPI Task 0; Serverless/edge projects
+with a real deploy step get a Release Runbook produced at `dev-finish`.
 
 ### Domain-skill layering
 
@@ -202,6 +205,10 @@ reviewing" a structural guarantee instead of a prompt that can be ignored.
 | `dev-exec-fixer` | 4 execute | Apply only the findings it was given | sonnet | full |
 | `dev-exec-fixer-critical` | 4 execute | Fix-loop rounds 4-5 only, after the standard tier stalls twice | opus | full |
 | `dev-wayfind-researcher` | pre-stage | Resolve one externally-answerable research ticket | sonnet | read-only + full search |
+
+`dev-exec-reviewer-spec` grades every Interface-drift finding by contract-test
+evidence strength (existing test > described contract > unverified claim)
+rather than taking the plan's word for it.
 
 Plus two general-purpose specialists this pipeline dispatches by their
 existing names when a finding calls for them: `test-engineer`,
@@ -298,6 +305,7 @@ time (2026-07-14; subagent roster and prior-art scanning added 2026-07-30):
 | planning-with-files | 3.5.0 | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) |
 | mattpocock/skills | unversioned monorepo — synced by commit, not tag | [mattpocock/skills](https://github.com/mattpocock/skills) |
 | dev-pipeline-security-review requirements (2026-08-07) | internal doc, not a repo | sources: STRIDE threat modeling, OWASP Top 10:2025, Veracode 2025 GenAI report, slopsquatting research |
+| dev-workflow SDD 元素整合需求書 (2026-08-07) | internal doc, not a repo | sources: 外部分享的 SDD/Contract-first/ADR 流程比對 |
 
 To sync with upstream:
 

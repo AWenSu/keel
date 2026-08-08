@@ -17,7 +17,7 @@ gate.
 | Backend API / DB service | Full, evidence-heavy | Full artifact | CEO+Eng+DX | Orchestrated | Contract tests + one real request | API design, migration, observability skills |
 | CLI / automation script | Five-question intake only | Sizing guide says skip mostly | Skip unless >8 files | Inline | Run the CLI end-to-end | — |
 | MCP server / agent tooling | Full | Full artifact | Eng+DX (DX is the product!) | Orchestrated or inline | Connect a real client, call every tool | MCP builder skill |
-| Serverless / edge (Workers) | Full | Full artifact | Eng+DX | Inline (small surface) | Deploy to preview, hit the endpoint | Platform skill (e.g. Cloudflare) |
+| Serverless / edge (Workers) | Full | Full artifact | Eng+DX | Inline (small surface) | Deploy to preview, hit the endpoint; Release Runbook if non-preview deploy | Platform skill (e.g. Cloudflare) |
 | Docs / config / knowledge repo | Skip | Skip | Skip | Direct edits | Render/lint check | Doc-coauthoring skill for long docs |
 | Scraping / integration | Light — targets ARE the spec | Findings-file driven | Skip | Inline, iterative | Run against the live target once | Browser-automation skills |
 
@@ -38,7 +38,10 @@ against the approved visual. Never claim "looks right" from code reading.
 
 ### Backend API / database service
 Evidence rule matters most here: current behavior claims need `path:line`,
-schema claims need the actual schema. Plan must risk-grade every migration
+schema claims need the actual schema. When the plan involves a public or
+inter-service API, dev-plan should produce an OpenAPI/AsyncAPI spec as a
+standalone Task 0 first, and later `Interfaces:` blocks should reference
+that spec's path instead of re-writing signatures. Plan must risk-grade every migration
 task High with a named rollback. dev-plan-review's DX lens activates
 (API consumers are developers). Finish: contract/integration tests plus ONE
 real request against a running instance — unit tests lie about wiring.
@@ -61,7 +64,11 @@ Layer the platform skill for platform idioms; the pipeline governs process.
 Surfaces are small — inline execution usually beats orchestration. Finish
 requires a preview deploy + a real HTTP hit; local emulation passes are
 evidence for logic, not for platform behavior (bindings, limits, cold
-starts).
+starts). For projects with a real deploy step (not preview-only), dev-finish
+Part 3 should additionally produce a Release Runbook — pre-deploy checks,
+deploy command, post-deploy verification commands, and rollback command —
+written into the PR body or a standalone doc; preview-only deploys don't
+need this.
 
 ### Docs / config / knowledge repo
 The pipeline mostly stands down — no runtime surface, reversible edits.

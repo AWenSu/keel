@@ -159,9 +159,17 @@ planning decision.
 ### 6. Write the spec
 
 Write the design to `docs/specs/YYYY-MM-DD-<topic>.md` and commit it.
+Header line: `**Status:** draft` — spec is the single source of truth, and
+this field is what downstream `dev-plan` checks before entering (see step 7
+for the approved transition).
 Sections: Problem / Current behavior (with evidence) / Proposed design /
 Alternatives considered / Test seams (from 5b) / Out of scope /
 Success criteria.
+
+Success criteria uses a Given-When-Then three-part format (scenario /
+condition / expected result), not a free-prose checklist — each criterion
+must read as one verifiable assertion, not a one-line claim. Example:
+"Given 使用者已登入, When 點擊登出, Then session 被清除且導向首頁."
 
 Write the spec in `CONTEXT.md` vocabulary throughout — a spec that invents
 its own words for things the glossary already names is a defect (step 7
@@ -186,6 +194,12 @@ One inline pass before showing the user — fix and move on, no re-review loop:
 - Scope: does anything in the design exceed what was locked in step 5?
 
 Then the user reviews the written spec. Wait for explicit approval.
+
+Once approved, flip the header line to `**Status:** approved`, and record the
+commit hash or timestamp at approval time on the same line — e.g.
+`**Status:** approved (2026-08-07, a1b2c3d)`. If the spec is edited again
+after approval, this recorded version is what `dev-execute`'s backward routes
+check against.
 
 ## Exit
 

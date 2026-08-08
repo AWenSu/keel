@@ -33,11 +33,11 @@ Claude Code 裝備齊全一點，規劃類的 skill 就會越堆越多：superpo
 
 | # | Skill | 做什麼 | 骨幹抄哪來 | 從哪嫁接了什麼 |
 |---|-------|--------|-----------|---------------|
-| 1 | [`dev-discover`](skills/dev-discover/SKILL.md) | 模糊想法 → 使用者點頭認可、有憑有據的 spec。規矩很硬：沒核准就不准動一行程式碼。 | superpowers:brainstorming | gstack spec 那套「先甩證據再問問題」、開場五問、範圍先鎖死、同一個問題在不同限制下平行想兩套做法 |
-| 2 | [`dev-plan`](skills/dev-plan/SKILL.md) | spec → 一份就算完全不懂這個 codebase 的工程師也能照做的計畫。分大小的指南、`Interfaces:` 區塊、禁止空話佔位。 | superpowers:writing-plans | planner agent 的風險分級；每個 task 上的 `Skills:` 欄位，先講清楚該叫哪些領域 skill；mattpocock to-tickets 的垂直切片任務框架、拆完票先問粒度/依賴對不對的 quiz |
-| 3 | [`dev-plan-review`](skills/dev-plan-review/SKILL.md) | 四個視角（CEO/Design/Eng/DX）自動輪流審，還會主動上網查有沒有人早就做過或早就撞牆。例行的自己拍板，真的要人判斷的才丟回來問，而且丟出結論前自己先反駁自己一輪。 | gstack autoplan 的決策系統 | 自我懷疑反駁法、Mechanical / Taste / User-Challenge 三分法、6 條自動拍板原則、兩層懷疑者升級機制 |
+| 1 | [`dev-discover`](skills/dev-discover/SKILL.md) | 模糊想法 → 使用者點頭認可、有憑有據的 spec。規矩很硬：沒核准就不准動一行程式碼。 | superpowers:brainstorming | gstack spec 那套「先甩證據再問問題」、開場五問、範圍先鎖死、同一個問題在不同限制下平行想兩套做法；spec 帶 `Status: draft\|approved` 核准閘門、`Spec Version` 欄位、Success Criteria 改寫成 Given-When-Then |
+| 2 | [`dev-plan`](skills/dev-plan/SKILL.md) | spec → 一份就算完全不懂這個 codebase 的工程師也能照做的計畫。分大小的指南、`Interfaces:` 區塊、禁止空話佔位。 | superpowers:writing-plans | planner agent 的風險分級；每個 task 上的 `Skills:` 欄位，先講清楚該叫哪些領域 skill；mattpocock to-tickets 的垂直切片任務框架、拆完票先問粒度/依賴對不對的 quiz；UI 相關的計畫強制多產出一段 `### 2b.` feature matrix |
+| 3 | [`dev-plan-review`](skills/dev-plan-review/SKILL.md) | 四個視角（CEO/Design/Eng/DX）自動輪流審，還會主動上網查有沒有人早就做過或早就撞牆。例行的自己拍板，真的要人判斷的才丟回來問，而且丟出結論前自己先反駁自己一輪。 | gstack autoplan 的決策系統 | 自我懷疑反駁法、Mechanical / Taste / User-Challenge 三分法、6 條自動拍板原則、兩層懷疑者升級機制；Step 5 決策一過自動拍板門檻就當場產出一段式 ADR |
 | 4 | [`dev-execute`](skills/dev-execute/SKILL.md) | 審完的計畫 → 能跑的程式碼。每個 task 都是新開一個 implementer，配二到三個**互相看不到彼此**的審查者（規格對不對、寫得好不好，R4 條件命中時再加一軸資安——二至三軸絕不混成一個裁決）。進度帳本掉線也不會丟資料。subagent 用不了時還有 inline 備援。 | superpowers:subagent-driven-development | executing-plans 的 inline 模式；planning-with-files 那套「檔案系統就是記憶體」 |
-| 5 | [`dev-finish`](skills/dev-finish/SKILL.md) | 敢說「完成」之前：每個宣稱都要有剛查出來的新鮮證據、真的把整條流程走一遍、把這次過程中散落各處的未決事項全部收攏，最後才合併分支。 | superpowers:verification-before-completion | 宣稱對照證據表、紅燈變綠燈的回歸鐵律、分支整合怎麼選 |
+| 5 | [`dev-finish`](skills/dev-finish/SKILL.md) | 敢說「完成」之前：每個宣稱都要有剛查出來的新鮮證據、真的把整條流程走一遍、把這次過程中散落各處的未決事項全部收攏，最後才合併分支。 | superpowers:verification-before-completion | 宣稱對照證據表、紅燈變綠燈的回歸鐵律、分支整合怎麼選；已有 Step-5 ADR 的宣稱不用重查，Success Criteria 改成請使用者當場核對而非重新推導 |
 
 **內建跳過規則。** 小事（改一個檔、可逆、30 分鐘內搞定）直接跳過 1–3 階段。只有大案或風險高的案子才走完整審查。規劃花的時間不該超過任務本身的兩成。
 
@@ -104,6 +104,7 @@ cp -R agents/* ~/.claude/agents/
 | 計畫審查吵到第 3 輪還沒共識——代表計畫在跟 spec 打架 | `dev-plan-review` | `dev-discover` |
 | `dev-finish` 查證據時，某個宣稱怎麼都拿不出證明 | `dev-finish` | `dev-debug` |
 | debug 到最後發現，根本是需求本身就錯了 | `dev-debug` | `dev-discover` |
+| 計畫引用的 `Spec Version` 跟現行 spec 對不上 | `dev-workflow` | `dev-plan` |
 
 ### 建議路由（`dev-workflow` 怎麼判斷）
 
@@ -119,7 +120,7 @@ cp -R agents/* ~/.claude/agents/
 
 ### 不同專案類型該怎麼配
 
-哪些階段要跑、哪些審查視角要開、上面還要疊什麼——**web app、API、CLI、MCP server、serverless、文件 repo、爬蟲**都有講：見 **[PROJECT-TYPE-GUIDE.md](PROJECT-TYPE-GUIDE.md)**。
+哪些階段要跑、哪些審查視角要開、上面還要疊什麼——**web app、API、CLI、MCP server、serverless、文件 repo、爬蟲**都有講：見 **[PROJECT-TYPE-GUIDE.md](PROJECT-TYPE-GUIDE.md)**。Backend API 型別現在新增 contract-first 的 OpenAPI/AsyncAPI Task 0；有正式部署環節的 Serverless/edge 型別新增 Release Runbook，在 `dev-finish` 階段產出。
 
 ### 領域 skill 怎麼疊上去
 
@@ -148,6 +149,8 @@ cp -R agents/* ~/.claude/agents/
 | `dev-exec-fixer` | 4 執行 | 只修拿到手的那幾條發現，不順手改別的 | sonnet | 完整權限 |
 | `dev-exec-fixer-critical` | 4 執行 | 只在修復迴圈第 4-5 輪出手——標準層卡了兩次才輪到它 | **opus** | 完整權限 |
 | `dev-wayfind-researcher` | 前置階段 | 解一張能靠外部資料查出答案的研究票 | sonnet | 唯讀 + 完整檢索工具 |
+
+`dev-exec-reviewer-spec` 會依「合約測試證據強度」分級每一條 Interface drift 發現（有既有測試 > 只寫了合約描述 > 未經查證的宣稱），不是照計畫怎麼寫就照單全收。
 
 另外還有兩個現成的通用專家，pipeline 該用的時候會直接用原名派出去：`test-engineer`、`silent-failure-hunter`。`security-auditor` 是另一路的即興專家——只在你手動叫 `/security-review` 或 `/ship` 時才會出場，`dev-plan-review`、`dev-execute` 從來不會自動派它；這兩個階段自己的資安把關現在交給 `dev-plan-lens-security`（第 3 階段）跟 `dev-exec-reviewer-security`（第 4 階段第三軸）。`dev-execute` 收尾時的整分支審查用 `code-reviewer`，而且**故意不去指定它的模型**——讓它自己繼承這次 session 裡最強的那顆模型，因為這是 `dev-finish` 之前的最後一道防線，不能省。
 
@@ -189,6 +192,7 @@ Eng 視角（`dev-plan-lens-eng`）跑另一輪平行檢查，對照現行文件
 | planning-with-files | 3.5.0 | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) |
 | mattpocock/skills | 沒版號的 monorepo——照 commit 對，不是照 tag | [mattpocock/skills](https://github.com/mattpocock/skills) |
 | dev-pipeline-security-review 需求書（2026-08-07） | 內部文件，非 repo | 資料來源：STRIDE 威脅建模、OWASP Top 10:2025、Veracode 2025 GenAI report、slopsquatting 研究 |
+| dev-workflow SDD 元素整合需求書（2026-08-07） | 內部文件，非 repo | 資料來源：外部分享的 SDD/Contract-first/ADR 流程比對 |
 
 要跟上游同步的話：
 

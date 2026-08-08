@@ -79,10 +79,14 @@ drive; "all tests pass but the feature doesn't work" is a routine failure.
 
 ## Part 2: Success criteria check
 
-Open the plan's **Success Criteria** checklist (dev-plan header). Check every
-box with evidence, or say plainly which are unmet and why. Unmet criteria are
-reported, never silently dropped. A criterion the user agrees to ship
-without is deferred work: record it in the repo's `TODOS.md` using
+Open the plan's **Success Criteria** checklist (dev-plan header). Read each
+criterion aloud with its evidence and only mark it done once the user confirms
+it on the spot — a one-line "does this one check out?" is enough; the user's
+on-the-spot confirmation is what closes a box, never the agent's own
+assessment. If the user disagrees, that criterion follows the existing unmet
+path below. Unmet criteria are reported plainly, with why, and never silently
+dropped. A criterion the user agrees
+to ship without is deferred work: record it in the repo's `TODOS.md` using
 dev-plan-review's entry format — unwritten deferrals evaporate.
 
 If `CONTEXT.md` exists: any new domain term this work introduced belongs in
@@ -90,6 +94,10 @@ it, and public names in the diff should match its vocabulary. One-line check,
 report mismatches — don't rename code at this stage. Same check for ADRs:
 a decision this work locked that is hard to reverse + surprising without
 context + a real trade-off → offer a one-paragraph ADR before integrating.
+If the plan file already has a matching `## ADR: <decision name>` section —
+because `dev-plan-review` Step 5 already produced it at the moment the
+decision was made — skip the offer (found → skip, not found → offer as
+before).
 
 ## Part 2b: Open-items reconciliation
 
@@ -179,7 +187,11 @@ context `dev-finish` hands to `code-reviewer` at dispatch time, not the
 All boxes checked, evidence fresh — present the user exactly these options:
 
 1. **Merge** back to the base branch locally
-2. **Push + PR** — PR body summarizes what/why, links spec + plan
+2. **Push + PR** — PR body summarizes what/why, links spec + plan. If the
+   project hits PROJECT-TYPE-GUIDE.md's "a real deploy step (not
+   preview-only)" criterion, additionally produce a Release Runbook
+   (pre-deploy checks, deploy command, post-deploy verification commands,
+   rollback command) and write it into the PR body; otherwise skip it.
 3. **Keep the branch** — user integrates later
 4. **Discard** — the work was exploratory. This is the pipeline's only
    irreversible deletion path: list exactly what will be deleted (branch
