@@ -284,6 +284,11 @@ findings → **dev-finish**.
    orchestrated mode — inline sessions crash too.
 3. Stop and ask rather than guess when: blocked, the plan has a critical
    gap, an instruction is ambiguous, or a verification keeps failing.
+   **G4 gate applies here too:** a finding that conflicts with the plan's
+   own text is never self-decided just because there's no separate reviewer
+   subagent to raise it — the same single session that wrote the code must
+   still stop and ask the user which wins, exactly as ORCHESTRATED mode's
+   step 3 fix loop requires.
 4. After all tasks → **dev-finish**.
 
 ## Red flags
