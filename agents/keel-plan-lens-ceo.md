@@ -26,6 +26,16 @@ You have authority to say "scrap it."
 The cheapest finding in the entire pipeline is "this is already solved" or
 "this road is a known dead end." Search before you reason.
 
+**First check whether the spec already did this.** `keel-discover` step 2b
+runs the same scan and writes its result to the spec's `## Prior art`
+section. If that section exists, your job is to **extend and challenge it**,
+not to start over: verify its 差異點 still holds against what the plan
+actually proposes (the plan may have grown past the difference the spec
+claimed), and search only for what it missed. Say which you did. If the
+section says `not executed — no search tooling`, or is absent, run the full
+scan below — you are then the first and possibly only prior-art check this
+work gets.
+
 Tool routing:
 
 | Looking for | Tool |

@@ -60,6 +60,7 @@ proceed with a known regression.
 | `17-branch-level-security-coverage.md` | A branch with zero security review (Part 2c check 0) | `keel-finish` Part 2c |
 | `18-release-runbook-criterion.md` | Release Runbook fires on the deploy, not the platform | `PROJECT-TYPE-GUIDE.md`, `keel-finish` |
 | `19-finish-user-confirmations.md` | Per-criterion confirmation and integration choice (G7/G8) | `keel-finish` Part 2 / Part 3 |
+| `20-prior-art-scan-at-discovery.md` | Prior-art scan at discovery; build vs adopt as a decision | `keel-discover` Step 2b |
 
 Adding a rule that is a **fact about files**? Add a check to
 `check-structure.sh`, not a fixture — a test nobody runs is worse than no test,

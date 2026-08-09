@@ -92,6 +92,8 @@ does not bind a subagent.
 | D5 | Design lens dispatch (2+ UI keywords) | `keel-plan-review` Step 1 | Step 2 roster | — |
 | D6 | DX lens dispatch (2+ API/CLI/SDK keywords) | `keel-plan-review` Step 1 | Step 2 roster | — |
 | D7 | Release Runbook when the project has a real (non-preview) deploy step | `PROJECT-TYPE-GUIDE.md` cross-cutting | `keel-finish` Part 3 option 2 | `18` |
+| D8 | Prior-art scan at discovery — internal + external, three sections, 差異點 as a hard gate | `keel-discover` Step 2b | same; consumed by `keel-plan-lens-ceo` Step A | `20` |
+| D9 | The scan's decision (adopt/adapt/build) is written to the spec's `## Prior art` section | `keel-discover` Step 2b | `keel-discover` Step 6 spec template | `20` |
 
 ## E. Security chain
 
@@ -161,7 +163,7 @@ or `Enforced at` points into that file.
 
 ## Current coverage
 
-**59 rules. 39 verified (66%)** — 32 by scenario fixture, 7 by
+**61 rules. 41 verified (67%)** — 34 by scenario fixture, 7 by
 `check-structure.sh`. Recount with:
 
 ```
@@ -180,7 +182,7 @@ plausible number in a table reads as verified.
 
 ## This is the ceiling, and it is deliberate
 
-66% is not a milestone on the way to 100% — it is the intended end state. The
+67% is not a milestone on the way to 100% — it is the intended end state. The
 remaining 20 rows should stay uncovered:
 
 **V1–V5** (Iron Law, red-green regression, the evidence gate, "an agent's
