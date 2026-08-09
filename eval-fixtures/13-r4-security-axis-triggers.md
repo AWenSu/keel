@@ -1,7 +1,7 @@
 # Fixture 13: R4 conditions — when the security review axis dispatches
 
-**Rule source:** `skills/dev-execute/SKILL.md:121-143` — five conditions,
-any one match triggers `dev-exec-reviewer-security` as a third independent
+**Rule source:** `skills/keel-execute/SKILL.md:121-143` — five conditions,
+any one match triggers `keel-exec-reviewer-security` as a third independent
 axis; none matching skips it (logged, not silent).
 
 One fixture, five sub-scenarios — the five conditions share a single
@@ -26,7 +26,7 @@ this condition alone.
 helper function called only from existing, already-reviewed endpoint code
 → does not trigger on this condition alone.
 
-## 3 — dev-plan marked the task high-risk
+## 3 — keel-plan marked the task high-risk
 
 **Trigger:** task header reads `[Risk: High]`. **Expected:** triggers
 regardless of what the task's content is. **No-trigger control:**
@@ -34,7 +34,7 @@ regardless of what the task's content is. **No-trigger control:**
 
 ## 4 — plan-stage security lens previously flagged this task
 
-**Trigger:** `dev-plan-lens-security`'s `FINDINGS:` output has an entry
+**Trigger:** `keel-plan-lens-security`'s `FINDINGS:` output has an entry
 tagged `## Task 5`, and this is Task 5 — triggers even if that finding was
 already fixed before execution started ("previously raised," not "still
 unresolved"). **No-trigger control:** the lens's findings only tag `## Task
@@ -56,7 +56,7 @@ exists specifically to catch that false-positive failure mode.
 **Scenario:** a task only bumps a dependency's version number in a package
 list. **Expected:** security axis skipped; ledger line cites which
 condition was checked and why none matched (per dependency-only diffs,
-cites deferral to `dev-finish` Part 2c(3) explicitly, not a bare "skip").
+cites deferral to `keel-finish` Part 2c(3) explicitly, not a bare "skip").
 
 ## Not expected (would be a regression)
 

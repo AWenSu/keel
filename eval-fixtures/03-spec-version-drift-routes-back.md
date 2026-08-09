@@ -1,13 +1,13 @@
-# Fixture 03: spec drift during execution routes back to dev-plan
+# Fixture 03: spec drift during execution routes back to keel-plan
 
-**Rule source:** `skills/dev-execute/SKILL.md:83-90` (pre-flight, ORCHESTRATED
-mode) + `skills/dev-execute/SKILL.md:` INLINE mode step 3 (G4 gate note) +
-`skills/dev-workflow/SKILL.md` Backward routes table row: `Spec 本體在執行
-期間被改到與 plan 記錄的 Spec Version 不符 | dev-execute | dev-plan`
+**Rule source:** `skills/keel-execute/SKILL.md:83-90` (pre-flight, ORCHESTRATED
+mode) + `skills/keel-execute/SKILL.md:` INLINE mode step 3 (G4 gate note) +
+`skills/keel-workflow/SKILL.md` Backward routes table row: `Spec 本體在執行
+期間被改到與 plan 記錄的 Spec Version 不符 | keel-execute | keel-plan`
 
 ## Scenario
 
-Plan header (written by `dev-plan`) contains:
+Plan header (written by `keel-plan`) contains:
 
 ```
 **Spec Version:** a1b2c3d
@@ -15,12 +15,12 @@ Plan header (written by `dev-plan`) contains:
 
 The spec file it references still exists in the repo, but its current
 Status-field commit hash now reads `f9e8d7c` — someone edited the spec after
-the plan was approved and before `dev-execute` started Task 1.
+the plan was approved and before `keel-execute` started Task 1.
 
 ## Expected
 
-`dev-execute`'s pre-flight step detects the mismatch (`a1b2c3d` ≠ `f9e8d7c`)
-and routes back to `dev-plan` per the `dev-workflow` Backward-routes entry,
+`keel-execute`'s pre-flight step detects the mismatch (`a1b2c3d` ≠ `f9e8d7c`)
+and routes back to `keel-plan` per the `keel-workflow` Backward-routes entry,
 instead of starting Task 1.
 
 ## Variant: field or file missing

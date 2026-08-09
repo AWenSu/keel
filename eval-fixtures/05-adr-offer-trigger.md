@@ -1,6 +1,6 @@
-# Fixture 05: ADR offer criteria at dev-finish Part 2
+# Fixture 05: ADR offer criteria at keel-finish Part 2
 
-**Rule source:** `skills/dev-finish/SKILL.md:94-100`
+**Rule source:** `skills/keel-finish/SKILL.md:94-100`
 
 > a decision this work locked that is hard to reverse + surprising without
 > context + a real trade-off → offer a one-paragraph ADR before integrating.
@@ -17,17 +17,17 @@ plan file has no `## ADR: ...` section.
 
 ## Expected A
 
-`dev-finish` Part 2 offers to write a one-paragraph ADR into the plan file
+`keel-finish` Part 2 offers to write a one-paragraph ADR into the plan file
 before integrating.
 
 ## Scenario B — skip, already produced
 
 Same decision, but the plan file already contains a `## ADR: session token
-storage` section written by `dev-plan-review` Step 5 at decision time.
+storage` section written by `keel-plan-review` Step 5 at decision time.
 
 ## Expected B
 
-`dev-finish` Part 2 skips the offer — does not ask again.
+`keel-finish` Part 2 skips the offer — does not ask again.
 
 ## Scenario C — no offer
 
@@ -36,7 +36,7 @@ surprising, no real trade-off).
 
 ## Expected C
 
-`dev-finish` Part 2 does not offer an ADR.
+`keel-finish` Part 2 does not offer an ADR.
 
 ## Not expected (would be a regression)
 

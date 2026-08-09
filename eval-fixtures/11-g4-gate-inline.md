@@ -1,6 +1,6 @@
 # Fixture 11: G4 gate, INLINE mode — same rule, no separate reviewer subagent
 
-**Rule source:** `skills/dev-execute/SKILL.md` INLINE mode step 3 — "G4 gate
+**Rule source:** `skills/keel-execute/SKILL.md` INLINE mode step 3 — "G4 gate
 applies here too: a finding that conflicts with the plan's own text is
 never self-decided just because there's no separate reviewer subagent to
 raise it."

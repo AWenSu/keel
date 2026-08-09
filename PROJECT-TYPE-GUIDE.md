@@ -5,10 +5,10 @@ The five stages are the same everywhere; what changes per project type is
 skills you layer on top**. Defaults below; deviate when the task tells you to.
 
 Reminder that overrides everything: planning cost ≤ ~20% of the task.
-A one-file fix in ANY project type skips straight to work + the dev-finish
+A one-file fix in ANY project type skips straight to work + the keel-finish
 gate. One exception: if that one file sits on an auth/session, encryption,
 upload, outbound-call, or query-construction path, or adds an
-externally-reachable endpoint, it also runs dev-finish Part 2c. Small and
+externally-reachable endpoint, it also runs keel-finish Part 2c. Small and
 safe are different measurements.
 
 ## Quick matrix
@@ -29,7 +29,7 @@ safe are different measurements.
 ### Full-stack web app
 The default pipeline as designed. Split UI tasks out to your UI router
 (design-taste skills) — the pipeline handles logic/data; the UI lane handles
-look and feel. dev-plan-review runs CEO + Eng always, Design activates on
+look and feel. keel-plan-review runs CEO + Eng always, Design activates on
 the UI vocabulary trigger automatically.
 
 ### Frontend / landing page / UI-heavy
@@ -42,10 +42,10 @@ against the approved visual. Never claim "looks right" from code reading.
 ### Backend API / database service
 Evidence rule matters most here: current behavior claims need `path:line`,
 schema claims need the actual schema. When the plan involves a public or
-inter-service API, dev-plan should produce an OpenAPI/AsyncAPI spec as a
+inter-service API, keel-plan should produce an OpenAPI/AsyncAPI spec as a
 standalone Task 0 first, and later `Interfaces:` blocks should reference
 that spec's path instead of re-writing signatures. Plan must risk-grade
-every migration task High with a named rollback. dev-plan-review's DX lens
+every migration task High with a named rollback. keel-plan-review's DX lens
 activates (API consumers are developers). Finish: contract/integration tests plus ONE
 real request against a running instance — unit tests lie about wiring.
 High-risk overlay (doubt-driven) on anything touching production data.
@@ -67,7 +67,7 @@ Layer the platform skill for platform idioms; the pipeline governs process.
 Surfaces are small — inline execution usually beats orchestration. Finish
 requires a preview deploy + a real HTTP hit; local emulation passes are
 evidence for logic, not for platform behavior (bindings, limits, cold
-starts). For projects with a real deploy step (not preview-only), dev-finish
+starts). For projects with a real deploy step (not preview-only), keel-finish
 Part 3 should additionally produce a Release Runbook — pre-deploy checks,
 deploy command, post-deploy verification commands, and rollback command —
 written into the PR body or a standalone doc; preview-only deploys don't
@@ -75,7 +75,7 @@ need this.
 
 ### Docs / config / knowledge repo
 The pipeline mostly stands down — no runtime surface, reversible edits.
-What survives: the dev-finish claim discipline (does the doc render? do the
+What survives: the keel-finish claim discipline (does the doc render? do the
 links resolve? does the config parse?) and scope lock for large
 reorganizations (moving 50 files is a plan, not an edit).
 

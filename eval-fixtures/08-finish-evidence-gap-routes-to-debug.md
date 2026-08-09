@@ -1,8 +1,8 @@
-# Fixture 08: dev-finish can't produce required evidence → dev-debug
+# Fixture 08: keel-finish can't produce required evidence → keel-debug
 
-**Rule source:** `skills/dev-workflow/SKILL.md:37` — "dev-finish gate cannot
-produce the evidence a claim requires | dev-finish | dev-debug" +
-`skills/dev-finish/SKILL.md` Part 1 Iron Law
+**Rule source:** `skills/keel-workflow/SKILL.md:37` — "keel-finish gate cannot
+produce the evidence a claim requires | keel-finish | keel-debug" +
+`skills/keel-finish/SKILL.md` Part 1 Iron Law
 
 ## Scenario A — evidence gap
 
@@ -13,8 +13,8 @@ produces a clean pass or a clear failure to fix.
 
 ## Expected A
 
-`dev-finish` does not claim "tests pass" based on a stale prior run or
-paraphrase ("should pass now"). It routes to `dev-debug` to resolve why the
+`keel-finish` does not claim "tests pass" based on a stale prior run or
+paraphrase ("should pass now"). It routes to `keel-debug` to resolve why the
 evidence can't be produced, rather than proceeding to Part 2 without it.
 
 ## Scenario B — evidence obtainable, just currently red
@@ -31,7 +31,7 @@ and it's red."
 
 ## Not expected (would be a regression)
 
-- Treating every red test as a dev-debug route-back (that's the normal Part
+- Treating every red test as a keel-debug route-back (that's the normal Part
   1 gate failure path, not this rule)
 - Claiming completion by asserting the evidence "should" exist without
   having run anything

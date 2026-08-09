@@ -1,13 +1,13 @@
-# Fixture 01: spec Status: draft blocks dev-plan
+# Fixture 01: spec Status: draft blocks keel-plan
 
-**Rule source:** `skills/dev-plan/SKILL.md:26-31`
+**Rule source:** `skills/keel-plan/SKILL.md:26-31`
 
 > the spec's `Status:` field must read `approved` before this skill
-> proceeds; otherwise `BLOCKED: spec 未核准 → 退回 dev-discover`
+> proceeds; otherwise `BLOCKED: spec 未核准 → 退回 keel-discover`
 
 ## Scenario
 
-INPUT to `dev-plan` is a spec file path. The spec file's header contains:
+INPUT to `keel-plan` is a spec file path. The spec file's header contains:
 
 ```
 **Status:** draft
@@ -15,10 +15,10 @@ INPUT to `dev-plan` is a spec file path. The spec file's header contains:
 
 ## Expected
 
-`dev-plan` does not proceed to Step 1. It returns:
+`keel-plan` does not proceed to Step 1. It returns:
 
 ```
-BLOCKED: spec 未核准 → 退回 dev-discover
+BLOCKED: spec 未核准 → 退回 keel-discover
 ```
 
 ## Not expected (would be a regression)

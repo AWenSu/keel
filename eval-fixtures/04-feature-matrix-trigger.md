@@ -1,7 +1,7 @@
 # Fixture 04: UI-heavy plan triggers the feature matrix step
 
-**Rule source:** `skills/dev-plan/SKILL.md:98-109` (`### 2b. Feature matrix
-for UI-heavy plans`), reusing `dev-plan-lens-design`'s trigger: "2+
+**Rule source:** `skills/keel-plan/SKILL.md:98-109` (`### 2b. Feature matrix
+for UI-heavy plans`), reusing `keel-plan-lens-design`'s trigger: "2+
 view/rendering/UI/component/screen keywords"
 
 ## Scenario A — trigger
@@ -12,11 +12,11 @@ component, view.)
 
 ## Expected A
 
-Before writing tasks (Step 3), `dev-plan` produces a feature ×
+Before writing tasks (Step 3), `keel-plan` produces a feature ×
 state/role/platform matrix (table form) under a new `## Feature Matrix`
 section in the plan file — heading text exactly `## Feature Matrix`, not a
 paraphrase, so the check in
-`.dev-pipeline/task-4-report.md`'s acceptance grep (`"^## Feature Matrix\|###
+`.keel/task-4-report.md`'s acceptance grep (`"^## Feature Matrix\|###
 2b\."`) actually matches.
 
 ## Scenario B — no trigger
@@ -26,13 +26,13 @@ webhook handler." (0 UI keyword hits.)
 
 ## Expected B
 
-`dev-plan` skips Step 2b entirely — no matrix, no `## Feature Matrix`
+`keel-plan` skips Step 2b entirely — no matrix, no `## Feature Matrix`
 section, no added planning overhead.
 
 ## Not expected (would be a regression)
 
 - Inventing a second, different keyword list instead of reusing
-  `dev-plan-lens-design`'s trigger verbatim
+  `keel-plan-lens-design`'s trigger verbatim
 - Producing the matrix for every plan regardless of keyword count
 - Using a heading other than `## Feature Matrix` (breaks the grep-based
   acceptance check and the repo's own `### 2b.`/`### 3b.` numbering

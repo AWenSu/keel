@@ -1,6 +1,6 @@
-# Fixture 14: dev-plan-review Security lens dispatch trigger
+# Fixture 14: keel-plan-review Security lens dispatch trigger
 
-**Rule source:** `skills/dev-plan-review/SKILL.md:47-50` — any ONE of: 2+
+**Rule source:** `skills/keel-plan-review/SKILL.md:47-50` — any ONE of: 2+
 hits of auth/login/session/token/secret/key/credential/permission/role/
 upload/個資/PII/payment/delete/export/webhook/external API; the plan's
 Global Constraints or any task carries a high-risk marker; the plan adds
@@ -13,7 +13,7 @@ Plan text: "Add **login** flow, issue a **session** **token** on success."
 
 ## Expected A
 
-Security lens (`dev-plan-lens-security`) is dispatched in Step 2, after CEO
+Security lens (`keel-plan-lens-security`) is dispatched in Step 2, after CEO
 and Design, before Eng/DX per the fixed lens order.
 
 ## Scenario B — high-risk marker, 0 keyword hits

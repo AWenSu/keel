@@ -1,16 +1,16 @@
-# Fixture 12: dev-finish Part 2c BLOCKED condition
+# Fixture 12: keel-finish Part 2c BLOCKED condition
 
-**Rule source:** `skills/dev-finish/SKILL.md:138-156`
+**Rule source:** `skills/keel-finish/SKILL.md:138-156`
 
 ## Scenario A — unresolved Critical from check (2), no risk-acceptance
 
-`dev-exec-reviewer-security` raised a Critical finding during Task 5
+`keel-exec-reviewer-security` raised a Critical finding during Task 5
 (SQL built via string concatenation from user input). It was never fixed
 and the user never explicitly accepted the risk.
 
 ## Expected A
 
-`dev-finish` returns `BLOCKED: 資安 finding 未關閉` and does not proceed to
+`keel-finish` returns `BLOCKED: 資安 finding 未關閉` and does not proceed to
 Part 3 (branch integration options are never presented).
 
 ## Scenario B — same finding, explicit risk-acceptance recorded
@@ -31,7 +31,7 @@ all clean/n/a.
 
 ## Expected C
 
-Not BLOCKED. `dev-finish` states "secrets scan: not executed" and "CVE
+Not BLOCKED. `keel-finish` states "secrets scan: not executed" and "CVE
 scan: not executed" plainly, proceeds to Part 3 — (1) and (3a) never
 trigger BLOCKED on their own, per the rule's explicit carve-out.
 

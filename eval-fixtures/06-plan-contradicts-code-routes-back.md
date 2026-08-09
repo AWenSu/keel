@@ -1,8 +1,8 @@
 # Fixture 06: execution finds the plan contradicts current code
 
-**Rule source:** `skills/dev-workflow/SKILL.md:34` (Backward routes) —
+**Rule source:** `skills/keel-workflow/SKILL.md:34` (Backward routes) —
 `Execution finds the plan contradicts the code as it now is (beyond one
-task's fix) | dev-execute | dev-plan`
+task's fix) | keel-execute | keel-plan`
 
 ## Scenario A — beyond one task's fix
 
@@ -13,7 +13,7 @@ built on a function that's gone, not just one task's file path.
 
 ## Expected A
 
-`dev-execute` routes back to `dev-plan`, not just relocating Task 4's edit
+`keel-execute` routes back to `keel-plan`, not just relocating Task 4's edit
 by its `Delivers:` line (the ordinary staleness rule) — because the
 contradiction spans multiple tasks, one task's fix-and-continue would leave
 Tasks 5-6 built on the same wrong assumption.
@@ -28,13 +28,13 @@ line (ordinary staleness rule) and continues.
 ## Expected B
 
 No route-back. This is the staleness-relocation path
-(`dev-plan/SKILL.md`'s "Delivers is truth, Files is a hint" rule), not the
+(`keel-plan/SKILL.md`'s "Delivers is truth, Files is a hint" rule), not the
 plan-contradicts-code path — the boundary between the two is exactly what
 this fixture exists to pin down.
 
 ## Not expected (would be a regression)
 
-- Routing back to `dev-plan` for every stale `Files:` line regardless of
+- Routing back to `keel-plan` for every stale `Files:` line regardless of
   scope (that's staleness-relocation's job, not this rule's)
 - Silently pushing through a multi-task contradiction by patching each task
   independently instead of stopping to re-plan

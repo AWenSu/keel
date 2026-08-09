@@ -1,6 +1,8 @@
-# unified-dev-skills
+# keel
 
 **A five-stage software development lifecycle for Claude Code — one skill per stage, a named subagent for every role, and hard gates where correctness matters more than speed.**
+
+> *The keel is the first timber laid in a ship, and every frame is built off it. Get it wrong and the hull is wrong — which is this pipeline's whole argument for gating the early stages hardest.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-skills-blueviolet)](https://code.claude.com/docs/en/skills)
@@ -10,16 +12,16 @@
 
 ```
 ┌──────────────┐   ┌──────────┐   ┌─────────────────┐   ┌─────────────┐   ┌────────────┐
-│ dev-discover │──▶│ dev-plan │──▶│ dev-plan-review │──▶│ dev-execute │──▶│ dev-finish │
+│ keel-discover │──▶│ keel-plan │──▶│ keel-plan-review │──▶│ keel-execute │──▶│ keel-finish │
 │  idea → spec │   │  spec →  │   │  large/risky    │   │ orchestrated│   │  evidence  │
 │   (gated)    │   │ artifact │   │  plans only     │   │  or inline  │   │ gate+merge │
 └──────────────┘   └──────────┘   └─────────────────┘   └─────────────┘   └────────────┘
         ▲                                  │                     │
-        └──────────── dev-discover ◀───────┘   dev-plan ◀────────┘   dev-debug ◀── dev-finish
+        └──────────── keel-discover ◀───────┘   keel-plan ◀────────┘   keel-debug ◀── keel-finish
                 (round 3 still unresolved)   (contradicts plan)   (evidence can't be produced)
 ```
 
-`dev-workflow` sits above all five stages as the router: it detects which
+`keel-workflow` sits above all five stages as the router: it detects which
 stage a request belongs to, dispatches the matching skill, and — this is the
 part most routers skip — knows how to send work **backward** when a later
 stage discovers the earlier one got something wrong.
@@ -50,11 +52,11 @@ name alone, exactly who is doing what. See [Subagent roster](#subagent-roster).
 
 | # | Skill | What it does | Spine | Key grafts |
 |---|-------|--------------|-------|------------|
-| 1 | [`dev-discover`](skills/dev-discover/SKILL.md) | Vague idea → user-approved, evidence-grounded spec. Hard gate: no code before approval. | superpowers:brainstorming | gstack spec's code-evidence rule (`path:line` before questions), five-question intake, scope lock, parallel "design it twice" exploration under diverging constraints; spec carries a `Status: draft\|approved` gate, a `Spec Version` field, and Given-When-Then Success Criteria |
-| 2 | [`dev-plan`](skills/dev-plan/SKILL.md) | Spec → plan an engineer with zero context could execute. Sizing guide, `Interfaces:` blocks, banned placeholders. | superpowers:writing-plans | planner agent's risk grading; per-task `Skills:` field naming domain skills to invoke; mattpocock to-tickets' vertical-slice task framing and post-breakdown granularity/dependency quiz; UI-heavy plans get a mandatory `### 2b.` feature matrix |
-| 3 | [`dev-plan-review`](skills/dev-plan-review/SKILL.md) | Multi-lens automated review (CEO/Design/Eng/DX) with a mandatory prior-art web scan — auto-decides routine choices, escalates only real judgment calls, adversarially refutes its own findings before trusting them. | gstack autoplan's decision system | doubt-driven refutation; Mechanical / Taste / User-Challenge taxonomy; 6 auto-decision principles; two-tier skeptic escalation; Step 5 auto-emits a one-paragraph ADR when a decision clears the auto-decide bar |
-| 4 | [`dev-execute`](skills/dev-execute/SKILL.md) | Reviewed plan → working code. Fresh implementer + two-to-three **independent** reviewers per task (spec axis, quality axis, plus a conditional security axis when R4 triggers — never merged into one verdict), crash-safe progress ledger. Inline fallback when subagents aren't available. | superpowers:subagent-driven-development | executing-plans inline mode; planning-with-files filesystem-as-memory; pre-flight spec-drift check against a plan's recorded `Spec Version`; G4 plan-conflict gate restated for INLINE mode; Finish step reports `FIXTURE COVERAGE` against `eval-fixtures/RULE-INVENTORY.md` when a plan edits this repo's own skill files |
-| 5 | [`dev-finish`](skills/dev-finish/SKILL.md) | Before any "done" claim: fresh verification evidence for every claim, drive the real flow end-to-end, reconcile every open item scattered across the run, then integrate the branch. | superpowers:verification-before-completion | claim→evidence table; red-green regression rule; branch integration options; skips re-verifying a claim already covered by a Step-5 ADR, and Success Criteria are confirmed live by the user rather than re-derived; Part 2c's secrets-scan check names the exact `gitleaks detect` invocation to run when installed |
+| 1 | [`keel-discover`](skills/keel-discover/SKILL.md) | Vague idea → user-approved, evidence-grounded spec. Hard gate: no code before approval. | superpowers:brainstorming | gstack spec's code-evidence rule (`path:line` before questions), five-question intake, scope lock, parallel "design it twice" exploration under diverging constraints; spec carries a `Status: draft\|approved` gate, a `Spec Version` field, and Given-When-Then Success Criteria |
+| 2 | [`keel-plan`](skills/keel-plan/SKILL.md) | Spec → plan an engineer with zero context could execute. Sizing guide, `Interfaces:` blocks, banned placeholders. | superpowers:writing-plans | planner agent's risk grading; per-task `Skills:` field naming domain skills to invoke; mattpocock to-tickets' vertical-slice task framing and post-breakdown granularity/dependency quiz; UI-heavy plans get a mandatory `### 2b.` feature matrix |
+| 3 | [`keel-plan-review`](skills/keel-plan-review/SKILL.md) | Multi-lens automated review (CEO/Design/Eng/DX) with a mandatory prior-art web scan — auto-decides routine choices, escalates only real judgment calls, adversarially refutes its own findings before trusting them. | gstack autoplan's decision system | doubt-driven refutation; Mechanical / Taste / User-Challenge taxonomy; 6 auto-decision principles; two-tier skeptic escalation; Step 5 auto-emits a one-paragraph ADR when a decision clears the auto-decide bar |
+| 4 | [`keel-execute`](skills/keel-execute/SKILL.md) | Reviewed plan → working code. Fresh implementer + two-to-three **independent** reviewers per task (spec axis, quality axis, plus a conditional security axis when R4 triggers — never merged into one verdict), crash-safe progress ledger. Inline fallback when subagents aren't available. | superpowers:subagent-driven-development | executing-plans inline mode; planning-with-files filesystem-as-memory; pre-flight spec-drift check against a plan's recorded `Spec Version`; G4 plan-conflict gate restated for INLINE mode; Finish step reports `FIXTURE COVERAGE` against `eval-fixtures/RULE-INVENTORY.md` when a plan edits this repo's own skill files |
+| 5 | [`keel-finish`](skills/keel-finish/SKILL.md) | Before any "done" claim: fresh verification evidence for every claim, drive the real flow end-to-end, reconcile every open item scattered across the run, then integrate the branch. | superpowers:verification-before-completion | claim→evidence table; red-green regression rule; branch integration options; skips re-verifying a claim already covered by a Step-5 ADR, and Success Criteria are confirmed live by the user rather than re-derived; Part 2c's secrets-scan check names the exact `gitleaks detect` invocation to run when installed |
 
 **Built-in skip rules.** Small tasks (single file, reversible, <30 min) bypass
 stages 1–3 entirely; only large or risky plans go through review. Planning
@@ -88,29 +90,29 @@ no name in the progress display to tell you which role is running.
 
 Restart Claude Code once after installing (new skill/agent directories are
 only picked up from session start). Each skill is then available directly —
-`/dev-discover`, `/dev-plan`, `/dev-plan-review`, `/dev-execute`,
-`/dev-finish` — or through the router, `/dev-workflow`.
+`/keel-discover`, `/keel-plan`, `/keel-plan-review`, `/keel-execute`,
+`/keel-finish` — or through the router, `/keel-workflow`.
 
 ## Usage
 
 ```text
 # starting from a fuzzy idea
-/dev-discover I want rate limiting on the public API
+/keel-discover I want rate limiting on the public API
 
 # requirements already clear
-/dev-plan add CSV export to the reports page, spec in docs/specs/...
+/keel-plan add CSV export to the reports page, spec in docs/specs/...
 
 # plan is big or touches production data
-/dev-plan-review
+/keel-plan-review
 
 # ready to build
-/dev-execute
+/keel-execute
 
 # before you say "done"
-/dev-finish
+/keel-finish
 
 # or just describe the task and let the router figure out the stage
-/dev-workflow add OAuth login to the admin panel
+/keel-workflow add OAuth login to the admin panel
 ```
 
 Each stage announces its successor and hands off — you intervene at
@@ -125,14 +127,14 @@ never do:
 
 | Gate | Stage | What it asks |
 |------|-------|--------------|
-| **G1** | `dev-plan-review`, Step 0 | "This plan assumes X, Y, Z — correct?" The one always-asked premise check; wrong premises make every downstream finding worthless. |
-| **G2** | `dev-plan-review`, Step 5 | Every surviving Taste decision and User Challenge, one finding per question, **batched by dependency frontier** (see below), full context + options + consequence. |
-| **G3** | `dev-execute`, pre-flight | Batched plan-contradiction questions, asked once before Task 1 — not mid-task. |
-| **G4** | `dev-execute`, per-task review | A finding that contradicts the plan's own text (`PLAN-CONFLICT`) — never auto-resolved, never auto-applied. |
-| **G5** | `dev-discover` | Spec approval. No code before you approve it; no exception for "simple" projects. |
-| **G6** | `dev-plan`, Step 6 | Task-breakdown granularity and dependency edges — skipped only when the plan is going through `dev-plan-review` anyway. |
-| **G7** | `dev-finish`, Part 2 | Each Success Criterion, confirmed by you on the spot. The agent's own assessment never closes a box. |
-| **G8** | `dev-finish`, Part 3 | Which integration option — and the literal typed `discard` if that's the one. |
+| **G1** | `keel-plan-review`, Step 0 | "This plan assumes X, Y, Z — correct?" The one always-asked premise check; wrong premises make every downstream finding worthless. |
+| **G2** | `keel-plan-review`, Step 5 | Every surviving Taste decision and User Challenge, one finding per question, **batched by dependency frontier** (see below), full context + options + consequence. |
+| **G3** | `keel-execute`, pre-flight | Batched plan-contradiction questions, asked once before Task 1 — not mid-task. |
+| **G4** | `keel-execute`, per-task review | A finding that contradicts the plan's own text (`PLAN-CONFLICT`) — never auto-resolved, never auto-applied. |
+| **G5** | `keel-discover` | Spec approval. No code before you approve it; no exception for "simple" projects. |
+| **G6** | `keel-plan`, Step 6 | Task-breakdown granularity and dependency edges — skipped only when the plan is going through `keel-plan-review` anyway. |
+| **G7** | `keel-finish`, Part 2 | Each Success Criterion, confirmed by you on the spot. The agent's own assessment never closes a box. |
+| **G8** | `keel-finish`, Part 3 | Which integration option — and the literal typed `discard` if that's the one. |
 | **G9** | any stage | An irreversible operation outside the repo: deploy, migration against a non-ephemeral database, data deletion, external publication, credential rotation, push/merge to a protected branch. Named target, exact command, asked at the point of action — **even when the plan already says to do it.** |
 
 G5–G9 are not checkpoints. Each is a point where continuing without your
@@ -157,21 +159,21 @@ frontier is empty.
 
 | Trigger | From | Back to |
 |---------|------|---------|
-| Execution finds the plan contradicts the code as it now stands (beyond one task's fix) | `dev-execute` | `dev-plan` |
-| Plan review round 3 still has unresolved decisions — the plan is fighting the spec | `dev-plan-review` | `dev-discover` |
-| `dev-finish`'s evidence gate can't produce proof for a claim | `dev-finish` | `dev-debug` |
-| Debugging concludes the requirement itself is wrong | `dev-debug` | `dev-discover` |
-| The plan's `Spec Version` doesn't match the current spec | `dev-execute` | `dev-plan` |
+| Execution finds the plan contradicts the code as it now stands (beyond one task's fix) | `keel-execute` | `keel-plan` |
+| Plan review round 3 still has unresolved decisions — the plan is fighting the spec | `keel-plan-review` | `keel-discover` |
+| `keel-finish`'s evidence gate can't produce proof for a claim | `keel-finish` | `keel-debug` |
+| Debugging concludes the requirement itself is wrong | `keel-debug` | `keel-discover` |
+| The plan's `Spec Version` doesn't match the current spec | `keel-execute` | `keel-plan` |
 
-### Suggested routing (what `dev-workflow` detects)
+### Suggested routing (what `keel-workflow` detects)
 
 | Signal | Route |
 |--------|-------|
-| Fuzzy idea, requirements unclear | `dev-discover` |
-| Spec exists, multi-step work ahead | `dev-plan` |
-| Plan is large/risky (>8 files, new architecture, production data) | `dev-plan-review` |
-| Plan ready and straightforward | `dev-execute` |
-| About to claim done / open a PR | `dev-finish` |
+| Fuzzy idea, requirements unclear | `keel-discover` |
+| Spec exists, multi-step work ahead | `keel-plan` |
+| Plan is large/risky (>8 files, new architecture, production data) | `keel-plan-review` |
+| Plan ready and straightforward | `keel-execute` |
+| About to claim done / open a PR | `keel-finish` |
 | Bug or test failure | your debugging skill — the pipeline is for building |
 | UI/visual work | your design-skill router |
 
@@ -181,14 +183,14 @@ Which stages to run, which review lenses fire, and what to layer on top for
 **web apps, APIs, CLIs, MCP servers, serverless, docs repos, and scrapers**:
 see **[PROJECT-TYPE-GUIDE.md](PROJECT-TYPE-GUIDE.md)**. Backend API projects
 now get a contract-first OpenAPI/AsyncAPI Task 0; Serverless/edge projects
-with a real deploy step get a Release Runbook produced at `dev-finish`.
+with a real deploy step get a Release Runbook produced at `keel-finish`.
 
 ### Domain-skill layering
 
 Skill selection happens at **plan time**, where there's global context: every
-task in a `dev-plan` artifact carries a `Skills:` field naming the domain
+task in a `keel-plan` artifact carries a `Skills:` field naming the domain
 skills its implementer must invoke (a UI-design skill for visual tasks, a
-platform skill for Workers/MCP idioms). `dev-execute` passes that field into
+platform skill for Workers/MCP idioms). `keel-execute` passes that field into
 each implementer's brief.
 
 ## Subagent roster
@@ -202,7 +204,7 @@ opus here") tends to.
 **Read-only by tool grant, not by prose.** Lenses, skeptics, the designer,
 and the researcher get `Read, Grep, Glob` (plus search tools where named) —
 no shell at all, so read-only is a property of what they hold rather than a
-promise they make. The three `dev-exec-reviewer-*` agents additionally get
+promise they make. The three `keel-exec-reviewer-*` agents additionally get
 `Bash`, since reviewing a diff requires `git diff`; each restricts that shell
 to read-only commands in its own definition, a weaker guarantee and the
 reason the grant goes no further. Only implementers and fixers get
@@ -211,23 +213,23 @@ reviewing" structural instead of a prompt that can be ignored.
 
 | subagent_type | Stage | Role | model | Tools |
 |---|---|---|---|---|
-| `dev-discover-designer` | 1 discover | One of 3 parallel approach proposals, each under a different constraint | sonnet | read-only |
-| `dev-plan-lens-ceo` | 3 review | Should this exist at all — plus a mandatory prior-art web scan | **opus** | read-only + tavily, exa, context7 |
-| `dev-plan-lens-design` | 3 review | Every user-visible state named (conditional: UI-heavy plans) | sonnet | read-only |
-| `dev-plan-lens-eng` | 3 review | Buildable as written — plus an API-currency check against live docs | sonnet | read-only + context7, Ref |
-| `dev-plan-lens-dx` | 3 review | Developer onboarding cost (conditional: API/CLI/SDK-facing plans) | sonnet | read-only + context7 |
-| `dev-plan-lens-security` | 3 review | Design-time STRIDE threat modeling (conditional: 2+ security keywords, high-risk marker, or new external endpoint) | **opus** | read-only |
-| `dev-plan-skeptic` | 3 review | Refute one High finding — single-point evidence check | sonnet | read-only, **no search** |
-| `dev-plan-skeptic-critical` | 3 review | Refute one Critical / security / cross-file-reasoning finding | **opus** | read-only, **no search** |
-| `dev-exec-implementer` | 4 execute | Build one task, test-first enforced | sonnet | full |
-| `dev-exec-reviewer-spec` | 4 execute | Spec-compliance axis only | sonnet | read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests |
-| `dev-exec-reviewer-quality` | 4 execute | Code-quality axis only | sonnet | read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests |
-| `dev-exec-reviewer-security` | 4 execute | Security axis only, dispatched conditionally when an R4 trigger is hit | **opus** | read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests |
-| `dev-exec-fixer` | 4 execute | Apply only the findings it was given | sonnet | full |
-| `dev-exec-fixer-critical` | 4 execute | Fix-loop rounds 4-5 only, after the standard tier stalls twice | opus | full |
-| `dev-wayfind-researcher` | pre-stage | Resolve one externally-answerable research ticket | sonnet | read-only + full search |
+| `keel-discover-designer` | 1 discover | One of 3 parallel approach proposals, each under a different constraint | sonnet | read-only |
+| `keel-plan-lens-ceo` | 3 review | Should this exist at all — plus a mandatory prior-art web scan | **opus** | read-only + tavily, exa, context7 |
+| `keel-plan-lens-design` | 3 review | Every user-visible state named (conditional: UI-heavy plans) | sonnet | read-only |
+| `keel-plan-lens-eng` | 3 review | Buildable as written — plus an API-currency check against live docs | sonnet | read-only + context7, Ref |
+| `keel-plan-lens-dx` | 3 review | Developer onboarding cost (conditional: API/CLI/SDK-facing plans) | sonnet | read-only + context7 |
+| `keel-plan-lens-security` | 3 review | Design-time STRIDE threat modeling (conditional: 2+ security keywords, high-risk marker, or new external endpoint) | **opus** | read-only |
+| `keel-plan-skeptic` | 3 review | Refute one High finding — single-point evidence check | sonnet | read-only, **no search** |
+| `keel-plan-skeptic-critical` | 3 review | Refute one Critical / security / cross-file-reasoning finding | **opus** | read-only, **no search** |
+| `keel-exec-implementer` | 4 execute | Build one task, test-first enforced | sonnet | full |
+| `keel-exec-reviewer-spec` | 4 execute | Spec-compliance axis only | sonnet | read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests |
+| `keel-exec-reviewer-quality` | 4 execute | Code-quality axis only | sonnet | read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests |
+| `keel-exec-reviewer-security` | 4 execute | Security axis only, dispatched conditionally when an R4 trigger is hit | **opus** | read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests |
+| `keel-exec-fixer` | 4 execute | Apply only the findings it was given | sonnet | full |
+| `keel-exec-fixer-critical` | 4 execute | Fix-loop rounds 4-5 only, after the standard tier stalls twice | opus | full |
+| `keel-wayfind-researcher` | pre-stage | Resolve one externally-answerable research ticket | sonnet | read-only + full search |
 
-`dev-exec-reviewer-spec` grades every Interface-drift finding by contract-test
+`keel-exec-reviewer-spec` grades every Interface-drift finding by contract-test
 evidence strength (existing test > described contract > unverified claim)
 rather than taking the plan's word for it.
 
@@ -235,12 +237,12 @@ Plus two general-purpose specialists this pipeline dispatches by their
 existing names when a finding calls for them: `test-engineer`,
 `silent-failure-hunter`. `security-auditor` is a separate, ad-hoc specialist —
 it is invoked by `/security-review` or `/ship`, never dispatched by
-`dev-plan-review` or `dev-execute`; the pipeline's own security coverage in
-those two stages now lives in `dev-plan-lens-security` (stage 3) and
-`dev-exec-reviewer-security` (stage 4, third axis). A final whole-branch
-review at the end of `dev-execute` uses `code-reviewer` with **no model
+`keel-plan-review` or `keel-execute`; the pipeline's own security coverage in
+those two stages now lives in `keel-plan-lens-security` (stage 3) and
+`keel-exec-reviewer-security` (stage 4, third axis). A final whole-branch
+review at the end of `keel-execute` uses `code-reviewer` with **no model
 override** — it inherits whatever the strongest model in the session is,
-because it's the last line of defense before `dev-finish`.
+because it's the last line of defense before `keel-finish`.
 
 ### Tiering by agent identity, not by model parameter
 
@@ -254,9 +256,9 @@ every time).
 
 Instead, tier selection **is** agent selection:
 
-- `dev-plan-skeptic` (sonnet) handles findings a single-point check can settle
+- `keel-plan-skeptic` (sonnet) handles findings a single-point check can settle
   — does the cited line exist, does it say what's claimed.
-- `dev-plan-skeptic-critical` (opus) handles Critical severity, anything
+- `keel-plan-skeptic-critical` (opus) handles Critical severity, anything
   touching security/data-loss/irreversible operations, or anything needing
   cross-file reasoning (tracing callers, finding existing guards, sizing blast
   radius).
@@ -270,9 +272,9 @@ Instead, tier selection **is** agent selection:
   ("refute when evidence is weak") already leans toward killing findings — the
   model tier is the one thing standing between that bias and a real mistake.
 
-The same pattern governs `dev-execute`'s fix loop (ported from superpowers
-6.2.0): rounds 1-3 resume the standard `dev-exec-fixer` (sonnet); rounds 4-5
-switch to a fresh `dev-exec-fixer-critical` (opus) dispatch, because a fixer
+The same pattern governs `keel-execute`'s fix loop (ported from superpowers
+6.2.0): rounds 1-3 resume the standard `keel-exec-fixer` (sonnet); rounds 4-5
+switch to a fresh `keel-exec-fixer-critical` (opus) dispatch, because a fixer
 that failed twice with the same context and model isn't going to succeed a
 third time unchanged. At round 5, unresolved findings trip a circuit breaker
 — load-bearing ones block the task and go to the user, cosmetic ones get
@@ -281,7 +283,7 @@ passing a `model` override; every escalation is a named agent.
 
 ### Prior-art scanning — catching "this is already solved" before it's built
 
-The CEO lens (`dev-plan-lens-ceo`) runs a mandatory external scan before any
+The CEO lens (`keel-plan-lens-ceo`) runs a mandatory external scan before any
 internal reasoning: existing products/libraries via web search, known failure
 modes and deprecation notices via deep research, whether a named framework
 already ships the feature via documentation lookup. It reports three sections
@@ -294,7 +296,7 @@ can never sink a plan or become a User Challenge on its own. Surface-level name
 collision is not duplication, and killing legitimate work on a shallow match
 would be the single most expensive mistake this lens could make.
 
-The Eng lens (`dev-plan-lens-eng`) runs a parallel check on API currency —
+The Eng lens (`keel-plan-lens-eng`) runs a parallel check on API currency —
 verifying that every framework/library/API the plan names against current
 documentation hasn't been deprecated or removed since the plan was written.
 
@@ -326,7 +328,7 @@ time (2026-07-14; subagent roster and prior-art scanning added 2026-07-30):
 | planning-with-files | 3.5.0 | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) |
 | mattpocock/skills | unversioned monorepo — synced by commit, not tag | [mattpocock/skills](https://github.com/mattpocock/skills) |
 | dev-pipeline-security-review requirements (2026-08-07) | internal doc, not a repo | sources: STRIDE threat modeling, OWASP Top 10:2025, Veracode 2025 GenAI report, slopsquatting research |
-| dev-workflow SDD 元素整合需求書 (2026-08-07) | internal doc, not a repo | sources: 外部分享的 SDD/Contract-first/ADR 流程比對 |
+| keel-workflow SDD 元素整合需求書 (2026-08-07) | internal doc, not a repo | sources: 外部分享的 SDD/Contract-first/ADR 流程比對 |
 
 To sync with upstream:
 

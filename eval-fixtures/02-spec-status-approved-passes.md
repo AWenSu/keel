@@ -1,10 +1,10 @@
-# Fixture 02: spec Status: approved lets dev-plan proceed
+# Fixture 02: spec Status: approved lets keel-plan proceed
 
-**Rule source:** `skills/dev-plan/SKILL.md:26-31`
+**Rule source:** `skills/keel-plan/SKILL.md:26-31`
 
 ## Scenario
 
-INPUT to `dev-plan` is a spec file path. The spec file's header contains:
+INPUT to `keel-plan` is a spec file path. The spec file's header contains:
 
 ```
 **Status:** approved (2026-08-07, a1b2c3d)
@@ -12,9 +12,9 @@ INPUT to `dev-plan` is a spec file path. The spec file's header contains:
 
 ## Expected
 
-`dev-plan` proceeds normally to "Scope check, then map files" (Step 1) — no
+`keel-plan` proceeds normally to "Scope check, then map files" (Step 1) — no
 `BLOCKED`. The plan header it writes copies the spec's approval marker into
-`**Spec Version:**` (`skills/dev-plan/SKILL.md:87-88`):
+`**Spec Version:**` (`skills/keel-plan/SKILL.md:87-88`):
 
 ```
 **Spec Version:** a1b2c3d
