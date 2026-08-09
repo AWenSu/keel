@@ -61,6 +61,7 @@ proceed with a known regression.
 | `18-release-runbook-criterion.md` | Release Runbook fires on the deploy, not the platform | `PROJECT-TYPE-GUIDE.md`, `keel-finish` |
 | `19-finish-user-confirmations.md` | Per-criterion confirmation and integration choice (G7/G8) | `keel-finish` Part 2 / Part 3 |
 | `20-prior-art-scan-at-discovery.md` | Prior-art scan at discovery; build vs adopt as a decision | `keel-discover` Step 2b |
+| `21-design-lens-visual-routing.md` | Visual source of truth + design-skill routing on UI tasks | `keel-plan-lens-design` |
 
 Adding a rule that is a **fact about files**? Add a check to
 `check-structure.sh`, not a fixture — a test nobody runs is worse than no test,
