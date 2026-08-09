@@ -62,8 +62,8 @@ therefore not merely undocumented but actively countermanded.
 | B4 | G4 `PLAN-CONFLICT` arbitration | `keel-workflow` gate table | `keel-execute` fix loop step 4; INLINE mode step 3 | `10`, `11` |
 | B5 | G5 spec approval (keel-discover) | `keel-workflow` gate table | `keel-discover` Step 7 self-review/user-review ("Wait for explicit approval") | `01`, `02` |
 | B6 | G6 task-breakdown quiz | `keel-workflow` gate table | `keel-plan` Step 6 | — |
-| B7 | G7 Success Criteria live confirmation | `keel-workflow` gate table | `keel-finish` Part 2 | — |
-| B8 | G8 branch-integration choice | `keel-workflow` gate table | `keel-finish` Part 3 | — |
+| B7 | G7 Success Criteria live confirmation | `keel-workflow` gate table | `keel-finish` Part 2 | `19` |
+| B8 | G8 branch-integration choice | `keel-workflow` gate table | `keel-finish` Part 3 | `19`, `16` |
 | B9 | G9 irreversible operation outside the repo | `keel-workflow` gate table | `keel-execute` pre-flight destructive-op scan; `keel-finish` target-environment rule | `15` |
 
 ## C. Irreversible-operation consent
@@ -75,7 +75,7 @@ does not bind a subagent.
 | # | Rule | Declared at | Enforced at | Fixture |
 |---|------|-------------|-------------|---------|
 | C1 | Never work on `main`/`master` without consent | `keel-workflow` branch-protection para, `keel-execute` universal rules | `keel-exec-implementer` / `-fixer` / `-fixer-critical` pre-commit branch check | `15` (A) |
-| C2 | Never merge/rebase/push/force-push to main without consent | `keel-finish` Part 3 intro | same section (acting agent is the controller) | — |
+| C2 | Never merge/rebase/push/force-push to main without consent | `keel-finish` Part 3 intro | same section (acting agent is the controller) | `16` |
 | C3 | Discard requires the literal word `discard` | `keel-finish` Part 3 option 4 | same section | `15` (D) |
 | C4 | Worktree removal requires a dirty-state check + confirmation | `keel-finish` Part 3 cleanup | same section | `15` (C) |
 | C5 | Deploy / migration / writes to a live target require a named target environment + consent | `keel-finish` Drive-the-real-flow; `PROJECT-TYPE-GUIDE.md` cross-cutting | same sections | `15` (E) |
@@ -91,7 +91,7 @@ does not bind a subagent.
 | D4 | Security lens dispatch (2+ keywords / high-risk / new endpoint) | `keel-plan-review` Step 1 | `keel-plan-review` Step 2 roster | `14` |
 | D5 | Design lens dispatch (2+ UI keywords) | `keel-plan-review` Step 1 | Step 2 roster | — |
 | D6 | DX lens dispatch (2+ API/CLI/SDK keywords) | `keel-plan-review` Step 1 | Step 2 roster | — |
-| D7 | Release Runbook when the project has a real (non-preview) deploy step | `PROJECT-TYPE-GUIDE.md` cross-cutting | `keel-finish` Part 3 option 2 | — |
+| D7 | Release Runbook when the project has a real (non-preview) deploy step | `PROJECT-TYPE-GUIDE.md` cross-cutting | `keel-finish` Part 3 option 2 | `18` |
 
 ## E. Security chain
 
@@ -115,7 +115,7 @@ context fork.
 | E11 | Part 2c check 3b — dependency existence (anti-slopsquatting), no exemption | `keel-finish` Part 2c (3b) | same | `12` |
 | E12 | Part 2c check 4 — plan-lens findings disposition | `keel-finish` Part 2c (4) | same (reads E8) | `12` |
 | E13 | BLOCKED on unresolved Critical from (2)/(3b)/(4) | `keel-finish` Part 2c BLOCKED condition | same | `12` |
-| E14 | A branch with zero security review never reaches integration unreviewed | — | `keel-finish` Part 2c check 0 | — |
+| E14 | A branch with zero security review never reaches integration unreviewed | `17` | `keel-finish` Part 2c check 0 | — |
 
 ## F. Structural guarantees
 
@@ -161,7 +161,7 @@ or `Enforced at` points into that file.
 
 ## Current coverage
 
-**59 rules. 34 verified (57%)** — 27 by scenario fixture, 7 by
+**59 rules. 38 verified (64%)** — 31 by scenario fixture, 7 by
 `check-structure.sh`. Recount with:
 
 ```
@@ -178,21 +178,34 @@ is catching claims nobody checked. The reviewer auditing that same file
 independently reported "all 46 rows" too. Two readers, same error, because a
 plausible number in a table reads as verified.
 
-### The remaining 25 rows are not all worth covering
+## This is the ceiling, and it is deliberate
 
-Chasing 100% would be the anti-pattern this repo already names — optimizing
-for the check rather than the behavior.
+64% is not a milestone on the way to 100% — it is the intended end state. The
+remaining 21 rows should stay uncovered:
 
-| Kind | Rows | Why |
-|------|------|-----|
-| Worth a fixture | ~4 | Clear trigger/no-trigger boundary, expensive to get wrong: C2 merge/push consent, E14 zero-security-review branch, D7 Release Runbook criterion, B7/B8 the two keel-finish confirmations |
-| Not worth testing | ~21 | G1–G5 (Iron Law, red-green, evidence gate) and H1–H5 (ledger, state file, TODOS) are **behaviors every run exercises**, not conditional branches. A fixture for the Iron Law restates the rule as its own expected result — tautological, and they fail loudly in normal use anyway |
+**G1–G5** (Iron Law, red-green regression, the evidence gate, "an agent's
+success report is not evidence", untrusted search results) and **H1–H5**
+(ledger append, state file, `.gitignore`, `TODOS.md`, report-to-file) are
+**behaviors every single run exercises**, not conditional branches with a
+trigger boundary. A fixture for the Iron Law would state the rule as its own
+expected result — tautological, zero information. And they fail loudly in
+normal use: a run that skips the ledger is visibly broken by the next
+compaction, which is a faster and harsher test than any document.
 
-So the honest ceiling is roughly **38/59 (64%)**, not 59/59.
+**B1–B3, B6, D5–D6, A6, E7–E9** are in the same family — gates and dispatch
+triggers that fire on ordinary runs, or persistence rules whose absence is
+immediately apparent.
 
-The `Enforced at` column is a different claim and is **not** summarised here
-on purpose. Every row names a location, and every location was confirmed to
-contain the rule when written — but "the text is there" is weaker than "the
-rule operates," and collapsing 59 individually-checkable claims into one
-percentage is how the weaker reading gets laundered into the stronger one.
+Chasing the last 21 would be the anti-pattern this repo already names:
+optimizing for the check rather than the behavior. Adding a rule that
+genuinely has a trigger/no-trigger boundary and a high cost of being wrong?
+That earns a fixture. Adding one to move a percentage does not.
+
+## What the two columns mean, separately
+
+`Enforced at` is a different claim from `Fixture`, and is **not** summarised
+as a percentage on purpose. Every row names a location, and every location was
+confirmed to contain the rule when written — but "the text is there" is weaker
+than "the rule operates," and collapsing 59 individually-checkable claims into
+one number is how the weaker reading gets laundered into the stronger one.
 Check the rows you care about.

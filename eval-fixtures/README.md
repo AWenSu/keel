@@ -56,6 +56,10 @@ proceed with a known regression.
 | `13-r4-security-axis-triggers.md` | R4 conditions (5 sub-scenarios) | `keel-execute/SKILL.md` |
 | `14-security-lens-dispatch-trigger.md` | Security lens dispatch (OR of 3 conditions) | `keel-plan-review/SKILL.md` |
 | `15-irreversible-operation-consent.md` | Consent guards for unrecoverable actions (5 sub-scenarios) | `keel-workflow`, `keel-execute`, `keel-finish`, the 3 write-capable agents |
+| `16-merge-push-consent.md` | merge / push / force-push need explicit consent (G8) | `keel-finish` Part 3 |
+| `17-branch-level-security-coverage.md` | A branch with zero security review (Part 2c check 0) | `keel-finish` Part 2c |
+| `18-release-runbook-criterion.md` | Release Runbook fires on the deploy, not the platform | `PROJECT-TYPE-GUIDE.md`, `keel-finish` |
+| `19-finish-user-confirmations.md` | Per-criterion confirmation and integration choice (G7/G8) | `keel-finish` Part 2 / Part 3 |
 
 Adding a rule that is a **fact about files**? Add a check to
 `check-structure.sh`, not a fixture — a test nobody runs is worse than no test,
