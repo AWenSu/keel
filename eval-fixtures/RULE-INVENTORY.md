@@ -157,7 +157,25 @@ or `Enforced at` points into that file.
 
 ## Current coverage
 
-**Enforced: 46/46 rules.** **Fixture-covered: 28/46 (61%).** These are the
-two numbers `dev-execute`'s Finish step reports as `FIXTURE COVERAGE`; the
-denominator is the row count of the tables above. Recount them when rows are
-added — a stale total is the same failure this file exists to catch.
+**59 rules. 27 fixture-covered (46%).** Recount with:
+
+```
+grep -cE '^\|\s*[A-H][0-9]+\s*\|' eval-fixtures/RULE-INVENTORY.md          # total
+grep -E '^\|\s*[A-H][0-9]+\s*\|' eval-fixtures/RULE-INVENTORY.md \
+  | grep -vcE '\|\s*—\s*\|?\s*$'                                         # fixture-covered
+```
+
+These are the numbers `dev-execute`'s Finish step reports as
+`FIXTURE COVERAGE`. **Run the commands; do not carry the number forward from
+this line.** The first version of this section said "46/46 enforced, 28/46
+fixture-covered" — both figures written from memory, both wrong, in the file
+whose entire purpose is catching claims nobody checked. The reviewer auditing
+that same file independently reported "all 46 rows" too. Two readers, same
+error, because a plausible number in a table reads as verified.
+
+The `Enforced at` column is a different claim and is **not** summarised here
+on purpose. Every row names a location, and every location was confirmed to
+contain the rule when written — but "the text is there" is weaker than "the
+rule operates," and collapsing 59 individually-checkable claims into one
+percentage is how the weaker reading gets laundered into the stronger one.
+Check the rows you care about.
