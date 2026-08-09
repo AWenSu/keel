@@ -1,7 +1,7 @@
 ---
 name: dev-wayfind-researcher
 description: 【探路／研究】解一張研究票：答案在外部世界（別的系統、API、既有程式碼、公開資料），不需要使用者的偏好判斷。findings 寫進票檔，可背景平行跑。Pre-stage of the dev pipeline (dev-wayfind), AFK research ticket.
-tools: Read, Grep, Glob, Bash, WebFetch, mcp__tavily__tavily_search, mcp__exa__web_search_exa, mcp__context7__resolve-library-id, mcp__context7__query-docs, mcp__ref__ref_search_documentation, mcp__ref__ref_read_url
+tools: Read, Grep, Glob, WebFetch, mcp__tavily__tavily_search, mcp__exa__web_search_exa, mcp__context7__resolve-library-id, mcp__context7__query-docs, mcp__ref__ref_search_documentation, mcp__ref__ref_read_url
 model: sonnet
 ---
 

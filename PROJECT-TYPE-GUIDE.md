@@ -6,7 +6,10 @@ skills you layer on top**. Defaults below; deviate when the task tells you to.
 
 Reminder that overrides everything: planning cost ≤ ~20% of the task.
 A one-file fix in ANY project type skips straight to work + the dev-finish
-gate.
+gate. One exception: if that one file sits on an auth/session, encryption,
+upload, outbound-call, or query-construction path, or adds an
+externally-reachable endpoint, it also runs dev-finish Part 2c. Small and
+safe are different measurements.
 
 ## Quick matrix
 
@@ -86,6 +89,20 @@ inspected.
 
 ## Cross-cutting, all types
 
+- **Name the target environment before driving anything.** Several rows above
+  demand evidence from a running system — "ONE real request against a running
+  instance," "a preview deploy + a real HTTP hit," "one run against the live
+  target." None of them authorize choosing production to satisfy that demand.
+  Before executing, state which environment you are pointing at; if it cannot
+  be shown to be local, preview, or ephemeral, stop and get explicit consent
+  naming the environment and the exact command. `not executed — no
+  non-production environment available` is a legitimate evidence line.
+- **Release Runbook** (pre-deploy checks, deploy command, post-deploy
+  verification, rollback): required for **any** project type with a real
+  deploy step, not preview-only — the criterion is the deploy, not the
+  platform. The Serverless/edge section above names it explicitly because preview deploys
+  make the distinction easy to miss there, but a full-stack app or backend
+  service that ships to a real environment needs one just the same.
 - **High-risk overlay** (production / security / irreversible / data
   migration): layer adversarial review on any stage, any project type.
 - **Unknown codebase**: prepend a cheap exploration pass (read-only agent or

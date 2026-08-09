@@ -1,7 +1,7 @@
 ---
 name: dev-discover-designer
 description: 【需求探索／設計方案】在指定的一個設計約束下，獨立提出一套完整做法。多隻平行派出，各自不知道彼此在做什麼——差異性就是目的。只提方案不寫程式。Stage 1 of the dev pipeline (dev-discover), parallel approach exploration.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob
 model: sonnet
 ---
 

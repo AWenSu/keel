@@ -19,6 +19,11 @@ OUTPUT  a user-approved spec: scope locked, test seams agreed, every
         requirement grounded in evidence rather than recollection
 ```
 
+Missing INPUT → `BLOCKED: 缺 <idea | codebase access> → 退回 the requester`.
+This stage is the pipeline's entry point, so there is no earlier stage to
+route to: an idea too vague to state at all goes back to the person who
+asked, and no codebase access means the evidence rule below cannot be met.
+
 Turn "I want X" into a written, approved spec. Nothing downstream (plan, review,
 execution) can be better than the spec it started from.
 

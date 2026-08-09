@@ -11,6 +11,24 @@ provenance:
 
 # dev-debug — Diagnosis Loop
 
+```
+INPUT   an observable symptom (error, wrong output, flake, slowness) and an
+        environment the code can be run in
+OUTPUT  a one-line root-cause statement, a regression test that went red
+        before the fix and green after, and zero leftover instrumentation
+```
+
+Missing INPUT → `BLOCKED: 缺 <symptom | runnable environment> → 退回 <the
+stage or person that owes it>`. A symptom nobody can reproduce and no
+environment to try it in are the two things this stage cannot substitute for.
+
+**Build/compile failures short-circuit the loop.** If the symptom is a
+compile, type, or build error rather than a runtime behavior, Phase 1 is
+already done — the build command *is* the loop. Dispatch
+`build-error-resolver` (by name, never `general-purpose`, no `model`
+override) and skip to Phase 6's checklist. The phases below are
+for behavior you have to hunt.
+
 Skip phases only when explicitly justified. Read `CONTEXT.md` (if it exists)
 before exploring, so you name modules the way the project does, and
 `docs/adr/` for the affected area — what looks like a bug is sometimes a
@@ -66,8 +84,21 @@ fixed. Paste the invocation and its output.
 ## Phase 2 — Reproduce + minimise
 
 Run the loop; watch it go red. Confirm it fails with the **user's exact
-symptom** — a nearby different failure means wrong bug, wrong fix. Then
-shrink to the smallest scenario that still goes red: cut inputs, config,
+symptom** — a nearby different failure means wrong bug, wrong fix.
+
+**A third outcome exists: the loop is red, the symptom matches, and the code
+is doing exactly what the spec or an ADR says it should.** Then this is not a
+bug — the requirement is wrong. Stop the diagnostic loop and route back to
+`dev-discover` with the repro and the `file:line` of the spec/ADR text that
+sanctions the behavior (`dev-workflow`'s `dev-debug → dev-discover` route).
+
+Do not "fix" it here. A code change that contradicts an approved spec is a
+silent spec amendment — it skips the approval gate stage 1 exists to enforce,
+and leaves the written requirement stating the opposite of what ships. Phase
+3 asks "why does the code do this"; this outcome answers it in one line and
+makes the remaining phases the wrong tool.
+
+Otherwise, shrink to the smallest scenario that still goes red: cut inputs, config,
 callers one at a time, re-running after each cut. Done when every remaining
 element is load-bearing. The minimal repro shrinks Phase 3's hypothesis
 space and becomes Phase 5's regression test.

@@ -1,7 +1,7 @@
 ---
 name: dev-plan-lens-security
 description: 【計畫審查／資安視角】設計期威脅建模：逐一列出計畫新增/修改的元件與資料流，每個跨信任邊界處套用 Spoofing/Tampering/Repudiation/Information Disclosure/DoS/Elevation of Privilege 六類，找出認證授權模型、敏感資料流、不可逆操作、攻擊面、相依風險上的設計期風險。不做程式碼層級審查。Stage 3 of the dev pipeline (dev-plan-review), security lens。只在計畫命中 2+ 資安詞彙、高風險標記或新增對外端點時啟用。
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob
 model: opus
 ---
 
