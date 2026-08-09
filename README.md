@@ -43,7 +43,7 @@ themselves.
 
 **What changed since the first release:** the pipeline no longer dispatches
 work as anonymous `general-purpose` subagents. Every role — implementer,
-spec reviewer, quality reviewer, four review lenses, two tiers of adversarial
+spec reviewer, quality reviewer, five review lenses, two tiers of adversarial
 skeptic, fixer, research ticket — is a named agent definition with its own
 pinned model and its own tool access. You can watch a run and know, from the
 name alone, exactly who is doing what. See [Subagent roster](#subagent-roster).
@@ -54,7 +54,7 @@ name alone, exactly who is doing what. See [Subagent roster](#subagent-roster).
 |---|-------|--------------|-------|------------|
 | 1 | [`keel-discover`](skills/keel-discover/SKILL.md) | Vague idea → user-approved, evidence-grounded spec. Hard gate: no code before approval. | superpowers:brainstorming | gstack spec's code-evidence rule (`path:line` before questions), five-question intake, scope lock, parallel "design it twice" exploration under diverging constraints; **a prior-art scan that searches outside the repo, not just inside it** — adopt/adapt/build becomes a recorded decision with a named 差異點, and the feature list of mature solutions is harvested even when the answer is build; spec carries a `Status: draft\|approved` gate, a `Spec Version` field, and Given-When-Then Success Criteria |
 | 2 | [`keel-plan`](skills/keel-plan/SKILL.md) | Spec → plan an engineer with zero context could execute. Sizing guide, `Interfaces:` blocks, banned placeholders. | superpowers:writing-plans | planner agent's risk grading; per-task `Skills:` field naming domain skills to invoke; mattpocock to-tickets' vertical-slice task framing and post-breakdown granularity/dependency quiz; UI-heavy plans get a mandatory `### 2b.` feature matrix |
-| 3 | [`keel-plan-review`](skills/keel-plan-review/SKILL.md) | Multi-lens automated review (CEO/Design/Eng/DX) with a mandatory prior-art web scan — auto-decides routine choices, escalates only real judgment calls, adversarially refutes its own findings before trusting them. | gstack autoplan's decision system | doubt-driven refutation; Mechanical / Taste / User-Challenge taxonomy; 6 auto-decision principles; two-tier skeptic escalation; Step 5 auto-emits a one-paragraph ADR when a decision clears the auto-decide bar |
+| 3 | [`keel-plan-review`](skills/keel-plan-review/SKILL.md) | Multi-lens automated review (CEO/Design/Eng/Security/DX) with a mandatory prior-art web scan — auto-decides routine choices, escalates only real judgment calls, adversarially refutes its own findings before trusting them. | gstack autoplan's decision system | doubt-driven refutation; Mechanical / Taste / User-Challenge taxonomy; 6 auto-decision principles; two-tier skeptic escalation; Step 5 auto-emits a one-paragraph ADR when a decision clears the auto-decide bar |
 | 4 | [`keel-execute`](skills/keel-execute/SKILL.md) | Reviewed plan → working code. Fresh implementer + two-to-three **independent** reviewers per task (spec axis, quality axis, plus a conditional security axis when R4 triggers — never merged into one verdict), crash-safe progress ledger. Inline fallback when subagents aren't available. | superpowers:subagent-driven-development | executing-plans inline mode; planning-with-files filesystem-as-memory; pre-flight spec-drift check against a plan's recorded `Spec Version`; G6 plan-conflict gate restated for INLINE mode; Finish step reports `FIXTURE COVERAGE` against `eval-fixtures/RULE-INVENTORY.md` when a plan edits this repo's own skill files |
 | 5 | [`keel-finish`](skills/keel-finish/SKILL.md) | Before any "done" claim: fresh verification evidence for every claim, drive the real flow end-to-end, reconcile every open item scattered across the run, then integrate the branch. | superpowers:verification-before-completion | claim→evidence table; red-green regression rule; branch integration options; skips re-verifying a claim already covered by a Step-5 ADR, and Success Criteria are confirmed live by the user rather than re-derived; Part 2c's secrets-scan check names the exact `gitleaks detect` invocation to run when installed |
 
@@ -75,7 +75,7 @@ bash eval-fixtures/check-structure.sh    # exit 0 = all pass
 The `NN-*.md` files are scenario fixtures for rules a script can't judge
 (does a spec marked `draft` block `keel-plan`? does a plan-vs-code
 contradiction route back?), graded by walkthrough. `RULE-INVENTORY.md` lists
-all 59 declared rules with where each is enforced and what verifies it — a
+every declared rule with where each is enforced and what verifies it — a
 row with no verifier is a rule that can regress silently, and a row whose
 `Enforced at` is empty is a rule that is already broken.
 
@@ -174,6 +174,7 @@ frontier is empty.
 | `keel-finish`'s evidence gate can't produce proof for a claim | `keel-finish` | `keel-debug` |
 | Debugging concludes the requirement itself is wrong | `keel-debug` | `keel-discover` |
 | The plan's `Spec Version` doesn't match the current spec | `keel-execute` | `keel-plan` |
+| A stage's INPUT contract cannot be satisfied | any stage | the stage that owes the missing artifact |
 
 ### Suggested routing (what `keel-workflow` detects)
 
@@ -184,7 +185,7 @@ frontier is empty.
 | Plan is large/risky (>8 files, new architecture, production data) | `keel-plan-review` |
 | Plan ready and straightforward | `keel-execute` |
 | About to claim done / open a PR | `keel-finish` |
-| Bug or test failure | your debugging skill — the pipeline is for building |
+| Bug, test failure, unexpected behavior | [`keel-debug`](skills/keel-debug/SKILL.md) — loop-first: no hypothesis without a red repro command |
 | UI/visual work | your design-skill router |
 
 ### Per-project-type defaults
@@ -319,7 +320,7 @@ ignored, only factual claims are extracted.
 ### Fan-out ceiling
 
 No stage dispatches an unbounded number of agents. The cap is **≤8 concurrent,
-≤16 total per stage**; if the real workload exceeds that, the pipeline sorts
+≤16 total per task loop**; if the real workload exceeds that, the pipeline sorts
 by severity, covers the top N, and **must** emit a `SKIPPED: <n> — <reason>`
 line. Silent truncation is treated as a bug — a stage that quietly covers 60%
 of the findings and reports as if it covered 100% is worse than one that never

@@ -239,8 +239,11 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
    every standard and build the wrong thing, or vice versa; one axis must
    not mask another — a third axis does not change this rule, it just adds
    a third independent voice).
-   Each reviewer reads the task brief and report as *file paths* and returns
-   findings the same way when long — same inline-bloat rule as step 2.
+   Each reviewer reads the task brief and report as *file paths*. It returns
+   findings **inline** — reviewers hold no `Write` tool and their own text
+   forbids using the shell for one, so "return it as a file too" would read as
+   licence to breach the read-only grant. Cap the return instead: verdict plus
+   the worst findings inline, the remainder in the appendix.
    **Evidence gate:** every finding quotes the diff/code line that motivates
    it (file:line + verbatim text); no quotable line → confidence 4-5/10,
    appendix only, never the main verdict.
@@ -331,6 +334,12 @@ relocated: 1 (Files: said src/auth.py:120-140; found at :200-220 by Delivers)
 security: 2 Important (SQL string-building svc/order.py:44; missing authz check api/admin.py:12) → both fixed in a1b2c3d
 ```
 
+The task line **carries the implementer's returned status verbatim** —
+`DONE`, `DONE_WITH_CONCERNS`, and so on. `DONE_WITH_CONCERNS` additionally
+carries a one-line digest of the concern, because `keel-finish` Part 2b
+reconciles flagged concerns out of this file and cannot see a status that
+was paraphrased away.
+
 The **relocated** field is what makes the drift threshold above countable —
 criterion (b) counts relocates across completed tasks, and a count needs a
 field, not free-text concerns. Write `relocated: none` when there were none.
@@ -377,15 +386,38 @@ for — an unlisted new rule is the same silent-regression risk the inventory
 exists to catch, one release earlier. This is a report, not a gate: a plan
 may ship with fixture gaps, same as `COVERAGE` above never blocks on its own.
 
-Then one fix pass for its findings → **keel-finish**.
+Then one fix pass for its findings, and **write the closing ledger line** —
+without it `keel-finish` Part 3 has nothing to confirm this review against,
+and its check passes vacuously exactly the way the security chain's did
+before it was persisted:
+
+```
+final-review: PASS — 2 Important (svc/order.py:44 unwired guard; api/admin.py:12 missing authz) → both fixed in 9ed28b5; COVERAGE: 23/27 paths (85%)
+```
+
+`FAIL` with findings still open is a legitimate value; what is not legitimate
+is the line being absent, because absent and clean are indistinguishable to
+the stage that reads it. → **keel-finish**.
 
 ## INLINE mode
 
-1. Read the whole plan critically. Concerns → raise them BEFORE starting,
-   not at task 7.
-2. Create a todo per task. Execute in order: follow each step exactly, run
-   each verification, mark complete. Update the ledger the same as
-   orchestrated mode — inline sessions crash too.
+1. **Run the same pre-flight as ORCHESTRATED mode**, in full, before task 1:
+   the plan-contradiction scan (G5), the **Spec drift check**, the
+   **Destructive-operation scan** (G9), and the **dependency graph** read of
+   step 0. Read the whole plan critically alongside it — concerns get raised
+   BEFORE starting, not at task 7.
+
+   Those gates live under ORCHESTRATED above only because that is where they
+   were written, not because they are a property of dispatching subagents.
+   **INLINE removes the second chance, not the requirement** — and it removes
+   it twice over, because the G9 backstop that `keel-exec-implementer` carries
+   never fires here: there is no implementer, you are it. This is also the
+   mode `PROJECT-TYPE-GUIDE.md` makes the default for serverless/edge, CLI,
+   and scraping work — three of the project types most likely to deploy.
+2. Create a todo per task. Execute in **dependency order** per step 0, not
+   task-number order: follow each step exactly, run each verification, mark
+   complete. Update the ledger the same as orchestrated mode — inline
+   sessions crash too.
 3. Stop and ask rather than guess when: blocked, the plan has a critical
    gap, an instruction is ambiguous, or a verification keeps failing.
    **G6 gate applies here too:** a finding that conflicts with the plan's
@@ -393,7 +425,17 @@ Then one fix pass for its findings → **keel-finish**.
    subagent to raise it — the same single session that wrote the code must
    still stop and ask the user which wins, exactly as ORCHESTRATED mode's
    step 3 fix loop requires.
-4. After all tasks → **keel-finish**.
+4. **Run the ORCHESTRATED `### Finish` block unchanged** — the final
+   whole-branch `code-reviewer`, its coverage diagram, the `FIXTURE COVERAGE`
+   report when this repo's own rule files were touched, then one fix pass for
+   its findings. Write the closing `final-review:` ledger line.
+
+   INLINE removes the *per-task* reviewers. It does not remove the
+   branch-level one — and it is the mode that needs it most, because here the
+   code's author and its only reader are the same context. `keel-finish`
+   will not cover for a skip: it explicitly does not re-run this review, on
+   the stated assumption that it already happened.
+5. Then → **keel-finish**.
 
 ## Red flags
 

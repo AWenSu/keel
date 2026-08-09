@@ -1,6 +1,6 @@
 # Fixture 01: spec Status: draft blocks keel-plan
 
-**Rule source:** `skills/keel-plan/SKILL.md:26-31`
+**Rule source:** `skills/keel-plan/SKILL.md` INPUT block
 
 > the spec's `Status:` field must read `approved` before this skill
 > proceeds; otherwise `BLOCKED: spec 未核准 → 退回 keel-discover`

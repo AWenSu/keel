@@ -1,7 +1,7 @@
 # Fixture 03: spec drift during execution routes back to keel-plan
 
-**Rule source:** `skills/keel-execute/SKILL.md:83-90` (pre-flight, ORCHESTRATED
-mode) + `skills/keel-execute/SKILL.md:` INLINE mode step 3 (G6 gate note) +
+**Rule source:** `skills/keel-execute/SKILL.md` pre-flight spec-drift check (pre-flight, ORCHESTRATED
+mode) + `skills/keel-execute/SKILL.md` INLINE mode step 3 (G6 gate note) +
 `skills/keel-workflow/SKILL.md` Backward routes table row: `Spec 本體在執行
 期間被改到與 plan 記錄的 Spec Version 不符 | keel-execute | keel-plan`
 

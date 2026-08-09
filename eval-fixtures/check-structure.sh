@@ -116,14 +116,19 @@ else
   bad "possible model override instruction:"; echo "$hits" | sed 's/^/         /'
 fi
 
-# ── F7: fan-out ceiling stated once per scope, no contradiction ─────────────
-head_ "F7  fan-out ceiling consistent"
-wf=$(grep -c 'total agents per stage' skills/keel-workflow/SKILL.md || true)
-ex=$(grep -c 'per task loop' skills/keel-execute/SKILL.md || true)
-if [ "$wf" -eq 0 ] && [ "$ex" -ge 1 ]; then
-  ok "router caps concurrency only; total budget owned by each stage"
+# ── F7: fan-out ceiling — one scope, stated the same way everywhere ─────────
+# The previous version of this check asserted that one literal 8-word string was
+# ABSENT from one file. That is true of almost any file, including files stating
+# the contradiction in different words — and it reported PASS while the defect
+# was live in both READMEs. A green light certifying a live defect is worse than
+# no check, so this now sweeps every file that states a total.
+head_ "F7  fan-out ceiling consistent repo-wide"
+if hits=$(grep -rnE '≤ ?16|16 total|總量.{0,4}16' --include='*.md' . \
+          | grep -v '^./docs/plans/' \
+          | grep -viE 'task loop|每個 task|per round|skeptics per' || true); [ -z "$hits" ]; then
+  ok "every stated 16-agent budget is scoped to a task loop or a round"
 else
-  bad "router and keel-execute both claim a total-agent budget (drifted before)"
+  bad "16-agent budget stated with a non-task-loop scope:"; echo "$hits" | sed 's/^/         /'
 fi
 
 # ── bonus: prefix hygiene — no pre-rename names survive ─────────────────────
@@ -135,6 +140,19 @@ if leftover=$(git ls-files -z | xargs -0 grep -lE "\b($STALE)" 2>/dev/null \
   ok "no dev-* or unified-dev-skills references in tracked files"
 else
   bad "stale identifiers in:"; echo "$leftover" | sed 's/^/         /'
+fi
+
+# ── fixtures cite stable anchors, not line numbers ──────────────────────────
+# Four fixtures once cited line ranges that had drifted onto unrelated text —
+# one of them drifted inside the very commit that was auditing it. A grader
+# following eval-fixtures/README.md ("open the cited Rule source file:line")
+# then walks the wrong rule and grades PASS on text unrelated to the fixture.
+head_ "fixtures  Rule source cites an anchor, not a line number"
+if cites=$(grep -nE '^\*\*Rule source:\*\*|^\*\*Rule source' eval-fixtures/[0-9]*.md \
+           | grep -E 'SKILL\.md:[0-9]|\.md:[0-9]+-[0-9]' || true); [ -z "$cites" ]; then
+  ok "no fixture pins a rule to a line number"
+else
+  bad "line-number citation will drift:"; echo "$cites" | sed 's/^/         /'
 fi
 
 # ── maintainer-only: repo vs. installed copy ────────────────────────────────

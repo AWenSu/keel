@@ -36,6 +36,9 @@ only). A proposal built on imagined structure is worthless.
 ## Output
 
 ```
+介面: <the interface this approach exposes — signatures, entry points>
+用法範例: <one realistic call site, as a caller would write it>
+隱藏了什麼: <what this hides behind that interface — depth, in design.md terms>
 約束: <your assigned constraint, restated>
 做法: <the approach, 5-10 lines>
 會動到: <real file paths>

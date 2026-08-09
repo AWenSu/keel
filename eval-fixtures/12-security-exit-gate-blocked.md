@@ -1,6 +1,6 @@
 # Fixture 12: keel-finish Part 2c BLOCKED condition
 
-**Rule source:** `skills/keel-finish/SKILL.md:138-156`
+**Rule source:** `skills/keel-finish/SKILL.md` Part 2c BLOCKED condition
 
 ## Scenario A — unresolved Critical from check (2), no risk-acceptance
 

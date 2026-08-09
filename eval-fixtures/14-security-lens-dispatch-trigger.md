@@ -1,6 +1,6 @@
 # Fixture 14: keel-plan-review Security lens dispatch trigger
 
-**Rule source:** `skills/keel-plan-review/SKILL.md:47-50` — any ONE of: 2+
+**Rule source:** `skills/keel-plan-review/SKILL.md` Step 1 lens selection — any ONE of: 2+
 hits of auth/login/session/token/secret/key/credential/permission/role/
 upload/個資/PII/payment/delete/export/webhook/external API; the plan's
 Global Constraints or any task carries a high-risk marker; the plan adds

@@ -29,7 +29,7 @@ Claude Code 裝備齊全一點，規劃類的 skill 就會越堆越多：superpo
 
 這個 repo 只留**每階段一個 skill**。有用的機制才留下——硬性關卡、證據規則、決策分類、進度帳本、驗證鐵律；沒用的就砍（外部 CLI 依賴、遙測、重複的廢話）。每個 skill 就一份自包含的 `SKILL.md`，不用建置、不用掛 hook，除了檔案本身什麼都不用裝。
 
-**跟第一版比，這次改了什麼：** pipeline 不再把工作丟給一個沒名字的 `general-purpose` subagent 打混。implementer、規格審查、品質審查、四種審查視角、兩層懷疑者、fixer、研究票——每個角色都是獨立命名的 agent，模型釘死、工具權限也鎖死。你盯著畫面看誰在跑，光看名字就知道現在誰在幹嘛，不用猜。細節看下面〈[Subagent 名冊](#subagent-名冊)〉。
+**跟第一版比，這次改了什麼：** pipeline 不再把工作丟給一個沒名字的 `general-purpose` subagent 打混。implementer、規格審查、品質審查、五種審查視角、兩層懷疑者、fixer、研究票——每個角色都是獨立命名的 agent，模型釘死、工具權限也鎖死。你盯著畫面看誰在跑，光看名字就知道現在誰在幹嘛，不用猜。細節看下面〈[Subagent 名冊](#subagent-名冊)〉。
 
 ## 五個階段在幹嘛
 
@@ -37,7 +37,7 @@ Claude Code 裝備齊全一點，規劃類的 skill 就會越堆越多：superpo
 |---|-------|--------|-----------|---------------|
 | 1 | [`keel-discover`](skills/keel-discover/SKILL.md) | 模糊想法 → 使用者點頭認可、有憑有據的 spec。規矩很硬：沒核准就不准動一行程式碼。 | superpowers:brainstorming | gstack spec 那套「先甩證據再問問題」、開場五問、範圍先鎖死、同一個問題在不同限制下平行想兩套做法；**先驗掃描不只查 repo 內、也上網查**——adopt／adapt／build 變成一個有記錄、有具體差異點的決定，就算決定自己造，也會把成熟方案的功能清單撈回來；spec 帶 `Status: draft\|approved` 核准閘門、`Spec Version` 欄位、Success Criteria 改寫成 Given-When-Then |
 | 2 | [`keel-plan`](skills/keel-plan/SKILL.md) | spec → 一份就算完全不懂這個 codebase 的工程師也能照做的計畫。分大小的指南、`Interfaces:` 區塊、禁止空話佔位。 | superpowers:writing-plans | planner agent 的風險分級；每個 task 上的 `Skills:` 欄位，先講清楚該叫哪些領域 skill；mattpocock to-tickets 的垂直切片任務框架、拆完票先問粒度/依賴對不對的 quiz；UI 相關的計畫強制多產出一段 `### 2b.` feature matrix |
-| 3 | [`keel-plan-review`](skills/keel-plan-review/SKILL.md) | 四個視角（CEO/Design/Eng/DX）自動輪流審，還會主動上網查有沒有人早就做過或早就撞牆。例行的自己拍板，真的要人判斷的才丟回來問，而且丟出結論前自己先反駁自己一輪。 | gstack autoplan 的決策系統 | 自我懷疑反駁法、Mechanical / Taste / User-Challenge 三分法、6 條自動拍板原則、兩層懷疑者升級機制；Step 5 決策一過自動拍板門檻就當場產出一段式 ADR |
+| 3 | [`keel-plan-review`](skills/keel-plan-review/SKILL.md) | 五個視角（CEO/Design/Eng/Security/DX）自動輪流審，還會主動上網查有沒有人早就做過或早就撞牆。例行的自己拍板，真的要人判斷的才丟回來問，而且丟出結論前自己先反駁自己一輪。 | gstack autoplan 的決策系統 | 自我懷疑反駁法、Mechanical / Taste / User-Challenge 三分法、6 條自動拍板原則、兩層懷疑者升級機制；Step 5 決策一過自動拍板門檻就當場產出一段式 ADR |
 | 4 | [`keel-execute`](skills/keel-execute/SKILL.md) | 審完的計畫 → 能跑的程式碼。每個 task 都是新開一個 implementer，配二到三個**互相看不到彼此**的審查者（規格對不對、寫得好不好，R4 條件命中時再加一軸資安——二至三軸絕不混成一個裁決）。進度帳本掉線也不會丟資料。subagent 用不了時還有 inline 備援。 | superpowers:subagent-driven-development | executing-plans 的 inline 模式；planning-with-files 那套「檔案系統就是記憶體」；起手前先比對計畫記錄的 `Spec Version` 有沒有跟 spec 現況對不上；G6 plan-conflict 閘門在 INLINE 模式也重申一次；改到本 repo 自己的 skill 檔時，Finish 階段額外回報對照 `eval-fixtures/RULE-INVENTORY.md` 的 `FIXTURE COVERAGE` |
 | 5 | [`keel-finish`](skills/keel-finish/SKILL.md) | 敢說「完成」之前：每個宣稱都要有剛查出來的新鮮證據、真的把整條流程走一遍、把這次過程中散落各處的未決事項全部收攏，最後才合併分支。 | superpowers:verification-before-completion | 宣稱對照證據表、紅燈變綠燈的回歸鐵律、分支整合怎麼選；已有 Step-5 ADR 的宣稱不用重查，Success Criteria 改成請使用者當場核對而非重新推導；Part 2c 的洩密掃描檢查項寫明裝好時該跑的確切指令 `gitleaks detect` |
 
@@ -49,7 +49,7 @@ Claude Code 裝備齊全一點，規劃類的 skill 就會越堆越多：superpo
 bash eval-fixtures/check-structure.sh    # exit 0 = 全過
 ```
 
-`NN-*.md` 則是腳本判斷不了的情境測試（spec 標 `draft` 會不會擋下 `keel-plan`？計畫與現況牴觸會不會退回？），靠走查。`RULE-INVENTORY.md` 列出全部 59 條已宣告規則、各自的執行點與驗證方式——沒有驗證方式的那列表示它可能無聲壞掉，`執行於` 空著的那列表示它現在就是壞的。
+`NN-*.md` 則是腳本判斷不了的情境測試（spec 標 `draft` 會不會擋下 `keel-plan`？計畫與現況牴觸會不會退回？），靠走查。`RULE-INVENTORY.md` 列出每一條已宣告規則、各自的執行點與驗證方式——沒有驗證方式的那列表示它可能無聲壞掉，`執行於` 空著的那列表示它現在就是壞的。
 
 ## 安裝
 
@@ -123,6 +123,7 @@ G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續
 | `keel-finish` 查證據時，某個宣稱怎麼都拿不出證明 | `keel-finish` | `keel-debug` |
 | debug 到最後發現，根本是需求本身就錯了 | `keel-debug` | `keel-discover` |
 | 計畫引用的 `Spec Version` 跟現行 spec 對不上 | `keel-execute` | `keel-plan` |
+| 某階段的 INPUT 契約無法滿足 | 任何階段 | 欠交那份產物的階段 |
 
 ### 建議路由（`keel-workflow` 怎麼判斷）
 
@@ -133,7 +134,7 @@ G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續
 | 計畫規模大或風險高（超過 8 個檔案、動新架構、碰正式環境資料） | `keel-plan-review` |
 | 計畫寫好了而且直觀好懂 | `keel-execute` |
 | 準備說做完了、要開 PR 了 | `keel-finish` |
-| bug 或測試掛掉 | 交給你自己的 debug skill，這條 pipeline 是拿來蓋東西的，不是抓蟲的 |
+| bug、測試掛掉、行為不如預期 | [`keel-debug`](skills/keel-debug/SKILL.md)——loop 優先：沒有紅燈重現指令就不准開始猜原因 |
 | UI / 視覺相關工作 | 交給你自己的設計 skill 路由 |
 
 ### 不同專案類型該怎麼配
@@ -197,7 +198,7 @@ Eng 視角（`keel-plan-lens-eng`）跑另一輪平行檢查，對照現行文�
 
 ### 扇出上限
 
-沒有哪個階段可以無限開 agent。上限是**每階段最多 8 個同時跑、總量最多 16 個**；真的超過的話，pipeline 會按嚴重度排序，先蓋前面幾條，剩下的**一定要**印出 `SKIPPED: <幾條> — <原因>`。悄悄少做卻不講，這條 pipeline 當成 bug 處理——一個階段偷偷只查了六成卻回報得像查了十成，比一開始就沒跑還糟糕。
+沒有哪個階段可以無限開 agent。上限是**同時最多 8 個，總量每個 task loop 最多 16 個**（keel-plan-review 是每輪最多 8 隻 skeptic）；真的超過的話，pipeline 會按嚴重度排序，先蓋前面幾條，剩下的**一定要**印出 `SKIPPED: <幾條> — <原因>`。悄悄少做卻不講，這條 pipeline 當成 bug 處理——一個階段偷偷只查了六成卻回報得像查了十成，比一開始就沒跑還糟糕。
 
 ## 來源出處與跟上游同步
 

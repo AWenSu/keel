@@ -1,6 +1,6 @@
 # Fixture 05: ADR offer criteria at keel-finish Part 2
 
-**Rule source:** `skills/keel-finish/SKILL.md:94-100`
+**Rule source:** `skills/keel-finish/SKILL.md` Part 2 ADR check
 
 > a decision this work locked that is hard to reverse + surprising without
 > context + a real trade-off → offer a one-paragraph ADR before integrating.

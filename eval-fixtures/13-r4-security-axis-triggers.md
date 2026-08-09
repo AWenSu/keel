@@ -1,6 +1,6 @@
 # Fixture 13: R4 conditions — when the security review axis dispatches
 
-**Rule source:** `skills/keel-execute/SKILL.md:121-143` — five conditions,
+**Rule source:** `skills/keel-execute/SKILL.md` step 3c R4 conditions — five conditions,
 any one match triggers `keel-exec-reviewer-security` as a third independent
 axis; none matching skips it (logged, not silent).
 

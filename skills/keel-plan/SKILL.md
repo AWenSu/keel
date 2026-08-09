@@ -106,10 +106,30 @@ matrix (table form) and save it under a new `## Feature Matrix` section in
 the plan file (or in `CONTEXT.md` if the project already has one, with the
 plan file linking to it).
 
+Under the same trigger, add one line to the plan header:
+
+```
+**Visual source of truth:** <approved mockup path | the existing screen this
+  must match | the design system/theme it follows | the design skill whose
+  conventions it adopts>
+```
+
+One of those four, named. Without it the plan can specify every state and
+still leave every visual decision to whoever picks up the ticket — and three
+tasks will answer it three different ways. `keel-plan-lens-design` §B checks
+this field exists; nothing produced it until now, so that check fired on
+every UI plan, which is how a reviewer learns to skim an axis.
+
 Plans that do not hit the criterion skip this step entirely — no matrix, no
-added planning overhead.
+visual-source line, no added planning overhead.
 
 ### 3. Write tasks
+
+**Context check first.** Task-writing is long and detail-dense. Past ~120k
+tokens, write a handoff and fork rather than pushing on degraded — a plan
+written past that line is where placeholder phrases and type-inconsistent
+names come from. (`keel-workflow`'s smart-zone rule.)
+
 
 Each task uses this template:
 

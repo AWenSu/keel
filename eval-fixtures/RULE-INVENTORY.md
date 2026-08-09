@@ -46,7 +46,7 @@ the executing agent's improvisation. The second is worse, and both fixture
 | A3 | Plan review round 3 still unresolved → keel-discover | `keel-workflow` Backward routes | `keel-plan-review` Step 5 exit gate | `07` |
 | A4 | keel-finish can't produce required evidence → keel-debug | `keel-workflow` Backward routes | `keel-finish` Part 1 gate-function failure branch | `08` |
 | A5 | Debugging concludes the requirement is wrong → keel-discover | `keel-workflow` Backward routes | `keel-debug` Phase 2 third outcome | `09` |
-| A6 | A stage's INPUT contract is unsatisfiable → the owing stage | `keel-workflow` Backward routes | `BLOCKED: 缺 <field>` line in keel-discover, keel-plan, keel-plan-review, keel-execute, keel-finish, keel-debug; `keel-wayfind` states it as prose instead | — |
+| A6 | A stage's INPUT contract is unsatisfiable → the owing stage | `keel-workflow` Backward routes | `BLOCKED: 缺 <field>` line in keel-discover, keel-plan-review, keel-execute, keel-finish, keel-debug; `keel-wayfind` states it as prose; **`keel-plan` has none** — its only BLOCKED is the spec-status gate (D1), not an INPUT-contract miss | — |
 
 ## B. Gates that may stop for a user answer
 
@@ -118,7 +118,7 @@ context fork.
 | E10 | Part 2c check 2 — execution-stage findings closed | `keel-finish` Part 2c (2) | same (reads E7) | `12` |
 | E11 | Part 2c check 3b — dependency existence (anti-slopsquatting), no exemption | `keel-finish` Part 2c (3b) | same | `12` |
 | E12 | Part 2c check 4 — plan-lens findings disposition | `keel-finish` Part 2c (4) | same (reads E8) | `12` |
-| E13 | BLOCKED on unresolved Critical from (2)/(3b)/(4) | `keel-finish` Part 2c BLOCKED condition | same | `12` |
+| E13 | BLOCKED on unresolved Critical from (0)/(2)/(3b)/(4) | `keel-finish` Part 2c BLOCKED condition | same | `12` |
 | E14 | A branch with zero security review never reaches integration unreviewed | `keel-finish` Part 2c (this rule has no separate declaration site — the check is the declaration) | `keel-finish` Part 2c check 0 | `17` |
 
 ## F. Structural guarantees
@@ -155,6 +155,7 @@ Add a row here whenever a field is added to the plan template.
 | P7 | `Spec Version:` | `keel-plan` Step 2 header | `keel-execute` pre-flight drift check | same check (mismatch routes back) | `03` |
 | P8 | `Success Criteria:` | `keel-plan` Step 2 header | `keel-finish` Part 2; final `code-reviewer` spec axis | user at G7, one criterion at a time | `19` |
 | P9 | `Global Constraints:` | `keel-plan` Step 2 header | `keel-execute` brief extraction | `keel-execute` pre-flight (tasks violating them) | — |
+| P10 | `Visual source of truth:` | `keel-plan` Step 2b (same UI trigger as the feature matrix) | implementer; sets the bar the built screen is judged against | `keel-plan-lens-design` §B | `21` |
 
 ## V. Evidence rules (verification discipline)
 
@@ -175,6 +176,8 @@ Add a row here whenever a field is added to the plan template.
 | H3 | `.keel/` added to `.gitignore` on creation | `keel-workflow` Pipeline state file, `keel-execute` universal rules | same | — |
 | H4 | Deferred work written to `TODOS.md` | `keel-plan-review` Step 5 deferrals | same; `keel-finish` Part 2 + risk-acceptance | — |
 | H5 | Implementer writes its full report to a file, returns ≤15 lines | `keel-execute` per-task step 2 | `keel-exec-implementer` Report section | — |
+| H6 | Final whole-branch review is persisted to the ledger | `keel-execute` Finish | same (`final-review:` line) | `keel-finish` Part 3 reads it | — |
+| H7 | Pre-flight and the final review run in **both** modes, not only ORCHESTRATED | `keel-execute` INLINE steps 1 and 4 | same | — |
 
 ## Maintenance
 
@@ -188,13 +191,13 @@ or `Enforced at` points into that file.
 
 ## Current coverage
 
-**72 rules. 50 verified (69%)** — 43 by scenario fixture, 7 by
+**75 rules. 51 verified (68%)** — 44 by scenario fixture, 7 by
 `check-structure.sh`. Recount with:
 
 ```
 bash eval-fixtures/check-structure.sh                                   # F series, live
-grep -cE '^\|\s*[A-H][0-9]+\s*\|' eval-fixtures/RULE-INVENTORY.md      # total rows
-grep -E '^\|\s*[A-H][0-9]+\s*\|' eval-fixtures/RULE-INVENTORY.md \
+grep -cE '^\|\s*[A-HPV][0-9]+\s*\|' eval-fixtures/RULE-INVENTORY.md      # total rows
+grep -E '^\|\s*[A-HPV][0-9]+\s*\|' eval-fixtures/RULE-INVENTORY.md \
   | grep -vcE '\|\s*—\s*\|?\s*$'                                     # rows with any verifier
 ```
 
@@ -207,8 +210,8 @@ plausible number in a table reads as verified.
 
 ## This is the ceiling, and it is deliberate
 
-69% is not a milestone on the way to 100% — it is the intended end state. The
-remaining 22 rows should stay uncovered:
+68% is not a milestone on the way to 100% — it is the intended end state. The
+remaining 24 rows should stay uncovered:
 
 **V1–V5** (Iron Law, red-green regression, the evidence gate, "an agent's
 success report is not evidence", untrusted search results) and **H1–H5**
@@ -219,11 +222,11 @@ expected result — tautological, zero information. And they fail loudly in
 normal use: a run that skips the ledger is visibly broken by the next
 compaction, which is a faster and harsher test than any document.
 
-**B1–B3, B6, D5–D6, A6, E7–E9** are in the same family — gates and dispatch
+**B2–B5, D5–D6, A6, E7–E9, P3, P9, H6–H7** are in the same family — gates and dispatch
 triggers that fire on ordinary runs, or persistence rules whose absence is
 immediately apparent.
 
-Chasing the last 20 would be the anti-pattern this repo already names:
+Chasing the last 24 would be the anti-pattern this repo already names:
 optimizing for the check rather than the behavior. Adding a rule that
 genuinely has a trigger/no-trigger boundary and a high cost of being wrong?
 That earns a fixture. Adding one to move a percentage does not.

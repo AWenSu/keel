@@ -1,6 +1,6 @@
 # Fixture 02: spec Status: approved lets keel-plan proceed
 
-**Rule source:** `skills/keel-plan/SKILL.md:26-31`
+**Rule source:** `skills/keel-plan/SKILL.md` INPUT block
 
 ## Scenario
 
@@ -14,7 +14,7 @@ INPUT to `keel-plan` is a spec file path. The spec file's header contains:
 
 `keel-plan` proceeds normally to "Scope check, then map files" (Step 1) — no
 `BLOCKED`. The plan header it writes copies the spec's approval marker into
-`**Spec Version:**` (`skills/keel-plan/SKILL.md:87-88`):
+`**Spec Version:**` (`skills/keel-plan/SKILL.md` Step 2 header template):
 
 ```
 **Spec Version:** a1b2c3d

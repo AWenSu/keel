@@ -1,6 +1,6 @@
 # Fixture 09: debugging concludes the requirement is wrong → keel-discover
 
-**Rule source:** `skills/keel-workflow/SKILL.md:38` — "Debugging concludes
+**Rule source:** `skills/keel-workflow/SKILL.md` Backward routes — "Debugging concludes
 the requirement itself is wrong | keel-debug | keel-discover"
 
 ## Scenario A — requirement is wrong

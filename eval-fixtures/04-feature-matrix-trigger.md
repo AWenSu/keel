@@ -1,6 +1,6 @@
 # Fixture 04: UI-heavy plan triggers the feature matrix step
 
-**Rule source:** `skills/keel-plan/SKILL.md:98-109` (`### 2b. Feature matrix
+**Rule source:** `skills/keel-plan/SKILL.md` Step 2b (`### 2b. Feature matrix
 for UI-heavy plans`), reusing `keel-plan-lens-design`'s trigger: "2+
 view/rendering/UI/component/screen keywords"
 

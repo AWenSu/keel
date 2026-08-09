@@ -119,6 +119,14 @@ Ask clarifying questions **one at a time**, multiple-choice where possible.
 Batching five questions gets you five shallow answers; one good question gets
 a real decision.
 
+**Context check before a long grill.** This step and step 4 are where this
+stage burns context. Past ~120k tokens, reasoning degrades — write a handoff
+file outside the repo, referencing artifacts by path rather than re-quoting
+them, and fork to a fresh session. Do not compact mid-stage: compaction
+severs exactly the accumulated understanding this step is building.
+(`keel-workflow`'s smart-zone rule; `keel-execute` states its own controller
+variant at ~100k.)
+
 **Two depth settings (grill mode from mattpocock grilling):**
 
 - **Fast (default):** stop when you can state the requirements without
@@ -160,7 +168,8 @@ say why. Always include the minimal-viable option — the user must see what
 **Design it twice (from mattpocock codebase-design)** — when the work
 centers on a new interface or module boundary (not for straightforward
 changes): spawn 3 parallel `keel-discover-designer` subagents (never
-`general-purpose`, no model override — the agent pins its own), each designing
+`general-purpose`, no model override — the agent pins its own), each given the path to
+[design.md](design.md) in its brief and each designing
 under a *different* constraint — "minimize the interface, 1-3 entry points max"
 / "maximize flexibility" / "optimize for the most common caller". Name the
 constraint in each dispatch and broadcast each proposal as it returns, so the

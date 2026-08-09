@@ -1,6 +1,6 @@
 # Fixture 08: keel-finish can't produce required evidence → keel-debug
 
-**Rule source:** `skills/keel-workflow/SKILL.md:37` — "keel-finish gate cannot
+**Rule source:** `skills/keel-workflow/SKILL.md` Backward routes — "keel-finish gate cannot
 produce the evidence a claim requires | keel-finish | keel-debug" +
 `skills/keel-finish/SKILL.md` Part 1 Iron Law
 

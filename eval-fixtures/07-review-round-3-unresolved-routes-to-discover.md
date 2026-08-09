@@ -1,8 +1,8 @@
 # Fixture 07: plan review round 3 still unresolved → keel-discover
 
-**Rule source:** `skills/keel-plan-review/SKILL.md:304-305` — "Max 3 review
+**Rule source:** `skills/keel-plan-review/SKILL.md` Step 5 exit gate — "Max 3 review
 rounds — if round 3 still has unresolved items, the plan is fighting the
-spec; go back to keel-discover." + `skills/keel-workflow/SKILL.md:36`
+spec; go back to keel-discover." + `skills/keel-workflow/SKILL.md` Backward routes
 
 ## Scenario A — round 3 still has open items
 
