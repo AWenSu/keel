@@ -1,6 +1,6 @@
-# Fixture 11: G4 gate, INLINE mode — same rule, no separate reviewer subagent
+# Fixture 11: PLAN-CONFLICT gate (G6), INLINE mode — same rule, no separate reviewer subagent
 
-**Rule source:** `skills/keel-execute/SKILL.md` INLINE mode step 3 — "G4 gate
+**Rule source:** `skills/keel-execute/SKILL.md` INLINE mode step 3 — "G6 gate
 applies here too: a finding that conflicts with the plan's own text is
 never self-decided just because there's no separate reviewer subagent to
 raise it."
@@ -16,7 +16,7 @@ implementing Task 3 notices the plan's Task 3 text says "reuse the existing
 
 The session stops and asks the user which wins (reintroduce `formatDate`,
 or update Task 3's text to use its replacement) — same as the
-ORCHESTRATED-mode G4 gate, even though there's no separate reviewer agent
+ORCHESTRATED-mode G6 gate, even though there's no separate reviewer agent
 in this loop to have raised it as a formal "finding."
 
 ## Scenario B — ordinary ambiguity, not plan-conflicting
@@ -27,12 +27,12 @@ files to add the new test to.
 ## Expected B
 
 This is ordinary "stop and ask rather than guess" (INLINE mode step 3's
-general clause) — it doesn't need the G4-specific framing since nothing in
+general clause) — it doesn't need the G6-specific framing since nothing in
 the plan's own text conflicts with anything else.
 
 ## Not expected (would be a regression)
 
-- Treating G4 as an ORCHESTRATED-only mechanism because INLINE has no
+- Treating G6 as an ORCHESTRATED-only mechanism because INLINE has no
   separate reviewer to "trigger" it
 - The INLINE session silently picking the interpretation it thinks is
   right and continuing, since "no one's reviewing this anyway"

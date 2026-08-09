@@ -101,7 +101,7 @@ plan already specifies it.**
 That last clause is the entire point. Every other gate in this stage arbitrates
 findings that *conflict* with the plan; nothing anywhere reviews what the plan
 itself instructs. A task reading `Delivers: production DB migrated to the new
-schema` passes G3 (no contradiction), never triggers G4 (no reviewer disagrees
+schema` passes G5 (no contradiction), never triggers G6 (no reviewer disagrees
 with it), and reaches an implementer whose brief contains no reason to hesitate.
 Plan approval is not operation authorization: the user last agreed that the
 plan's *premises* were right, possibly dozens of turns and one context fork ago.
@@ -234,7 +234,7 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
    → `keel-exec-fixer` → scoped re-review of only the findings just fixed →
    repeat. The fixer touches only the listed findings; anything else it
    changes enters the next review as unreviewed risk. `PLAN-CONFLICT`
-   findings are never handed to the fixer — they go to the user (gate G4).
+   findings are never handed to the fixer — they go to the user (gate G6).
 
    **Round cap: 5.** Rounds 1–3 resume the same `keel-exec-fixer` dispatch.
    Rounds 4–5 switch to `keel-exec-fixer-critical` (opus, fresh context, no
@@ -369,7 +369,7 @@ Then one fix pass for its findings → **keel-finish**.
    orchestrated mode — inline sessions crash too.
 3. Stop and ask rather than guess when: blocked, the plan has a critical
    gap, an instruction is ambiguous, or a verification keeps failing.
-   **G4 gate applies here too:** a finding that conflicts with the plan's
+   **G6 gate applies here too:** a finding that conflicts with the plan's
    own text is never self-decided just because there's no separate reviewer
    subagent to raise it — the same single session that wrote the code must
    still stop and ask the user which wins, exactly as ORCHESTRATED mode's

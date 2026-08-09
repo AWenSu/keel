@@ -50,8 +50,8 @@ proceed with a known regression.
 | `07-review-round-3-unresolved-routes-to-discover.md` | backward route: round-3 unresolved | `keel-plan-review/SKILL.md` |
 | `08-finish-evidence-gap-routes-to-debug.md` | backward route: evidence gap | `keel-finish/SKILL.md` |
 | `09-debug-wrong-requirement-routes-to-discover.md` | backward route: wrong requirement | `keel-workflow/SKILL.md` |
-| `10-g4-gate-orchestrated.md` | G4 gate, ORCHESTRATED mode | `keel-execute/SKILL.md` |
-| `11-g4-gate-inline.md` | G4 gate, INLINE mode | `keel-execute/SKILL.md` |
+| `10-plan-conflict-gate-orchestrated.md` | PLAN-CONFLICT gate (G6), ORCHESTRATED | `keel-execute/SKILL.md` |
+| `11-plan-conflict-gate-inline.md` | PLAN-CONFLICT gate (G6), INLINE | `keel-execute/SKILL.md` |
 | `12-security-exit-gate-blocked.md` | Part 2c BLOCKED condition | `keel-finish/SKILL.md` |
 | `13-r4-security-axis-triggers.md` | R4 conditions (5 sub-scenarios) | `keel-execute/SKILL.md` |
 | `14-security-lens-dispatch-trigger.md` | Security lens dispatch (OR of 3 conditions) | `keel-plan-review/SKILL.md` |

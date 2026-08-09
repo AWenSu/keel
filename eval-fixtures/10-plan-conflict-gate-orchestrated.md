@@ -1,8 +1,8 @@
-# Fixture 10: G4 gate, ORCHESTRATED mode — plan-conflict never self-decided
+# Fixture 10: PLAN-CONFLICT gate (G6), ORCHESTRATED mode — plan-conflict never self-decided
 
 **Rule source:** `skills/keel-execute/SKILL.md` Per-task loop, step 4 (Fix
 loop) — "`PLAN-CONFLICT` findings are never handed to the fixer — they go
-to the user (gate G4)." + step 3's "Plan-mandated findings" note.
+to the user (gate G6)." + step 3's "Plan-mandated findings" note.
 
 ## Scenario A — finding tagged PLAN-CONFLICT
 
@@ -26,7 +26,7 @@ bound) with no relationship to the plan's text.
 ## Expected B
 
 Goes straight to the normal fix loop — `keel-exec-fixer` — no user question,
-no G4 gate.
+no G6 gate.
 
 ## Not expected (would be a regression)
 

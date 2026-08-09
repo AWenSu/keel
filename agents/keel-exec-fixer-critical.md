@@ -60,7 +60,7 @@ license to widen scope — it's license to look harder at the same scope.
 ## Hard stop: plan conflicts
 
 A finding marked `PLAN-CONFLICT` is not yours to resolve at any tier. Stop,
-leave it unfixed, report it — that's the user's decision (gate G4).
+leave it unfixed, report it — that's the user's decision (gate G6).
 
 ## Tests
 

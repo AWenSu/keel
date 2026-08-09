@@ -214,19 +214,19 @@ Add `.keel/` to the repo's `.gitignore` on first creation.
 
 | Gate | Where | What |
 |------|-------|------|
-| G1 | keel-plan-review Step 0 | Premise confirmation — the one always-asked question |
-| G2 | keel-plan-review Step 5 | Each surviving Taste / User Challenge, asked one finding per question, batched by dependency frontier (never all at once, never forced serial past the frontier) |
-| G3 | keel-execute pre-flight | Batched plan-contradiction questions before Task 1 |
-| G4 | keel-execute per-task review | `PLAN-CONFLICT` finding arbitration |
-| G5 | keel-discover | Spec approval — no code before the user approves; no exceptions for "simple" projects |
-| G6 | keel-plan Step 6 | Task-breakdown granularity and `Depends on` edges (skipped only when the plan is heading into keel-plan-review anyway) |
+| G1 | keel-discover | Spec approval — no code before the user approves; no exceptions for "simple" projects |
+| G2 | keel-plan Step 6 | Task-breakdown granularity and `Depends on` edges (skipped only when the plan is heading into keel-plan-review anyway) |
+| G3 | keel-plan-review Step 0 | Premise confirmation — the one always-asked question |
+| G4 | keel-plan-review Step 5 | Each surviving Taste / User Challenge, asked one finding per question, batched by dependency frontier (never all at once, never forced serial past the frontier) |
+| G5 | keel-execute pre-flight | Batched plan-contradiction questions before Task 1 |
+| G6 | keel-execute per-task review | `PLAN-CONFLICT` finding arbitration |
 | G7 | keel-finish Part 2 | Each Success Criterion, confirmed on the spot by the user — the agent's own assessment never closes a box |
 | G8 | keel-finish Part 3 | Branch-integration choice, and the typed `discard` confirmation if that option is taken |
 | G9 | any stage | An irreversible operation outside the repo — deploy, migration against a non-ephemeral database, data deletion, external publication, credential rotation, push/merge to a protected branch. Named target + exact command, asked at the point of action, **even when the plan already specifies it** |
 
 A "should I continue?" that is **not one of the rows above** is forbidden —
 generic checkpoint questions burn the user's time and are not a safety
-mechanism. The distinction matters: G5–G9 are not checkpoints, they are the
+mechanism. The distinction matters: G1–G9 are not checkpoints, they are the
 points where proceeding without an answer would either skip a hard gate or
 do something that cannot be undone. Treating the table as shorter than it is
 does not make the pipeline faster; it makes it unsafe in exactly the places
@@ -253,7 +253,7 @@ a fresh context.
 **The execution controller is not exempt.** Before entering keel-execute's
 ORCHESTRATED mode, check your own context: past ~100k, write the handoff and
 fork first. The controller keeps accumulating (ledger reads, report summaries,
-G4 arbitration) and will hit mid-stage compaction — which is precisely the
+G6 arbitration) and will hit mid-stage compaction — which is precisely the
 failure the ledger exists to survive, not one to walk into deliberately.
 
 ## Project-type presets

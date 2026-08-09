@@ -40,7 +40,7 @@ even though the plan says to do it.
 **Boundary:** `Delivers: add an index to the local dev database used by the
 test suite` → ephemeral target, no question.
 
-**Regression shape this catches:** G4 arbitrates findings that *conflict*
+**Regression shape this catches:** G6 arbitrates findings that *conflict*
 with the plan; nothing else reviews what the plan itself orders. Plan
 approval is not operation authorization.
 

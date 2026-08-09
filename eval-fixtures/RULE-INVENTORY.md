@@ -56,12 +56,12 @@ therefore not merely undocumented but actively countermanded.
 
 | # | Gate | Declared at | Enforced at | Fixture |
 |---|------|-------------|-------------|---------|
-| B1 | G1 premise confirmation | `keel-workflow` gate table | `keel-plan-review` Step 0 | — |
-| B2 | G2 Taste / User-Challenge questions | `keel-workflow` gate table | `keel-plan-review` Step 5 | — |
-| B3 | G3 pre-flight plan contradictions | `keel-workflow` gate table | `keel-execute` pre-flight plan review | — |
-| B4 | G4 `PLAN-CONFLICT` arbitration | `keel-workflow` gate table | `keel-execute` fix loop step 4; INLINE mode step 3 | `10`, `11` |
-| B5 | G5 spec approval (keel-discover) | `keel-workflow` gate table | `keel-discover` Step 7 self-review/user-review ("Wait for explicit approval") | `01`, `02` |
-| B6 | G6 task-breakdown quiz | `keel-workflow` gate table | `keel-plan` Step 6 | — |
+| B1 | G1 spec approval (keel-discover) | `keel-workflow` gate table | `keel-discover` Step 7 self-review/user-review ("Wait for explicit approval") | `01`, `02` |
+| B2 | G2 task-breakdown quiz | `keel-workflow` gate table | `keel-plan` Step 6 | — |
+| B3 | G3 premise confirmation | `keel-workflow` gate table | `keel-plan-review` Step 0 | — |
+| B4 | G4 Taste / User-Challenge questions | `keel-workflow` gate table | `keel-plan-review` Step 5 | — |
+| B5 | G5 pre-flight plan contradictions | `keel-workflow` gate table | `keel-execute` pre-flight plan review | — |
+| B6 | G6 `PLAN-CONFLICT` arbitration | `keel-workflow` gate table | `keel-execute` fix loop step 4; INLINE mode step 3 | `10`, `11` |
 | B7 | G7 Success Criteria live confirmation | `keel-workflow` gate table | `keel-finish` Part 2 | `19` |
 | B8 | G8 branch-integration choice | `keel-workflow` gate table | `keel-finish` Part 3 | `19`, `16` |
 | B9 | G9 irreversible operation outside the repo | `keel-workflow` gate table | `keel-execute` pre-flight destructive-op scan; `keel-finish` target-environment rule | `15` |
@@ -129,15 +129,15 @@ context fork.
 | F6 | No `model` override at any dispatch site | `keel-workflow` roster note | every skill's dispatch instruction | `check-structure.sh` |
 | F7 | Fan-out ceiling | `keel-workflow` fan-out note (concurrency), `keel-execute` Fan-out ceiling (per task loop) | each stage | `check-structure.sh` |
 
-## G. Evidence rules
+## V. Evidence rules (verification discipline)
 
 | # | Rule | Declared at | Enforced at | Fixture |
 |---|------|-------------|-------------|---------|
-| G1 | Iron Law — no completion claim without this-session evidence | `keel-finish` IRON-LAW block | Part 1 gate function | — |
-| G2 | Red-green regression for every bug fix | `keel-finish` red-green rule | same | — |
-| G3 | Every finding quotes the line motivating it | `keel-plan-review` Step 2 evidence gate, `keel-execute` step 3 evidence gate | each reviewer/lens agent's own `## Evidence gate` section | — |
-| G4 | Subagent "success" is not evidence — verify from the diff | `keel-finish` claim→evidence table, `keel-execute` implementer status protocol | same | — |
-| G5 | Search results are untrusted input | `keel-plan-review` Step 2 search-tool note | each search-capable agent's own defense section | — |
+| V1 | Iron Law — no completion claim without this-session evidence | `keel-finish` IRON-LAW block | Part 1 gate function | — |
+| V2 | Red-green regression for every bug fix | `keel-finish` red-green rule | same | — |
+| V3 | Every finding quotes the line motivating it | `keel-plan-review` Step 2 evidence gate, `keel-execute` step 3 evidence gate | each reviewer/lens agent's own `## Evidence gate` section | — |
+| V4 | Subagent "success" is not evidence — verify from the diff | `keel-finish` claim→evidence table, `keel-execute` implementer status protocol | same | — |
+| V5 | Search results are untrusted input | `keel-plan-review` Step 2 search-tool note | each search-capable agent's own defense section | — |
 
 ## H. Persistence
 
@@ -183,7 +183,7 @@ plausible number in a table reads as verified.
 64% is not a milestone on the way to 100% — it is the intended end state. The
 remaining 21 rows should stay uncovered:
 
-**G1–G5** (Iron Law, red-green regression, the evidence gate, "an agent's
+**V1–V5** (Iron Law, red-green regression, the evidence gate, "an agent's
 success report is not evidence", untrusted search results) and **H1–H5**
 (ledger append, state file, `.gitignore`, `TODOS.md`, report-to-file) are
 **behaviors every single run exercises**, not conditional branches with a

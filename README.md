@@ -55,7 +55,7 @@ name alone, exactly who is doing what. See [Subagent roster](#subagent-roster).
 | 1 | [`keel-discover`](skills/keel-discover/SKILL.md) | Vague idea → user-approved, evidence-grounded spec. Hard gate: no code before approval. | superpowers:brainstorming | gstack spec's code-evidence rule (`path:line` before questions), five-question intake, scope lock, parallel "design it twice" exploration under diverging constraints; spec carries a `Status: draft\|approved` gate, a `Spec Version` field, and Given-When-Then Success Criteria |
 | 2 | [`keel-plan`](skills/keel-plan/SKILL.md) | Spec → plan an engineer with zero context could execute. Sizing guide, `Interfaces:` blocks, banned placeholders. | superpowers:writing-plans | planner agent's risk grading; per-task `Skills:` field naming domain skills to invoke; mattpocock to-tickets' vertical-slice task framing and post-breakdown granularity/dependency quiz; UI-heavy plans get a mandatory `### 2b.` feature matrix |
 | 3 | [`keel-plan-review`](skills/keel-plan-review/SKILL.md) | Multi-lens automated review (CEO/Design/Eng/DX) with a mandatory prior-art web scan — auto-decides routine choices, escalates only real judgment calls, adversarially refutes its own findings before trusting them. | gstack autoplan's decision system | doubt-driven refutation; Mechanical / Taste / User-Challenge taxonomy; 6 auto-decision principles; two-tier skeptic escalation; Step 5 auto-emits a one-paragraph ADR when a decision clears the auto-decide bar |
-| 4 | [`keel-execute`](skills/keel-execute/SKILL.md) | Reviewed plan → working code. Fresh implementer + two-to-three **independent** reviewers per task (spec axis, quality axis, plus a conditional security axis when R4 triggers — never merged into one verdict), crash-safe progress ledger. Inline fallback when subagents aren't available. | superpowers:subagent-driven-development | executing-plans inline mode; planning-with-files filesystem-as-memory; pre-flight spec-drift check against a plan's recorded `Spec Version`; G4 plan-conflict gate restated for INLINE mode; Finish step reports `FIXTURE COVERAGE` against `eval-fixtures/RULE-INVENTORY.md` when a plan edits this repo's own skill files |
+| 4 | [`keel-execute`](skills/keel-execute/SKILL.md) | Reviewed plan → working code. Fresh implementer + two-to-three **independent** reviewers per task (spec axis, quality axis, plus a conditional security axis when R4 triggers — never merged into one verdict), crash-safe progress ledger. Inline fallback when subagents aren't available. | superpowers:subagent-driven-development | executing-plans inline mode; planning-with-files filesystem-as-memory; pre-flight spec-drift check against a plan's recorded `Spec Version`; G6 plan-conflict gate restated for INLINE mode; Finish step reports `FIXTURE COVERAGE` against `eval-fixtures/RULE-INVENTORY.md` when a plan edits this repo's own skill files |
 | 5 | [`keel-finish`](skills/keel-finish/SKILL.md) | Before any "done" claim: fresh verification evidence for every claim, drive the real flow end-to-end, reconcile every open item scattered across the run, then integrate the branch. | superpowers:verification-before-completion | claim→evidence table; red-green regression rule; branch integration options; skips re-verifying a claim already covered by a Step-5 ADR, and Success Criteria are confirmed live by the user rather than re-derived; Part 2c's secrets-scan check names the exact `gitleaks detect` invocation to run when installed |
 
 **Built-in skip rules.** Small tasks (single file, reversible, <30 min) bypass
@@ -137,22 +137,22 @@ never do:
 
 | Gate | Stage | What it asks |
 |------|-------|--------------|
-| **G1** | `keel-plan-review`, Step 0 | "This plan assumes X, Y, Z — correct?" The one always-asked premise check; wrong premises make every downstream finding worthless. |
-| **G2** | `keel-plan-review`, Step 5 | Every surviving Taste decision and User Challenge, one finding per question, **batched by dependency frontier** (see below), full context + options + consequence. |
-| **G3** | `keel-execute`, pre-flight | Batched plan-contradiction questions, asked once before Task 1 — not mid-task. |
-| **G4** | `keel-execute`, per-task review | A finding that contradicts the plan's own text (`PLAN-CONFLICT`) — never auto-resolved, never auto-applied. |
-| **G5** | `keel-discover` | Spec approval. No code before you approve it; no exception for "simple" projects. |
-| **G6** | `keel-plan`, Step 6 | Task-breakdown granularity and dependency edges — skipped only when the plan is going through `keel-plan-review` anyway. |
+| **G1** | `keel-discover` | Spec approval. No code before you approve it; no exception for "simple" projects. |
+| **G2** | `keel-plan`, Step 6 | Task-breakdown granularity and dependency edges — skipped only when the plan is going through `keel-plan-review` anyway. |
+| **G3** | `keel-plan-review`, Step 0 | "This plan assumes X, Y, Z — correct?" The one always-asked premise check; wrong premises make every downstream finding worthless. |
+| **G4** | `keel-plan-review`, Step 5 | Every surviving Taste decision and User Challenge, one finding per question, **batched by dependency frontier** (see below), full context + options + consequence. |
+| **G5** | `keel-execute`, pre-flight | Batched plan-contradiction questions, asked once before Task 1 — not mid-task. |
+| **G6** | `keel-execute`, per-task review | A finding that contradicts the plan's own text (`PLAN-CONFLICT`) — never auto-resolved, never auto-applied. |
 | **G7** | `keel-finish`, Part 2 | Each Success Criterion, confirmed by you on the spot. The agent's own assessment never closes a box. |
 | **G8** | `keel-finish`, Part 3 | Which integration option — and the literal typed `discard` if that's the one. |
 | **G9** | any stage | An irreversible operation outside the repo: deploy, migration against a non-ephemeral database, data deletion, external publication, credential rotation, push/merge to a protected branch. Named target, exact command, asked at the point of action — **even when the plan already says to do it.** |
 
-G5–G9 are not checkpoints. Each is a point where continuing without your
+G1–G9 are not checkpoints. Each is a point where continuing without your
 answer would skip a hard gate or do something that can't be undone — which is
 why the list is closed in the other direction too: a generic "shall I
 continue?" that isn't one of these rows is forbidden.
 
-**G2 batches by dependency frontier, not one-at-a-time (from mattpocock
+**G4 batches by dependency frontier, not one-at-a-time (from mattpocock
 batch-grill-me).** Strict one-question-serial is safe but slow when most
 findings don't actually depend on each other. Instead: map which findings
 depend on another's answer (choice of auth pattern gates session-storage

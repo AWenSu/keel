@@ -38,7 +38,7 @@ Claude Code 裝備齊全一點，規劃類的 skill 就會越堆越多：superpo
 | 1 | [`keel-discover`](skills/keel-discover/SKILL.md) | 模糊想法 → 使用者點頭認可、有憑有據的 spec。規矩很硬：沒核准就不准動一行程式碼。 | superpowers:brainstorming | gstack spec 那套「先甩證據再問問題」、開場五問、範圍先鎖死、同一個問題在不同限制下平行想兩套做法；spec 帶 `Status: draft\|approved` 核准閘門、`Spec Version` 欄位、Success Criteria 改寫成 Given-When-Then |
 | 2 | [`keel-plan`](skills/keel-plan/SKILL.md) | spec → 一份就算完全不懂這個 codebase 的工程師也能照做的計畫。分大小的指南、`Interfaces:` 區塊、禁止空話佔位。 | superpowers:writing-plans | planner agent 的風險分級；每個 task 上的 `Skills:` 欄位，先講清楚該叫哪些領域 skill；mattpocock to-tickets 的垂直切片任務框架、拆完票先問粒度/依賴對不對的 quiz；UI 相關的計畫強制多產出一段 `### 2b.` feature matrix |
 | 3 | [`keel-plan-review`](skills/keel-plan-review/SKILL.md) | 四個視角（CEO/Design/Eng/DX）自動輪流審，還會主動上網查有沒有人早就做過或早就撞牆。例行的自己拍板，真的要人判斷的才丟回來問，而且丟出結論前自己先反駁自己一輪。 | gstack autoplan 的決策系統 | 自我懷疑反駁法、Mechanical / Taste / User-Challenge 三分法、6 條自動拍板原則、兩層懷疑者升級機制；Step 5 決策一過自動拍板門檻就當場產出一段式 ADR |
-| 4 | [`keel-execute`](skills/keel-execute/SKILL.md) | 審完的計畫 → 能跑的程式碼。每個 task 都是新開一個 implementer，配二到三個**互相看不到彼此**的審查者（規格對不對、寫得好不好，R4 條件命中時再加一軸資安——二至三軸絕不混成一個裁決）。進度帳本掉線也不會丟資料。subagent 用不了時還有 inline 備援。 | superpowers:subagent-driven-development | executing-plans 的 inline 模式；planning-with-files 那套「檔案系統就是記憶體」；起手前先比對計畫記錄的 `Spec Version` 有沒有跟 spec 現況對不上；G4 plan-conflict 閘門在 INLINE 模式也重申一次；改到本 repo 自己的 skill 檔時，Finish 階段額外回報對照 `eval-fixtures/RULE-INVENTORY.md` 的 `FIXTURE COVERAGE` |
+| 4 | [`keel-execute`](skills/keel-execute/SKILL.md) | 審完的計畫 → 能跑的程式碼。每個 task 都是新開一個 implementer，配二到三個**互相看不到彼此**的審查者（規格對不對、寫得好不好，R4 條件命中時再加一軸資安——二至三軸絕不混成一個裁決）。進度帳本掉線也不會丟資料。subagent 用不了時還有 inline 備援。 | superpowers:subagent-driven-development | executing-plans 的 inline 模式；planning-with-files 那套「檔案系統就是記憶體」；起手前先比對計畫記錄的 `Spec Version` 有沒有跟 spec 現況對不上；G6 plan-conflict 閘門在 INLINE 模式也重申一次；改到本 repo 自己的 skill 檔時，Finish 階段額外回報對照 `eval-fixtures/RULE-INVENTORY.md` 的 `FIXTURE COVERAGE` |
 | 5 | [`keel-finish`](skills/keel-finish/SKILL.md) | 敢說「完成」之前：每個宣稱都要有剛查出來的新鮮證據、真的把整條流程走一遍、把這次過程中散落各處的未決事項全部收攏，最後才合併分支。 | superpowers:verification-before-completion | 宣稱對照證據表、紅燈變綠燈的回歸鐵律、分支整合怎麼選；已有 Step-5 ADR 的宣稱不用重查，Success Criteria 改成請使用者當場核對而非重新推導；Part 2c 的洩密掃描檢查項寫明裝好時該跑的確切指令 `gitleaks detect` |
 
 **內建跳過規則。** 小事（改一個檔、可逆、30 分鐘內搞定）直接跳過 1–3 階段。只有大案或風險高的案子才走完整審查。規劃花的時間不該超過任務本身的兩成。
@@ -99,20 +99,20 @@ cp -R agents/* ~/.claude/agents/
 
 | 關卡 | 在哪個階段 | 問什麼 |
 |------|-----------|--------|
-| **G1** | `keel-plan-review` Step 0 | 「這計畫假設 X、Y、Z 對不對？」——永遠會問的前提確認，前提錯了，後面查再多也白搭。 |
-| **G2** | `keel-plan-review` Step 5 | 每個活下來的 Taste 決定、每個 User Challenge，一條發現一題，**依決策依賴關係分批**（見下），附完整脈絡、選項、後果。 |
-| **G3** | `keel-execute` pre-flight | 計畫矛盾的問題先打包，Task 1 開工前一次問完——不是做到一半才冒出來煩你。 |
-| **G4** | `keel-execute` 每個 task 審查 | 發現跟計畫原文對不上（`PLAN-CONFLICT`）——絕不自己決定怎麼修，也不自己套。 |
-| **G5** | `keel-discover` | spec 核准。你沒點頭就不准寫程式碼，「這案子很簡單」也不例外。 |
-| **G6** | `keel-plan` Step 6 | 拆票的粒度跟依賴邊對不對——只有計畫本來就要進 keel-plan-review 時才略過。 |
+| **G1** | `keel-discover` | spec 核准。你沒點頭就不准寫程式碼，「這案子很簡單」也不例外。 |
+| **G2** | `keel-plan` Step 6 | 拆票的粒度跟依賴邊對不對——只有計畫本來就要進 keel-plan-review 時才略過。 |
+| **G3** | `keel-plan-review` Step 0 | 「這計畫假設 X、Y、Z 對不對？」——永遠會問的前提確認，前提錯了，後面查再多也白搭。 |
+| **G4** | `keel-plan-review` Step 5 | 每個活下來的 Taste 決定、每個 User Challenge，一條發現一題，**依決策依賴關係分批**（見下），附完整脈絡、選項、後果。 |
+| **G5** | `keel-execute` pre-flight | 計畫矛盾的問題先打包，Task 1 開工前一次問完——不是做到一半才冒出來煩你。 |
+| **G6** | `keel-execute` 每個 task 審查 | 發現跟計畫原文對不上（`PLAN-CONFLICT`）——絕不自己決定怎麼修，也不自己套。 |
 | **G7** | `keel-finish` Part 2 | 每一條 Success Criteria 請你當場核對。agent 自己的判斷永遠不算數。 |
 | **G8** | `keel-finish` Part 3 | 選哪種整合方式——選 discard 的話還要逐字打出那個字。 |
 | **G9** | 任何階段 | repo 之外的不可逆操作：部署、對非暫時性資料庫做 migration、刪資料、對外發布、憑證輪替、push/merge 到受保護分支。指名目標與確切指令，在動手當下問，**就算計畫裡已經寫了也要問**。 |
 
-G5–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續，會跳過硬性關卡或做出無法復原的事」的位置——所以這張表反過來也是封閉的：不在表上的「要繼續嗎？」一律禁止。
+G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續，會跳過硬性關卡或做出無法復原的事」的位置——所以這張表反過來也是封閉的：不在表上的「要繼續嗎？」一律禁止。
 
 
-**G2 按依賴前緣分批，不是死板一次一題（借用 mattpocock batch-grill-me 的做法）。** 大部分發現彼此根本不相依賴，死板逐題只是安全但慢。改成先畫出哪個決定要等哪個決定先答（比如「用哪種登入方式」會決定「session 怎麼存」），再分輪處理。**前緣**指所有前提都已解決、現在就答得出來的發現——把整個前緣塞進**一次** `AskUserQuestion` 呼叫（它原生上限一次 4 題；前緣超過 4 條就拆成最少次數的呼叫）。每輪答完先套用到計畫檔再算下一輪前緣——一個答案常常會順便解掉或改變後面的問題。答案還依賴這輪某條未答問題的，就留到下一輪——分批的界線是依賴關係，不是圖方便。前緣清空就結束。
+**G4 按依賴前緣分批，不是死板一次一題（借用 mattpocock batch-grill-me 的做法）。** 大部分發現彼此根本不相依賴，死板逐題只是安全但慢。改成先畫出哪個決定要等哪個決定先答（比如「用哪種登入方式」會決定「session 怎麼存」），再分輪處理。**前緣**指所有前提都已解決、現在就答得出來的發現——把整個前緣塞進**一次** `AskUserQuestion` 呼叫（它原生上限一次 4 題；前緣超過 4 條就拆成最少次數的呼叫）。每輪答完先套用到計畫檔再算下一輪前緣——一個答案常常會順便解掉或改變後面的問題。答案還依賴這輪某條未答問題的，就留到下一輪——分批的界線是依賴關係，不是圖方便。前緣清空就結束。
 
 ### 回退路由——後面發現前面錯了怎麼辦
 
