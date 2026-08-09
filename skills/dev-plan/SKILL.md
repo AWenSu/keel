@@ -19,8 +19,9 @@ wrong.
 ```
 INPUT   an approved spec (dev-discover) or requirements clear enough to name
         exact file paths
-OUTPUT  a plan file: header (Goal, Global Constraints) + tasks each carrying
-        Delivers / Files / Interfaces / Skills, no placeholder phrases
+OUTPUT  a plan file: header (Goal, Spec Version, Global Constraints, Success
+        Criteria) + tasks each carrying Delivers / Files / Interfaces /
+        Skills, no placeholder phrases
 ```
 
 **If INPUT is the spec path**, the spec's `Status:` field must read

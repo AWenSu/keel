@@ -17,8 +17,9 @@ provenance:
 # dev-execute — Plan Execution
 
 ```
-INPUT   a plan file whose every task carries Delivers / Files / Interfaces /
-        Skills; if it came from dev-plan-review, a REVIEW REPORT ending in
+INPUT   a plan file with a header carrying Spec Version + Success Criteria,
+        and every task carrying Delivers / Files / Interfaces / Skills; if it
+        came from dev-plan-review, a REVIEW REPORT ending in
         NO UNRESOLVED DECISIONS
 OUTPUT  all tasks committed and reviewed on a non-main branch; ledger complete
         in .dev-pipeline/progress.md; final whole-branch review passed
@@ -89,6 +90,22 @@ Mismatch → the spec body changed after the plan was written; follow
 or the referenced spec file can't be found → skip the check, don't block
 (same skip-if-missing spirit as the staleness rule below).
 
+**Destructive-operation scan.** In the same pass, read every task's
+`Delivers:` and steps for operations that reach outside the repo and cannot
+be undone by `git`: deploys, migrations against a non-ephemeral database,
+data deletion, external publication, credential rotation, push or merge to a
+protected branch. Each one found is its own G9 question to the user before
+Task 1 — naming the exact command and the exact target — **even though the
+plan already specifies it.**
+
+That last clause is the entire point. Every other gate in this stage arbitrates
+findings that *conflict* with the plan; nothing anywhere reviews what the plan
+itself instructs. A task reading `Delivers: production DB migrated to the new
+schema` passes G3 (no contradiction), never triggers G4 (no reviewer disagrees
+with it), and reaches an implementer whose brief contains no reason to hesitate.
+Plan approval is not operation authorization: the user last agreed that the
+plan's *premises* were right, possibly dozens of turns and one context fork ago.
+
 ### Per task loop
 
 1. **Extract the task brief** — the task's own text plus the plan header
@@ -102,6 +119,24 @@ or the referenced spec file can't be found → skip the check, don't block
    `Files:` paths/lines still match reality. Mismatch → relocate using the
    task's `Delivers:` behavior, note the drift in the status report; never
    blind-edit whatever now sits at the stated lines.
+   **Drift threshold — when relocation stops being enough.** Record every
+   relocate in the ledger. The plan as a whole has stopped matching the code
+   when any of these holds:
+   (a) a task's `Delivers:` describes behavior with no corresponding location
+   left in the codebase at all — not moved, gone;
+   (b) a third or more of the completed tasks reported a relocate;
+   (c) a symbol named in some task's `Interfaces: Consumes:` doesn't exist and
+   isn't produced by any earlier task.
+   Any one → stop dispatching, emit
+   `BLOCKED: 計畫與現況牴觸 → 退回 dev-plan` with the accumulated relocate
+   list. This is `dev-workflow`'s "plan contradicts the code as it now is
+   (beyond one task's fix)" route, and the threshold is what "beyond one
+   task's fix" means operationally.
+   Without a threshold the drift is absorbed silently: each implementer
+   relocates its own task, notes it in its own report, and no one adds the
+   notes up. A plan that stopped being true at Task 2 then runs to Task 9,
+   each task individually reasonable and the whole built on ground that
+   moved.
    **Test-first is enforced, not aspirational (from superpowers TDD):** the
    brief states that production code written before its failing test gets
    deleted and redone — not kept as "reference", not "adapted". Sunk cost is
@@ -133,11 +168,13 @@ or the referenced spec file can't be found → skip the check, don't block
    - the diff adds or modifies an externally-reachable endpoint
    - `dev-plan` marked the task high-risk
    - the plan-stage security lens (`dev-plan-lens-security`) previously
-     raised a finding against this task: determined by matching its
-     `FINDINGS:` entries by their `## Task N` tag against the current task's
-     number — a tag match means condition 4 is met, regardless of whether
-     that finding was later addressed. ("Previously raised," not "still
-     unresolved.")
+     raised a finding against this task: determined by matching the plan
+     file's `## SECURITY FINDINGS` table rows by their `## Task N` tag
+     against the current task's number — a tag match means condition 4 is
+     met, regardless of whether that finding was later addressed.
+     ("Previously raised," not "still unresolved.") Read the table from the
+     plan file, never from conversation history: this controller may be a
+     fresh one that never saw the review stage.
    - the diff matches a sensitive-string pattern: `password`, `secret`,
      `token`, `api[_-]?key`, `BEGIN.*PRIVATE KEY`, or a connection-string
      shape
@@ -149,8 +186,21 @@ or the referenced spec file can't be found → skip the check, don't block
    Not triggered → do not dispatch it; instead write to the ledger
    `security axis skipped — <which of the five conditions was checked and
    why none matched — for a pure dependency-list change, cite "deferred to
-   dev-finish Part 2c(3)">`, so the skip is an auditable decision, not a
+   dev-finish Part 2c(3b)">`, so the skip is an auditable decision, not a
    silent omission.
+   **When in doubt, dispatch.** Skipping this axis carries the same evidence
+   burden as raising a finding: the ledger line quotes the task's `Delivers:`
+   text and its diff file list, not a prose assurance. Spec and quality run
+   unconditionally; this is the only axis whose omission is a judgment call,
+   and the entity making that call is the same controller carrying the
+   fan-out ceiling and the opus budget. Note the asymmetry the way this
+   pipeline notes it everywhere else — a needless security pass costs one
+   agent, a missed one costs whatever shipped.
+   **Findings go in the ledger, not just the conversation.** When the axis
+   runs, its Critical/Important findings and their disposition are written to
+   the task's ledger line (`security:` field, see Progress ledger below).
+   `dev-finish` Part 2c check (2) reads that field from a later, fresh
+   context; a finding that exists only here is one that gate will never see.
    Give each reviewer the **base commit explicitly** — the commit before the
    task started, **never `HEAD~1`**, which silently drops all but the last
    commit of a multi-commit task. A reviewer with no stated base returns
@@ -253,8 +303,20 @@ than a capable one that takes 1.
 Append one line per completed task to `.dev-pipeline/progress.md`:
 
 ```
-Task 3: auth middleware — DONE, reviewed (2 findings fixed), commit a1b2c3d
+Task 3: auth middleware — DONE, reviewed (2 findings fixed), commit a1b2c3d, branch feat/auth
+security: 2 Important (SQL string-building svc/order.py:44; missing authz check api/admin.py:12) → both fixed in a1b2c3d
 ```
+
+The **branch** field exists because a controller resuming after compaction
+reads this file to recover state, and "which branch was this on" is exactly
+the fact that gets lost — the failure that puts a fresh implementer on `main`.
+
+The **security line** is written whenever the security axis ran: every
+Critical/Important finding with its `file:line` and disposition, or
+`security: none` if it passed clean. When the axis was skipped, that line is
+the skip justification instead (see step 3c). `dev-finish` Part 2c check (2)
+reads these lines — with no producer here, that gate has nothing to check and
+passes vacuously, which is not the same as passing.
 
 **On session start or after compaction: read the ledger FIRST.** Trust the
 ledger and `git log` over your recollection — controllers that lost their

@@ -23,8 +23,9 @@ its own fully-detailed question, per the Step 5 rules.
 — its dual-model consensus and mockup generation earn their cost there.
 
 ```
-INPUT   plan file with header (Goal, Global Constraints) + tasks carrying
-        Delivers / Files / Interfaces / Skills; the spec it derives from
+INPUT   plan file with header (Goal, Spec Version, Global Constraints,
+        Success Criteria) + tasks carrying Delivers / Files / Interfaces /
+        Skills; the spec it derives from
 OUTPUT  the same plan file, edited, with a REVIEW REPORT section ending in
         NO UNRESOLVED DECISIONS; deferrals written to TODOS.md
 ```
@@ -222,10 +223,14 @@ enough to just evaluate inline.
 Apply surviving **Mechanical** edits directly to the plan file.
 
 Then work every surviving **Taste** finding and **User Challenge** as a
-**decision tree, in rounds** (from mattpocock batch-grill-me): map which
+**decision tree, in batches** (from mattpocock batch-grill-me): map which
 findings depend on another's answer (e.g. "which auth pattern" gates "session
 storage format"). One finding is still one question — this changes how many
-questions go out *per round*, not how a single question is asked.
+questions go out *per batch*, not how a single question is asked.
+
+("Batches," deliberately, not "rounds": the exit gate below counts *review
+passes* and sends a plan back to dev-discover at three. A deep dependency
+chain here is normal and must not be mistaken for that.)
 
 - **Frontier** = every finding whose prerequisite decisions are already
   settled — answerable right now without guessing an answer you haven't
@@ -271,8 +276,8 @@ This section's presence in the plan file IS the "already produced" signal:
 write one — found means skip, not found means offer, same trigger it always
 used.
 
-(`dev-discover/SKILL.md:170-176`'s ADR offer states this same three-part
-criterion comma-separated; `dev-finish/SKILL.md:91-92` separates it with
+(`dev-discover`'s Write-spec ADR offer states this same three-part
+criterion comma-separated; `dev-finish` Part 2's ADR check separates it with
 "+". That wording split predates this task and isn't reconciled here — this
 checkpoint copies the dev-finish wording verbatim on purpose.)
 
@@ -298,11 +303,36 @@ Append to the plan file:
 Lenses: CEO 7→9, Eng 6→9 [, Design, Security, DX]
 Decisions: <list — auto-applied Mechanical + user-answered Taste/Challenges>
 NO UNRESOLVED DECISIONS   ← or list them; execution is blocked until none remain
+
+## SECURITY FINDINGS (dev-plan-lens-security)
+| Severity | Tag | Finding | Disposition this stage |
+|---|---|---|---|
+| Critical | ## Task 5 | <verbatim from the lens's FINDINGS: entry> | applied as edit / risk-accepted / refuted by skeptic |
 ```
 
+**The `## SECURITY FINDINGS` table is written even when a finding was already
+handled here, and even when the lens found nothing** (write `lens not run` or
+`no findings`). It is the only durable copy: two downstream consumers read it
+from a fresh context that cannot see this conversation —
+
+- `dev-execute`'s R4 condition 4 matches its `## Task N` tags to decide
+  whether a task needs the security review axis, and that condition is
+  "previously raised," not "still unresolved," so deleting handled rows
+  disables it;
+- `dev-finish` Part 2c check (4) reconciles each Critical's disposition
+  before allowing integration.
+
+A lens's returned findings live only in this stage's context. `dev-execute`
+requires a fresh controller past ~100k tokens and `dev-finish` runs later
+still — so a finding not written into the plan file is a finding neither of
+them will ever see, and both of their checks silently pass on an empty set.
+
 **Exit gate:** dev-execute may not start while the report lists unresolved
-decisions. Max 3 review rounds — if round 3 still has unresolved items, the
-plan is fighting the spec; go back to dev-discover.
+decisions. Max 3 **full review passes** — one pass being Steps 1→5 run end to
+end. If a third pass still has unresolved items, the plan is fighting the
+spec; go back to dev-discover. Step 5's internal frontier batches are not
+passes and are not counted: a dependency chain four batches deep is a normal
+plan being questioned in the right order, not a plan in trouble.
 
 ## Red flags
 

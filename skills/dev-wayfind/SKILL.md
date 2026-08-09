@@ -10,6 +10,17 @@ provenance:
 
 # dev-wayfind — Decision Maps for Oversized Work
 
+```
+INPUT   an idea too large for one session whose route is still unclear —
+        fog, not just size
+OUTPUT  docs/maps/<topic>/MAP.md with zero open tickets and no fogged
+        section, exiting to dev-discover or dev-plan
+```
+
+Missing INPUT → this is the wrong stage. Work that is merely large but whose
+route is visible goes straight to `dev-discover`; the fog is the entry
+condition, not the size.
+
 A loose idea has arrived — too big for one session, and wrapped in fog: the
 route from here to the **destination** isn't visible yet. Wayfinding charts
 that route as a map of **decision tickets** — questions whose resolution is

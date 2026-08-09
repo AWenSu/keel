@@ -57,8 +57,18 @@ failure in this pipeline; checking on entry is nearly free.
 - **Small** (single file, reversible, <30 min): skip the pipeline. Do it,
   then run the dev-finish gate function on your claim. Planning cost must
   stay under ~20% of the task.
+  **Exception — the shortcut does not cover security.** A single-file change
+  to an authentication/authorization/session, encryption, file-upload,
+  outbound-call, or database-query-construction path, or one that adds an
+  externally-reachable endpoint, additionally runs `dev-finish` Part 2c
+  before it is done. "Reversible in git" and "safe to ship unreviewed" are
+  different properties; one file is exactly the size most auth bugs are.
 - **Medium** (multi-file, half a day): `planner` agent one-shot plan →
-  execute → dev-finish. **The one-shot plan must still carry the four fields
+  execute → dev-finish. It must also carry a header **Success Criteria**
+  list: `dev-finish` Part 2 opens that checklist unconditionally, and a plan
+  without one arrives at the final gate with nothing to check. (`Spec
+  Version` is genuinely exempt on this path — there is no spec file — and
+  that exemption is stated, not an oversight.) **Plus the four fields
   dev-execute consumes** — `Delivers:`, `Files:`, `Interfaces:`, `Skills:` —
   so say so in the planner dispatch. Without them, dev-execute's brief
   extraction, staleness check, and spec-axis review all fail silently. Any
@@ -97,21 +107,40 @@ is working. A `general-purpose` dispatch inside this pipeline is a bug.
 | `dev-exec-fixer` | 4 execute | Apply review findings | sonnet |
 | `dev-exec-fixer-critical` | 4 execute | Fix-loop round 4-5 — standard tier stalled | opus |
 | `dev-wayfind-researcher` | pre | Resolve one research ticket | sonnet |
-| `code-reviewer` | 4 execute | Final whole-branch review | inherit (strongest) |
-| `security-auditor` | ad-hoc | `/security-review`／`/ship` only — not dispatched by dev-plan-review/dev-execute | opus |
-| `test-engineer` | 3 review | Test-strategy findings | sonnet |
-| `silent-failure-hunter` | 3 review | Swallowed-error audit | sonnet |
-| `build-error-resolver` | debug | Compile/build failures | sonnet |
+
+**External agents — shipped elsewhere, not in this repo's `agents/`.** Still
+valid `subagent_type` values for the pre-dispatch check below, but their
+model and tools are whatever the local installation defines; this table
+cannot pin them.
+
+| subagent_type | Stage | Role | model |
+|---------------|-------|------|-------|
+| `planner` | 2 plan | Medium-task one-shot plan (must return Delivers/Files/Interfaces/Skills) | — (external) |
+| `code-reviewer` | 4 execute | Final whole-branch review | — (external; inherits strongest) |
+| `security-auditor` | ad-hoc | `/security-review`／`/ship` only — not dispatched by dev-plan-review/dev-execute | — (external) |
+| `test-engineer` | 3 review | Test-strategy findings | — (external) |
+| `silent-failure-hunter` | 3 review | Swallowed-error audit | — (external) |
+| `build-error-resolver` | debug | Compile/build failures — dispatched by `dev-debug` when the symptom is a build/compile error | — (external) |
 
 Each agent file pins its own `tools:` and `model:`. **Do not pass a `model`
 override** — the pin is the decision, and overriding it re-introduces the
-silent-inheritance bug it exists to prevent. Reviewers, lenses, skeptics, and
-researchers are read-only by declaration; only implementers and fixers write.
+silent-inheritance bug it exists to prevent.
 
-**Fan-out ceiling:** ≤8 concurrent and ≤16 total agents per stage. Over the
-ceiling, sort by severity, take the top N, and emit
-`SKIPPED: <n> — <id + reason>` at the stage's end. Silent truncation reads as
-full coverage when it isn't.
+**Read-only is enforced by the tool list, not by prose.** Lenses, skeptics,
+the designer, and the researcher hold `Read, Grep, Glob` (plus search tools
+where their job needs them) — no shell, so "read-only" is a property of the
+grant rather than a promise. The three `dev-exec-reviewer-*` agents
+additionally hold `Bash`, because reviewing a diff requires `git diff`; each
+one's definition restricts that shell to read-only commands in its own text,
+which is a weaker guarantee and is the reason the grant stops there. Only
+implementers and fixers hold `Edit`/`Write`.
+
+**Fan-out ceiling:** ≤8 concurrent, everywhere. Total-agent budgets belong to
+each stage, not to this table — dev-execute's is ≤16 per *task loop*
+(`dev-execute` Fan-out ceiling), dev-plan-review's is ≤8 skeptics per round
+(`dev-plan-review` Step 4). Over a ceiling, sort by severity, take the top N,
+and emit `SKIPPED: <n> — <id + reason>`. Silent truncation reads as full
+coverage when it isn't.
 
 **Pre-dispatch self-check (mandatory, every dispatch).** Naming the rule above
 is not enough on its own — a `general-purpose` dispatch can still slip through
@@ -180,7 +209,7 @@ Add `.dev-pipeline/` to the repo's `.gitignore` on first creation.
 4. When a stage completes, verify its OUTPUT contract, announce the next stage,
    and continue **without asking permission.**
 
-**The only four gates that may stop the pipeline for a user answer:**
+**The gates that may stop the pipeline for a user answer:**
 
 | Gate | Where | What |
 |------|-------|------|
@@ -188,13 +217,26 @@ Add `.dev-pipeline/` to the repo's `.gitignore` on first creation.
 | G2 | dev-plan-review Step 5 | Each surviving Taste / User Challenge, asked one finding per question, batched by dependency frontier (never all at once, never forced serial past the frontier) |
 | G3 | dev-execute pre-flight | Batched plan-contradiction questions before Task 1 |
 | G4 | dev-execute per-task review | `PLAN-CONFLICT` finding arbitration |
+| G5 | dev-discover | Spec approval — no code before the user approves; no exceptions for "simple" projects |
+| G6 | dev-plan Step 6 | Task-breakdown granularity and `Depends on` edges (skipped only when the plan is heading into dev-plan-review anyway) |
+| G7 | dev-finish Part 2 | Each Success Criterion, confirmed on the spot by the user — the agent's own assessment never closes a box |
+| G8 | dev-finish Part 3 | Branch-integration choice, and the typed `discard` confirmation if that option is taken |
+| G9 | any stage | An irreversible operation outside the repo — deploy, migration against a non-ephemeral database, data deletion, external publication, credential rotation, push/merge to a protected branch. Named target + exact command, asked at the point of action, **even when the plan already specifies it** |
 
-Any other "should I continue?" is forbidden — checkpoint questions burn the
-user's time and are not a safety mechanism.
+A "should I continue?" that is **not one of the rows above** is forbidden —
+generic checkpoint questions burn the user's time and are not a safety
+mechanism. The distinction matters: G5–G9 are not checkpoints, they are the
+points where proceeding without an answer would either skip a hard gate or
+do something that cannot be undone. Treating the table as shorter than it is
+does not make the pipeline faster; it makes it unsafe in exactly the places
+speed is worth the least.
 
 **Never work on `main`/`master` without explicit user consent** — branch first.
 This binds every stage that writes, dev-execute and dev-finish alike; neither
-redefines it locally.
+redefines it locally. Because subagents never read this file, the agents that
+actually commit (`dev-exec-implementer`, `dev-exec-fixer`,
+`dev-exec-fixer-critical`) carry their own pre-commit branch check — a rule
+stated only here would not reach the process performing the action.
 
 **Smart-zone rule (from mattpocock ask-matt/handoff):** past ~120k tokens of
 context, reasoning degrades. If a long conversational stage (discover, plan)

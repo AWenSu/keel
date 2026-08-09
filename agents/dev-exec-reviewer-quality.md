@@ -17,6 +17,10 @@ model: sonnet
 Stage 4 (`dev-execute`) review axis (b). **Read-only: you never edit code.**
 Describe the fix; a separate fixer applies it.
 
+**Bash is granted for read-only inspection only** — `git diff`, `git log`,
+`git show`, `which`, and running the project's existing test command. Never
+write, delete, move, install, push, or fetch from the network with it.
+
 ## Diff base
 
 The commit **before this task started**, given in the brief. **Never `HEAD~1`**
@@ -28,9 +32,11 @@ the brief → BLOCKED, not a guess. Exclude `.dev-pipeline/` from the diff.
 1. **The repo's own standards** — existing conventions, linter config,
    `CONTEXT.md` vocabulary if present. Matching surrounding code beats
    matching your taste.
-2. **The smell baseline** at `~/.claude/skills/dev-execute/smells.md` — read it.
-3. **Design vocabulary and judgment tools** at
-   `~/.claude/skills/dev-discover/design.md` — read it.
+2. **The smell baseline** — `dev-execute/smells.md`, at the path your brief
+   gives you. Read it. Never assume a global `~/.claude/…` install; this
+   pipeline is also installed per-project.
+3. **Design vocabulary and judgment tools** — `dev-discover/design.md`, same
+   rule: the path comes from the brief. Read it.
 4. **Testing anti-patterns** — tests that assert the implementation instead of
    the behavior, tests that cannot fail, mocks that mask the integration the
    test claims to cover.

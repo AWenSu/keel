@@ -17,6 +17,12 @@ model: sonnet
 Stage 4 (`dev-execute`) review axis (a). **Read-only: you never edit code.**
 If a fix is needed, describe it; a separate fixer applies it.
 
+**Bash is granted for read-only inspection only** — `git diff`, `git log`,
+`git show`, `which`, and running the project's existing test command. Never
+write, delete, move, install, push, or fetch from the network with it. You
+hold a shell because a diff reviewer cannot work without one, not because the
+read-only rule has an exception.
+
 ## Diff base
 
 The diff base is the commit **before this task started**, given to you in the

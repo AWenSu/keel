@@ -118,9 +118,9 @@ Each stage announces its successor and hands off — you intervene at
 broadcast the moment it lands (verdict, one anchored finding, next step) — you
 are never staring at a silent pipeline wondering what four agents are doing.
 
-### The four gates — the only points that stop for your answer
+### The gates — the only points that stop for your answer
 
-Everything else in the pipeline proceeds without asking permission. These four
+Everything else in the pipeline proceeds without asking permission. These
 never do:
 
 | Gate | Stage | What it asks |
@@ -129,6 +129,16 @@ never do:
 | **G2** | `dev-plan-review`, Step 5 | Every surviving Taste decision and User Challenge, one finding per question, **batched by dependency frontier** (see below), full context + options + consequence. |
 | **G3** | `dev-execute`, pre-flight | Batched plan-contradiction questions, asked once before Task 1 — not mid-task. |
 | **G4** | `dev-execute`, per-task review | A finding that contradicts the plan's own text (`PLAN-CONFLICT`) — never auto-resolved, never auto-applied. |
+| **G5** | `dev-discover` | Spec approval. No code before you approve it; no exception for "simple" projects. |
+| **G6** | `dev-plan`, Step 6 | Task-breakdown granularity and dependency edges — skipped only when the plan is going through `dev-plan-review` anyway. |
+| **G7** | `dev-finish`, Part 2 | Each Success Criterion, confirmed by you on the spot. The agent's own assessment never closes a box. |
+| **G8** | `dev-finish`, Part 3 | Which integration option — and the literal typed `discard` if that's the one. |
+| **G9** | any stage | An irreversible operation outside the repo: deploy, migration against a non-ephemeral database, data deletion, external publication, credential rotation, push/merge to a protected branch. Named target, exact command, asked at the point of action — **even when the plan already says to do it.** |
+
+G5–G9 are not checkpoints. Each is a point where continuing without your
+answer would skip a hard gate or do something that can't be undone — which is
+why the list is closed in the other direction too: a generic "shall I
+continue?" that isn't one of these rows is forbidden.
 
 **G2 batches by dependency frontier, not one-at-a-time (from mattpocock
 batch-grill-me).** Strict one-question-serial is safe but slow when most
@@ -189,11 +199,15 @@ role; the frontmatter pins the model and locks the tool access, so the
 decision can't quietly drift the way a prose instruction ("remember to use
 opus here") tends to.
 
-**Read-only by declaration.** Every reviewer, lens, skeptic, and researcher
-below is restricted to `Read, Grep, Glob, Bash` (plus search tools where
-named) — it can describe a fix, never apply one. Only implementers and fixers
-get write access. This is what makes "the reviewer must not edit the code it's
-reviewing" a structural guarantee instead of a prompt that can be ignored.
+**Read-only by tool grant, not by prose.** Lenses, skeptics, the designer,
+and the researcher get `Read, Grep, Glob` (plus search tools where named) —
+no shell at all, so read-only is a property of what they hold rather than a
+promise they make. The three `dev-exec-reviewer-*` agents additionally get
+`Bash`, since reviewing a diff requires `git diff`; each restricts that shell
+to read-only commands in its own definition, a weaker guarantee and the
+reason the grant goes no further. Only implementers and fixers get
+`Edit`/`Write`. This is what makes "the reviewer must not edit the code it's
+reviewing" structural instead of a prompt that can be ignored.
 
 | subagent_type | Stage | Role | model | Tools |
 |---|---|---|---|---|
@@ -206,8 +220,8 @@ reviewing" a structural guarantee instead of a prompt that can be ignored.
 | `dev-plan-skeptic` | 3 review | Refute one High finding — single-point evidence check | sonnet | read-only, **no search** |
 | `dev-plan-skeptic-critical` | 3 review | Refute one Critical / security / cross-file-reasoning finding | **opus** | read-only, **no search** |
 | `dev-exec-implementer` | 4 execute | Build one task, test-first enforced | sonnet | full |
-| `dev-exec-reviewer-spec` | 4 execute | Spec-compliance axis only | sonnet | read-only |
-| `dev-exec-reviewer-quality` | 4 execute | Code-quality axis only | sonnet | read-only |
+| `dev-exec-reviewer-spec` | 4 execute | Spec-compliance axis only | sonnet | read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests |
+| `dev-exec-reviewer-quality` | 4 execute | Code-quality axis only | sonnet | read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests |
 | `dev-exec-reviewer-security` | 4 execute | Security axis only, dispatched conditionally when an R4 trigger is hit | **opus** | read-only |
 | `dev-exec-fixer` | 4 execute | Apply only the findings it was given | sonnet | full |
 | `dev-exec-fixer-critical` | 4 execute | Fix-loop rounds 4-5 only, after the standard tier stalls twice | opus | full |

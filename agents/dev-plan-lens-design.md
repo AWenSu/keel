@@ -1,7 +1,7 @@
 ---
 name: dev-plan-lens-design
 description: 【計畫審查／設計視角】使用者可見的狀態有沒有全部指名。空狀態、錯誤狀態、載入狀態、邊界內容。只在計畫命中 view/rendering/UI/component/screen 詞彙時啟用。Stage 3 of the dev pipeline (dev-plan-review), design lens.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob
 model: sonnet
 ---
 

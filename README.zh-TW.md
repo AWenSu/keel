@@ -132,7 +132,7 @@ cp -R agents/* ~/.claude/agents/
 
 這條 pipeline 每次派工都指名道姓，指定具體的 `subagent_type`——絕不丟給通用的 `general-purpose` 打混。名字本身就講清楚是哪個階段、哪個角色；模型跟工具權限都寫死在 frontmatter 裡，不會像散文式的提醒（「這裡記得用 opus」）那樣講一講就被忘光。
 
-**唯讀是明文規定的，不是靠自律。** 下面每個審查者、視角、懷疑者、研究者，工具都只給 `Read, Grep, Glob, Bash`（加上各自需要的檢索工具）——它們只能講該怎麼改，不能自己動手。只有 implementer 跟 fixer 有寫入權限。這樣「審查的人不准動自己在審的程式碼」就是規則卡死的，不是提示詞寫寫就算了。
+**唯讀是靠工具權限卡死的，不是靠散文交代。** 視角、懷疑者、designer、researcher 只拿到 `Read, Grep, Glob`（加上各自需要的檢索工具）——**完全沒有 shell**，所以唯讀是「它手上就沒有那個能力」而不是「它答應不做」。三隻 `dev-exec-reviewer-*` 額外拿到 `Bash`，因為審 diff 非得跑 `git diff` 不可；各自在定義檔裡把 shell 限制成唯讀指令，那是比較弱的保證，也正是權限只放到這裡為止的原因。只有 implementer 跟 fixer 有 `Edit`/`Write`。這樣「審查的人不准動自己在審的程式碼」就是規則卡死的，不是提示詞寫寫就算了。
 
 | subagent_type | 階段 | 幹嘛的 | model | 工具權限 |
 |---|---|---|---|---|
