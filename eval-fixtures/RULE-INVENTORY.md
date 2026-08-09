@@ -115,7 +115,7 @@ context fork.
 | E11 | Part 2c check 3b — dependency existence (anti-slopsquatting), no exemption | `keel-finish` Part 2c (3b) | same | `12` |
 | E12 | Part 2c check 4 — plan-lens findings disposition | `keel-finish` Part 2c (4) | same (reads E8) | `12` |
 | E13 | BLOCKED on unresolved Critical from (2)/(3b)/(4) | `keel-finish` Part 2c BLOCKED condition | same | `12` |
-| E14 | A branch with zero security review never reaches integration unreviewed | `17` | `keel-finish` Part 2c check 0 | — |
+| E14 | A branch with zero security review never reaches integration unreviewed | `keel-finish` Part 2c (this rule has no separate declaration site — the check is the declaration) | `keel-finish` Part 2c check 0 | `17` |
 
 ## F. Structural guarantees
 
@@ -161,7 +161,7 @@ or `Enforced at` points into that file.
 
 ## Current coverage
 
-**59 rules. 38 verified (64%)** — 31 by scenario fixture, 7 by
+**59 rules. 39 verified (66%)** — 32 by scenario fixture, 7 by
 `check-structure.sh`. Recount with:
 
 ```
@@ -180,8 +180,8 @@ plausible number in a table reads as verified.
 
 ## This is the ceiling, and it is deliberate
 
-64% is not a milestone on the way to 100% — it is the intended end state. The
-remaining 21 rows should stay uncovered:
+66% is not a milestone on the way to 100% — it is the intended end state. The
+remaining 20 rows should stay uncovered:
 
 **V1–V5** (Iron Law, red-green regression, the evidence gate, "an agent's
 success report is not evidence", untrusted search results) and **H1–H5**
@@ -196,7 +196,7 @@ compaction, which is a faster and harsher test than any document.
 triggers that fire on ordinary runs, or persistence rules whose absence is
 immediately apparent.
 
-Chasing the last 21 would be the anti-pattern this repo already names:
+Chasing the last 20 would be the anti-pattern this repo already names:
 optimizing for the check rather than the behavior. Adding a rule that
 genuinely has a trigger/no-trigger boundary and a high cost of being wrong?
 That earns a fixture. Adding one to move a percentage does not.
