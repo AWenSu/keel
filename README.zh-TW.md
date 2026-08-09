@@ -203,7 +203,7 @@ Eng 視角（`keel-plan-lens-eng`）跑另一輪平行檢查，對照現行文�
 | gstack | 1.60.1.0 | [garrytan/gstack](https://github.com/garrytan/gstack) |
 | planning-with-files | 3.5.0 | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) |
 | mattpocock/skills | 沒版號的 monorepo——照 commit 對，不是照 tag | [mattpocock/skills](https://github.com/mattpocock/skills) |
-| dev-pipeline-security-review 需求書（2026-08-07） | 內部文件，非 repo | 資料來源：STRIDE 威脅建模、OWASP Top 10:2025、Veracode 2025 GenAI report、slopsquatting 研究 |
+| keel-security-review 需求書（2026-08-07） | 內部文件，非 repo | 資料來源：STRIDE 威脅建模、OWASP Top 10:2025、Veracode 2025 GenAI report、slopsquatting 研究 |
 | keel-workflow SDD 元素整合需求書（2026-08-07） | 內部文件，非 repo | 資料來源：外部分享的 SDD/Contract-first/ADR 流程比對 |
 
 要跟上游同步的話：

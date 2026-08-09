@@ -8,7 +8,7 @@ provenance:
     - superpowers:finishing-a-development-branch @6.1.1 (integration options; typed discard confirmation added 2026-07-23)
     - built-in /verify concept (drive the real flow, not just the test suite)
     - gstack TODOS.md deferral + mattpocock ADR offer (added 2026-07-23)
-    - 20260807 dev-pipeline-security-review-requirements 需求書 R6 (security
+    - 20260807 keel-security-review-requirements 需求書 R6 (security
       exit gate section; added 2026-08-07)
 ---
 

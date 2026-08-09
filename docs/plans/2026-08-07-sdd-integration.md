@@ -8,7 +8,7 @@ E2E／UAT＋Release Runbook」流程中，本 pipeline 目前缺或偏弱的項�
 （spec 溯源、結構化驗收、核准閘門——既有 keel-plan 只有 spec-first 精神，
 缺這三個機制本體）。
 
-**Spec:** `/Users/wen/myProject/Claude/20260807_2214_dev-workflow-sdd-integration-requirements.md`
+**Spec:** `/Users/wen/myProject/Claude/20260807_2214_keel-workflow-sdd-integration-requirements.md`
 
 **Architecture:**
 ```
@@ -172,7 +172,7 @@ checklist 新增明確步驟——每一條 Success Criteria 由**使用者**當
 - [ ] `grep -c "使用者當場\|user confirms\|UAT" skills/keel-finish/SKILL.md`
       確認新文字寫入且未重複
 - [ ] 手動走查：對照現有一份已完成的 Success Criteria checklist（如
-      `docs/plans/2026-08-07-dev-pipeline-security-review.md` 的
+      `docs/plans/2026-08-07-keel-security-review.md` 的
       Success Criteria），逐條核對新流程文字是否要求「使用者確認」而非
       「agent 自證」
 - [ ] 不在此 commit —— 已核實 `~/.claude` 不是 git repo，只是安裝目錄；本 task

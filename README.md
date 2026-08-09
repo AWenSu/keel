@@ -327,7 +327,7 @@ time (2026-07-14; subagent roster and prior-art scanning added 2026-07-30):
 | gstack | 1.60.1.0 | [garrytan/gstack](https://github.com/garrytan/gstack) |
 | planning-with-files | 3.5.0 | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) |
 | mattpocock/skills | unversioned monorepo — synced by commit, not tag | [mattpocock/skills](https://github.com/mattpocock/skills) |
-| dev-pipeline-security-review requirements (2026-08-07) | internal doc, not a repo | sources: STRIDE threat modeling, OWASP Top 10:2025, Veracode 2025 GenAI report, slopsquatting research |
+| keel-security-review requirements (2026-08-07) | internal doc, not a repo | sources: STRIDE threat modeling, OWASP Top 10:2025, Veracode 2025 GenAI report, slopsquatting research |
 | keel-workflow SDD 元素整合需求書 (2026-08-07) | internal doc, not a repo | sources: 外部分享的 SDD/Contract-first/ADR 流程比對 |
 
 To sync with upstream:

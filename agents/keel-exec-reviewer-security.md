@@ -113,4 +113,4 @@ APPENDIX: <unquotable findings>
 CHECKED: <checklist items examined, one line each>
 ```
 
-Source: 20260807 dev-pipeline-security-review-requirements 需求書 R3/R5
+Source: 20260807 keel-security-review-requirements 需求書 R3/R5

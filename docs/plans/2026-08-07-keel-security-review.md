@@ -1,12 +1,12 @@
-# Plan: dev-pipeline 資安審查缺口補齊
+# Plan: keel 資安審查缺口補齊
 
 > **For agentic workers:** execute with keel-execute.
 
-**Goal:** dev-* pipeline 新增計畫期威脅建模 lens 與執行期資安審查軸，使 pipeline
+**Goal:** keel-* pipeline 新增計畫期威脅建模 lens 與執行期資安審查軸，使 pipeline
 從「只能驗證已存在的資安 finding」升級為「能主動產生資安 finding」，並在
 keel-finish 加上資安退場閘門。
 
-**Spec:** `/Users/wen/myProject/Claude/20260807_0009_dev-pipeline-security-review-requirements-資安審查缺口需求書.md`
+**Spec:** `/Users/wen/myProject/Claude/20260807_0009_keel-security-review-requirements-資安審查缺口需求書.md`
 （定案版，已補 STRIDE 方法論、OWASP Top 10:2025 A02/A10、套件存在性驗證三處）
 
 **Architecture:**
@@ -321,7 +321,7 @@ Part 2b 之間插入新小節；provenance frontmatter）
 欄位更新，不再暗示它涵蓋 stage 3 計畫審查（該職責已移交
 `keel-plan-lens-security`）。**不修改 `~/.claude/CLAUDE.md`**——實查該檔
 Custom Agents 路由表只收錄使用者手動路由的 9 個 agent，現有 9 個
-`dev-*` pipeline 內部 agent（`keel-plan-lens-ceo/eng/design/dx` 等）
+`keel-*` pipeline 內部 agent（`keel-plan-lens-ceo/eng/design/dx` 等）
 一個都不在其中，因為它們是 pipeline 內部派工、使用者從不手動叫。兩個新
 agent 屬同一類，比照既有慣例不入全域路由表；roster 記於
 `keel-workflow/SKILL.md` 已足夠可查。
@@ -388,7 +388,7 @@ quality 軸的既有段落逐字比對確認未被誤改。
       輸出格式完全未變，對應 spec 驗收標準第 6 項）
 - [ ] `git status --short` 確認六個 skill/agent 檔 + 兩份 README 皆已加入
       預備 commit 範圍，無遺漏檔案
-- [ ] Commit（`docs: sync READMEs and repo copies for dev-pipeline security review addition`）
+- [ ] Commit（`docs: sync READMEs and repo copies for keel security review addition`）
 
 ## Self-review
 
@@ -398,7 +398,7 @@ quality 軸的既有段落逐字比對確認未被誤改。
   型別 ✓
 - Type-consistency：`keel-plan-lens-security`、`keel-exec-reviewer-security`
   兩個名字在全部 7 個 task 中拼寫一致，未出現變體（如
-  `dev-security-lens`）✓
+  `keel-plan-lens-security`）✓
 - 每個 phase 結束系統仍可運作：Task 1/3（純新增檔案）完成後既有 pipeline
   行為零變化；Task 2/4 完成後才真正接線，但接線前後既有兩軸/四 lens
   行為不變（僅新增條件式第三者）；Task 5 是純加規則，不影響既有 Part
@@ -437,7 +437,7 @@ Task 7 (README + repo 同步)   — Task 1, Task 2, Task 3, Task 4, Task 5, Task
 - Eng-4：Self-review 補一段justification，說明 15 觸及檔案數是安全機制橫跨三階段+雙語文件的直接反映，非拆分不當
 - Eng-5：Task 4 觸發時 ledger 條目格式沿用既有 spec/quality 兩軸格式
 - Sec-6：Task 3 checklist AuthN/AuthZ 項目補 session 管理（cookie屬性/逾時/固定攻擊防範）
-- CEO-5：Task 6 移除 `~/.claude/CLAUDE.md` 修改項——實查該檔路由表不收錄任何內部 `dev-*` pipeline agent，兩個新 agent 比照既有慣例不入表
+- CEO-5：Task 6 移除 `~/.claude/CLAUDE.md` 修改項——實查該檔路由表不收錄任何內部 `keel-*` pipeline agent，兩個新 agent 比照既有慣例不入表
 - CEO-6：Task 5 補一句，keel-finish 呼叫既有 `code-reviewer` 時附上「哪些 task 已跑過 security 軸」context，聚焦跨 task 組合風險；只改 keel-finish 端 context，不改 code-reviewer 本身，不牴觸 Global Constraints
 
 **Decisions（Taste，使用者回答）：**

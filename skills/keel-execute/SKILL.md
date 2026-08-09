@@ -10,7 +10,7 @@ provenance:
     - planning-with-files @3.5.0 (filesystem-as-memory: findings/progress files, 2-action rule)
     - mattpocock/skills code-review @1.2.0 (Fowler smell baseline in smells.md, two-axis no-merged-ranking rule, staleness/relocate-by-Delivers rule; added 2026-07-22)
     - gstack plan-eng-review sections @1.60.1.0 (evidence gate, coverage diagram; added 2026-07-23)
-    - 20260807 dev-pipeline-security-review-requirements 需求書 R3/R4/R5 (conditionally-triggered third review axis `keel-exec-reviewer-security`, opus-pinned, independent no-merge-ranking; added 2026-08-07)
+    - 20260807 keel-security-review-requirements 需求書 R3/R4/R5 (conditionally-triggered third review axis `keel-exec-reviewer-security`, opus-pinned, independent no-merge-ranking; added 2026-08-07)
   dropped: task-brief/review-package helper scripts (plugin-internal paths; inlined their intent as prompt rules)
 ---
 

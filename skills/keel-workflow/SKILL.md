@@ -1,6 +1,6 @@
 ---
 name: keel-workflow
-description: Software development lifecycle orchestrator — detects the current stage and routes to the matching dev-* pipeline skill (keel-discover → keel-plan → keel-plan-review → keel-execute → keel-finish), with lanes for debugging, UI work, issue-driven work, and heavyweight review. Pure router; contains no duplicated skill content.
+description: Software development lifecycle orchestrator — detects the current stage and routes to the matching keel-* pipeline skill (keel-discover → keel-plan → keel-plan-review → keel-execute → keel-finish), with lanes for debugging, UI work, issue-driven work, and heavyweight review. Pure router; contains no duplicated skill content.
 argument-hint: "[task description]"
 ---
 
