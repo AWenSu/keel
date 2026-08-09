@@ -63,11 +63,21 @@ stages 1–3 entirely; only large or risky plans go through review. Planning
 overhead should never exceed ~20% of the task itself.
 
 **Regression-testing this pipeline's own rules.** [`eval-fixtures/`](eval-fixtures/)
-holds hypothetical-scenario fixtures for every declared trigger/gate rule
-(spec approval gate, backward routes, G4 plan-conflict gate, R4 security-axis
-conditions, and more) — `RULE-INVENTORY.md` tracks which rules have a fixture.
-Run the relevant fixtures whenever you edit a skill file in this repo, before
-committing.
+verifies keel against itself two ways. `check-structure.sh` is a script —
+every agent pins a model and a tool list, no read-only agent holds write
+tools, every dispatched name resolves to a definition — run it before
+committing any change to this repo:
+
+```bash
+bash eval-fixtures/check-structure.sh    # exit 0 = all pass
+```
+
+The `NN-*.md` files are scenario fixtures for rules a script can't judge
+(does a spec marked `draft` block `keel-plan`? does a plan-vs-code
+contradiction route back?), graded by walkthrough. `RULE-INVENTORY.md` lists
+all 59 declared rules with where each is enforced and what verifies it — a
+row with no verifier is a rule that can regress silently, and a row whose
+`Enforced at` is empty is a rule that is already broken.
 
 ## Install
 

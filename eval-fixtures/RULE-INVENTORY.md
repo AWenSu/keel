@@ -25,7 +25,11 @@ produces and never verifies itself.
   thing. Must be a location an executing agent reaches with the rule in its
   context. A rule stated only in `keel-workflow` (which subagents never read)
   is **not** enforced for subagents.
-- `Fixture` — the `eval-fixtures/NN-*.md` covering it, if any.
+- `Fixture` — what verifies it. `NN-*.md` is a hypothetical-scenario file
+  graded by manual walkthrough; `check-structure.sh` is a script that runs.
+  Prefer the script wherever the rule is a fact about files rather than a
+  scenario about behavior — nobody re-runs a walkthrough, and both real
+  defects in the 2026-08-09 audit were caught by grep in seconds.
 
 **Coverage means two different things and both must be tracked.** `Enforced`
 without `Fixture` = works today, may silently regress. `Fixture` without
@@ -117,13 +121,13 @@ context fork.
 
 | # | Rule | Declared at | Enforced at | Fixture |
 |---|------|-------------|-------------|---------|
-| F1 | Every agent pins its own `model:` | `keel-workflow` roster note | all 15 `agents/*.md` frontmatter | — |
-| F2 | Every agent pins its own `tools:` | `keel-workflow` roster note | all 15 `agents/*.md` frontmatter | — |
-| F3 | Reviewers / lenses / skeptics / researchers are read-only | `keel-workflow` roster note, `README` | each agent's `tools:` list — lenses/skeptics/designer/researcher hold no shell at all; the 3 diff reviewers hold Bash restricted in their own text to `git diff`/`log`/`show`, `which`, and the project's existing test command (which does execute, so this tier is a weaker guarantee than the no-shell one) | — |
-| F4 | No `general-purpose` dispatch inside the pipeline | `keel-workflow` roster heading | `keel-workflow` pre-dispatch self-check | — |
-| F5 | Every dispatched `subagent_type` is a roster row | `keel-workflow` pre-dispatch self-check | same | — |
-| F6 | No `model` override at any dispatch site | `keel-workflow` roster note | every skill's dispatch instruction | — |
-| F7 | Fan-out ceiling | `keel-workflow` fan-out note (concurrency), `keel-execute` Fan-out ceiling (per task loop) | each stage | — |
+| F1 | Every agent pins its own `model:` | `keel-workflow` roster note | all 15 `agents/*.md` frontmatter | `check-structure.sh` |
+| F2 | Every agent pins its own `tools:` | `keel-workflow` roster note | all 15 `agents/*.md` frontmatter | `check-structure.sh` |
+| F3 | Reviewers / lenses / skeptics / researchers are read-only | `keel-workflow` roster note, `README` | each agent's `tools:` list — lenses/skeptics/designer/researcher hold no shell at all; the 3 diff reviewers hold Bash restricted in their own text to `git diff`/`log`/`show`, `which`, and the project's existing test command (which does execute, so this tier is a weaker guarantee than the no-shell one) | `check-structure.sh` |
+| F4 | No `general-purpose` dispatch inside the pipeline | `keel-workflow` roster heading | `keel-workflow` pre-dispatch self-check | `check-structure.sh` |
+| F5 | Every dispatched `subagent_type` is a roster row | `keel-workflow` pre-dispatch self-check | same | `check-structure.sh` |
+| F6 | No `model` override at any dispatch site | `keel-workflow` roster note | every skill's dispatch instruction | `check-structure.sh` |
+| F7 | Fan-out ceiling | `keel-workflow` fan-out note (concurrency), `keel-execute` Fan-out ceiling (per task loop) | each stage | `check-structure.sh` |
 
 ## G. Evidence rules
 
@@ -157,21 +161,34 @@ or `Enforced at` points into that file.
 
 ## Current coverage
 
-**59 rules. 27 fixture-covered (46%).** Recount with:
+**59 rules. 34 verified (57%)** — 27 by scenario fixture, 7 by
+`check-structure.sh`. Recount with:
 
 ```
-grep -cE '^\|\s*[A-H][0-9]+\s*\|' eval-fixtures/RULE-INVENTORY.md          # total
+bash eval-fixtures/check-structure.sh                                   # F series, live
+grep -cE '^\|\s*[A-H][0-9]+\s*\|' eval-fixtures/RULE-INVENTORY.md      # total rows
 grep -E '^\|\s*[A-H][0-9]+\s*\|' eval-fixtures/RULE-INVENTORY.md \
-  | grep -vcE '\|\s*—\s*\|?\s*$'                                         # fixture-covered
+  | grep -vcE '\|\s*—\s*\|?\s*$'                                     # rows with any verifier
 ```
 
-These are the numbers `keel-execute`'s Finish step reports as
-`FIXTURE COVERAGE`. **Run the commands; do not carry the number forward from
-this line.** The first version of this section said "46/46 enforced, 28/46
-fixture-covered" — both figures written from memory, both wrong, in the file
-whose entire purpose is catching claims nobody checked. The reviewer auditing
-that same file independently reported "all 46 rows" too. Two readers, same
-error, because a plausible number in a table reads as verified.
+**Run the commands; do not carry the number forward from this line.** The
+first version of this section said "46/46 enforced, 28/46 fixture-covered" —
+both figures written from memory, both wrong, in the file whose entire purpose
+is catching claims nobody checked. The reviewer auditing that same file
+independently reported "all 46 rows" too. Two readers, same error, because a
+plausible number in a table reads as verified.
+
+### The remaining 25 rows are not all worth covering
+
+Chasing 100% would be the anti-pattern this repo already names — optimizing
+for the check rather than the behavior.
+
+| Kind | Rows | Why |
+|------|------|-----|
+| Worth a fixture | ~4 | Clear trigger/no-trigger boundary, expensive to get wrong: C2 merge/push consent, E14 zero-security-review branch, D7 Release Runbook criterion, B7/B8 the two keel-finish confirmations |
+| Not worth testing | ~21 | G1–G5 (Iron Law, red-green, evidence gate) and H1–H5 (ledger, state file, TODOS) are **behaviors every run exercises**, not conditional branches. A fixture for the Iron Law restates the rule as its own expected result — tautological, and they fail loudly in normal use anyway |
+
+So the honest ceiling is roughly **38/59 (64%)**, not 59/59.
 
 The `Enforced at` column is a different claim and is **not** summarised here
 on purpose. Every row names a location, and every location was confirmed to

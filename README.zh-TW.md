@@ -43,7 +43,13 @@ Claude Code 裝備齊全一點，規劃類的 skill 就會越堆越多：superpo
 
 **內建跳過規則。** 小事（改一個檔、可逆、30 分鐘內搞定）直接跳過 1–3 階段。只有大案或風險高的案子才走完整審查。規劃花的時間不該超過任務本身的兩成。
 
-**回歸測試 pipeline 自己的規則。** [`eval-fixtures/`](eval-fixtures/) 收錄每一條已宣告的 trigger/gate 規則對應的假想情境測試（spec 核准閘門、backward routes、G4 plan-conflict 閘門、R4 資安軸觸發條件等）——`RULE-INVENTORY.md` 追蹤哪些規則已經有 fixture。改本 repo 的 skill 檔前，先跑相關 fixture 再 commit。
+**回歸測試 pipeline 自己的規則。** [`eval-fixtures/`](eval-fixtures/) 用兩種方式驗證 keel 自己。`check-structure.sh` 是腳本——每隻 agent 都釘死 model 與工具清單、沒有唯讀 agent 拿到寫入權限、每個被派工的名字都找得到定義檔。動本 repo 前先跑：
+
+```bash
+bash eval-fixtures/check-structure.sh    # exit 0 = 全過
+```
+
+`NN-*.md` 則是腳本判斷不了的情境測試（spec 標 `draft` 會不會擋下 `keel-plan`？計畫與現況牴觸會不會退回？），靠走查。`RULE-INVENTORY.md` 列出全部 59 條已宣告規則、各自的執行點與驗證方式——沒有驗證方式的那列表示它可能無聲壞掉，`執行於` 空著的那列表示它現在就是壞的。
 
 ## 安裝
 

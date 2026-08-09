@@ -6,7 +6,23 @@ fixture is a hypothetical scenario plus the exact rule text it should
 trigger, graded by manual walkthrough (same substitute the
 2026-08-07 SDD-integration plan used for its own verification).
 
-## How to run
+## Two kinds of check
+
+**`check-structure.sh` — run it.** Mechanical facts about files (does every
+agent pin a model and a tool list? is any read-only agent holding write tools?
+does every dispatched name resolve to a definition?) are verified by script,
+not by prose. One second, exact filenames on failure. Both real defects in the
+2026-08-09 audit were of this kind.
+
+```
+bash eval-fixtures/check-structure.sh     # exit 0 = all pass
+```
+
+**`NN-*.md` — walk them.** Scenario fixtures pin trigger/no-trigger boundaries
+that no script can judge ("does a spec marked draft block `keel-plan`?"). These
+need a human or an agent reading the rule text against the scenario.
+
+## How to run the scenario fixtures
 
 For each fixture:
 
@@ -41,7 +57,11 @@ proceed with a known regression.
 | `14-security-lens-dispatch-trigger.md` | Security lens dispatch (OR of 3 conditions) | `keel-plan-review/SKILL.md` |
 | `15-irreversible-operation-consent.md` | Consent guards for unrecoverable actions (5 sub-scenarios) | `keel-workflow`, `keel-execute`, `keel-finish`, the 3 write-capable agents |
 
-Adding a new SDD/pipeline rule that has a clear trigger/no-trigger boundary?
+Adding a rule that is a **fact about files**? Add a check to
+`check-structure.sh`, not a fixture — a test nobody runs is worse than no test,
+because the inventory then reads as covered.
+
+Adding a rule with a clear trigger/no-trigger boundary?
 Add a fixture here in the same format — that boundary is exactly what
 silently breaks first when unrelated wording nearby gets edited. Then add a
 row to `RULE-INVENTORY.md`, which tracks every declared rule (covered or

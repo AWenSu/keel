@@ -346,7 +346,11 @@ paths as an ASCII tree, grade each path [★★★ behavior+edge+error / ★★ 
 Coverage claims without the diagram are vibes.
 
 If this plan edited the pipeline's own skill/rule files (this repo, not a
-consumer repo) and `eval-fixtures/RULE-INVENTORY.md` exists: also report
+consumer repo): **run `bash eval-fixtures/check-structure.sh` and paste its
+summary line** — it verifies the structural guarantees (model/tool pins,
+read-only grants, roster completeness) mechanically, and a non-zero exit is
+a real failure, not a report. Then, if `eval-fixtures/RULE-INVENTORY.md`
+exists: also report
 `FIXTURE COVERAGE: N/M rules fixture-covered (X%)` from that file's
 `## Current coverage` totals, alongside its enforced count, and list
 any rule this plan added or changed that the table doesn't yet have a row
