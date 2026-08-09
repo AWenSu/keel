@@ -25,7 +25,8 @@ environment to try it in are the two things this stage cannot substitute for.
 **Build/compile failures short-circuit the loop.** If the symptom is a
 compile, type, or build error rather than a runtime behavior, Phase 1 is
 already done — the build command *is* the loop. Dispatch
-`build-error-resolver` and skip to Phase 6's checklist. The phases below are
+`build-error-resolver` (by name, never `general-purpose`, no `model`
+override) and skip to Phase 6's checklist. The phases below are
 for behavior you have to hunt.
 
 Skip phases only when explicitly justified. Read `CONTEXT.md` (if it exists)
@@ -97,8 +98,7 @@ and leaves the written requirement stating the opposite of what ships. Phase
 3 asks "why does the code do this"; this outcome answers it in one line and
 makes the remaining phases the wrong tool.
 
-Then
-shrink to the smallest scenario that still goes red: cut inputs, config,
+Otherwise, shrink to the smallest scenario that still goes red: cut inputs, config,
 callers one at a time, re-running after each cut. Done when every remaining
 element is load-bearing. The minimal repro shrinks Phase 3's hypothesis
 space and becomes Phase 5's regression test.

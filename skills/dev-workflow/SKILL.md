@@ -185,7 +185,8 @@ some issues" is not a broadcast. A score never appears without its evidence.
 ## Pipeline state file
 
 Maintain `.dev-pipeline/state.md`, overwritten on every stage transition and
-every task completion. The ledger records what finished; this records where you
+every task completion. In practice `dev-execute` is the only stage that
+writes it per task; every other stage writes it once, on entry and exit. The ledger records what finished; this records where you
 are:
 
 ```

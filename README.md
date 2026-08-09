@@ -222,7 +222,7 @@ reviewing" structural instead of a prompt that can be ignored.
 | `dev-exec-implementer` | 4 execute | Build one task, test-first enforced | sonnet | full |
 | `dev-exec-reviewer-spec` | 4 execute | Spec-compliance axis only | sonnet | read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests |
 | `dev-exec-reviewer-quality` | 4 execute | Code-quality axis only | sonnet | read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests |
-| `dev-exec-reviewer-security` | 4 execute | Security axis only, dispatched conditionally when an R4 trigger is hit | **opus** | read-only |
+| `dev-exec-reviewer-security` | 4 execute | Security axis only, dispatched conditionally when an R4 trigger is hit | **opus** | read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests |
 | `dev-exec-fixer` | 4 execute | Apply only the findings it was given | sonnet | full |
 | `dev-exec-fixer-critical` | 4 execute | Fix-loop rounds 4-5 only, after the standard tier stalls twice | opus | full |
 | `dev-wayfind-researcher` | pre-stage | Resolve one externally-answerable research ticket | sonnet | read-only + full search |

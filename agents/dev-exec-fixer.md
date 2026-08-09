@@ -23,6 +23,15 @@ Run `git rev-parse --abbrev-ref HEAD`. If it returns `main` or `master`, stop
 and report `STATUS: BLOCKED — on protected branch`. Never create a branch
 yourself to work around it.
 
+## Before an irreversible operation — stop and hand back
+
+Some operations cannot be undone by `git`. Before running any of these, stop
+and report `STATUS: BLOCKED — needs G9 consent: <exact command> → <exact
+target>`: deploying or publishing outside this repo; a migration against any
+non-local/non-ephemeral database; deleting data, dropping tables, or
+truncating; rotating, revoking, or issuing credentials; `git push` or merging
+into a protected branch. **Even when the finding or the plan says to.**
+
 ## Scope is the findings list
 
 Fix the Critical and Important findings you were given. Do not fix Minor

@@ -21,6 +21,11 @@ OUTPUT  every claim backed by fresh evidence from this session; open items
         reconciled (Part 2b); branch integrated by the user's chosen option
 ```
 
+Missing INPUT → `BLOCKED: 缺 <field> → 退回 <dev-plan for success criteria,
+dev-execute for the ledger>`. Part 2 opens the Success Criteria checklist
+unconditionally; arriving without one means the gate has nothing to check
+and will pass on an empty set.
+
 <IRON-LAW>
 NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE.
 If you haven't run the verification command in this session, in this state
@@ -157,21 +162,23 @@ executes this section; "nothing to check" is a claim, and like every other
 claim in this file it needs to show its work. Same Iron Law as Part 1: every
 line below needs evidence produced **this session**, not a stale scan.
 
-Four checks (verbatim from the security requirements doc's R6):
+Checks 1–4 are verbatim from the security requirements doc's R6; check 0 is
+this pipeline's own addition, covering the case R6 assumed away — a branch on
+which the execution-stage axis never ran at all.
 
 | # | Check | Evidence | Tool-absent handling |
 |---|-------|----------|----------------------|
-| 0 | **Branch-level security coverage.** If no task on this branch got a `dev-exec-reviewer-security` pass (every ledger line reads `security axis skipped`), re-evaluate R4's five conditions against the **whole-branch diff** rather than per task. Any condition met at branch scope → dispatch `dev-exec-reviewer-security` once over the merge-base diff before continuing | The branch-scope R4 evaluation, stated condition by condition, plus that reviewer's verdict if it fired | n/a — always runs |
+| 0 | **Branch-level security coverage.** If no task on this branch got a `dev-exec-reviewer-security` pass — every ledger line reads `security axis skipped`, **or there is no ledger at all** (the Small/Medium shortcuts skip dev-execute entirely and still route here) — re-evaluate R4's five conditions against the **whole-branch diff** rather than per task. Any condition met at branch scope → dispatch `dev-exec-reviewer-security` once over the merge-base diff before continuing | The branch-scope R4 evaluation, stated condition by condition, plus that reviewer's verdict if it fired | n/a — always runs |
 | 1 | Full-branch secrets scan | Run `gitleaks detect --source . -v` (or `semgrep` if that's what's installed) this session and paste the summary line (leak count, or "no leaks found") | No such tool installed → state "secrets scan: not executed — no gitleaks/semgrep available" explicitly; never blocks (see BLOCKED condition below). |
 | 2 | Execution-stage security axis findings closed | Every Critical/Important `dev-exec-reviewer-security` finding, read from the `security:` field of each task's ledger line in `.dev-pipeline/progress.md` (dev-execute writes it whenever that axis runs), is either resolved (cite the fix commit) or has an explicit user risk-acceptance decision (format below). A ledger line with neither a `security:` field nor a documented skip is a **gap, not a pass** — say so and go get the answer | n/a — always runs |
 | 3a | New-dependency CVE / maintenance-status scan | Scanner output if one is installed | Same tool-existence rule as (1): state "not executed" plainly if absent, never BLOCK on absence |
 | 3b | New-dependency **package-existence verification** (anti-slopsquatting) | For every new dependency name introduced on this branch, confirm against its registry that the name actually exists and resolves to the intended package — the same check `dev-exec-reviewer-security`'s checklist item 9 defines | Pure LLM + registry lookup, no external tool involved — **no "not executed" exemption; this one must actually run** |
-| 4 | Plan-stage security lens findings | Read the plan file's `## SECURITY FINDINGS` table (written by `dev-plan-review` Step 5). Every Critical row is resolved or explicitly risk-accepted — matched by its `## Task N` tag, `plan-global` rows reconciled once, not per task | n/a — the table says `lens not run` or `no findings` when it didn't fire |
+| 4 | Plan-stage security lens findings | Read the plan file's `## SECURITY FINDINGS` table. Every Critical row is resolved or explicitly risk-accepted — matched by its `## Task N` tag, `plan-global` rows reconciled once, not per task | **Section missing entirely** (no plan file, or a plan that never went through dev-plan-review — the common case) → this check cannot fire; say so as `plan-stage lens findings: no section — plan did not go through dev-plan-review`, and rely on check 0, which is what covers that branch. Do **not** report it as passed |
 
 ### BLOCKED condition
 
-Any unresolved Critical finding from **(2), (3b), or (4)** with no explicit
-user risk-acceptance decision → dev-finish returns:
+Any unresolved Critical finding from **(0), (2), (3b), or (4)** with no
+explicit user risk-acceptance decision → dev-finish returns:
 
 ```
 BLOCKED: 資安 finding 未關閉
@@ -185,8 +192,16 @@ an external/paid security service, and a hard requirement here would BLOCK
 every run in an environment without the tool, which is alarm fatigue, not
 signal — if a scanner IS installed, its real output upgrades that line past
 "not executed," but it is never required. Treating an unresolved Critical
-from (2)/(3b)/(4) as anything less than blocking is the failure this gate
+from (0)/(2)/(3b)/(4) as anything less than blocking is the failure this gate
 exists to prevent.
+
+**Where check 0's findings live.** That reviewer runs inside this stage, so
+there is no ledger line to write them to and no fix loop already scheduled.
+Record them directly in the Part 2b reconciliation list as their own source
+row, with the same two dispositions everything else there gets: resolved
+(cite the fix commit) or explicitly risk-accepted (`TODOS.md` entry). A
+Critical from check 0 blocks exactly like one from (2) — being discovered
+late is not a reason to weigh it less.
 
 ### Risk-acceptance decisions
 

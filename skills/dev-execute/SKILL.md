@@ -174,7 +174,11 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
      met, regardless of whether that finding was later addressed.
      ("Previously raised," not "still unresolved.") Read the table from the
      plan file, never from conversation history: this controller may be a
-     fresh one that never saw the review stage.
+     fresh one that never saw the review stage. No such section — the plan
+     skipped `dev-plan-review`, which most plans do — means this condition
+     is **unevaluable, not false**: it cannot contribute a trigger, and the
+     other four conditions carry the decision alone. Say so in the ledger
+     line rather than counting it as a clean miss.
    - the diff matches a sensitive-string pattern: `password`, `secret`,
      `token`, `api[_-]?key`, `BEGIN.*PRIVATE KEY`, or a connection-string
      shape
@@ -304,8 +308,13 @@ Append one line per completed task to `.dev-pipeline/progress.md`:
 
 ```
 Task 3: auth middleware — DONE, reviewed (2 findings fixed), commit a1b2c3d, branch feat/auth
+relocated: 1 (Files: said src/auth.py:120-140; found at :200-220 by Delivers)
 security: 2 Important (SQL string-building svc/order.py:44; missing authz check api/admin.py:12) → both fixed in a1b2c3d
 ```
+
+The **relocated** field is what makes the drift threshold above countable —
+criterion (b) counts relocates across completed tasks, and a count needs a
+field, not free-text concerns. Write `relocated: none` when there were none.
 
 The **branch** field exists because a controller resuming after compaction
 reads this file to recover state, and "which branch was this on" is exactly
@@ -338,7 +347,8 @@ Coverage claims without the diagram are vibes.
 
 If this plan edited the pipeline's own skill/rule files (this repo, not a
 consumer repo) and `eval-fixtures/RULE-INVENTORY.md` exists: also report
-`FIXTURE COVERAGE: N/M rules verified (X%)` from that file's table, and list
+`FIXTURE COVERAGE: N/M rules fixture-covered (X%)` from that file's
+`## Current coverage` totals, alongside its enforced count, and list
 any rule this plan added or changed that the table doesn't yet have a row
 for — an unlisted new rule is the same silent-regression risk the inventory
 exists to catch, one release earlier. This is a report, not a gate: a plan

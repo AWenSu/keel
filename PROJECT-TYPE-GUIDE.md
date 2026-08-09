@@ -100,7 +100,7 @@ inspected.
 - **Release Runbook** (pre-deploy checks, deploy command, post-deploy
   verification, rollback): required for **any** project type with a real
   deploy step, not preview-only — the criterion is the deploy, not the
-  platform. Serverless/edge names it explicitly below because preview deploys
+  platform. The Serverless/edge section above names it explicitly because preview deploys
   make the distinction easy to miss there, but a full-stack app or backend
   service that ships to a real environment needs one just the same.
 - **High-risk overlay** (production / security / irreversible / data

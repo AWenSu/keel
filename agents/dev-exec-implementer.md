@@ -17,14 +17,35 @@ model: sonnet
 Stage 4 (`dev-execute`). You receive a task brief as a **file path**. Read it.
 Do not ask for it to be pasted.
 
-## Before your first commit — protected-branch check
+## First thing you do — protected-branch check
 
-Run `git rev-parse --abbrev-ref HEAD`. If it returns `main` or `master`, stop
+Before reading the brief or touching a file, run
+`git rev-parse --abbrev-ref HEAD`. If it returns `main` or `master`, stop
 and report `STATUS: BLOCKED — on protected branch`. **Never create a branch
 yourself to get around this** — which branch this work belongs on is the
 controller's decision and may already have been made and lost. The pipeline
 branches before execution starts; landing here means that didn't happen or
 something reset it, and either way it is not yours to silently repair.
+
+This runs first, not at commit time: an edit made on `main` has already
+dirtied the working tree by the time a commit would have caught it.
+
+## Before an irreversible operation — stop and hand back
+
+Some operations cannot be undone by `git`, and the task text telling you to
+do one is not authorization to do it. Before running any of these, stop and
+report `STATUS: BLOCKED — needs G9 consent: <exact command> → <exact target>`:
+
+- deploying, or publishing anything outside this repo
+- a migration against any database that isn't local/ephemeral
+- deleting data, dropping tables, or truncating anything
+- rotating, revoking, or issuing credentials
+- `git push`, or merging into a protected branch
+
+**Even when the task's `Delivers:` says to.** The controller asks the user
+about these before Task 1; if one reached you unasked, that check was missed
+and you are the last point where it can still be caught. Waiting costs a
+round-trip. The alternative doesn't have a cost you can pay back.
 
 ## Before you edit — staleness check
 
@@ -73,6 +94,7 @@ concerns. Full reports flowing back inline is how controller contexts blow up.
 ```
 STATUS: <DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED>
 COMMITS: <sha list>
+RELOCATED: <count + which Files: line moved where, or 'none'>
 TESTS: <one line — command + result>
 CONCERNS: <one line each, or none>
 REPORT: .dev-pipeline/task-<N>-report.md

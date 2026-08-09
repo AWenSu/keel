@@ -42,7 +42,7 @@ the executing agent's improvisation. The second is worse, and both fixture
 | A3 | Plan review round 3 still unresolved → dev-discover | `dev-workflow` Backward routes | `dev-plan-review` Step 5 exit gate | `07` |
 | A4 | dev-finish can't produce required evidence → dev-debug | `dev-workflow` Backward routes | `dev-finish` Part 1 gate-function failure branch | `08` |
 | A5 | Debugging concludes the requirement is wrong → dev-discover | `dev-workflow` Backward routes | `dev-debug` Phase 2 third outcome | `09` |
-| A6 | A stage's INPUT contract is unsatisfiable → the owing stage | `dev-workflow` Backward routes | each stage's `BLOCKED: 缺 <field>` line | — |
+| A6 | A stage's INPUT contract is unsatisfiable → the owing stage | `dev-workflow` Backward routes | `BLOCKED: 缺 <field>` line in dev-discover, dev-plan, dev-plan-review, dev-execute, dev-finish, dev-debug; `dev-wayfind` states it as prose instead | — |
 
 ## B. Gates that may stop for a user answer
 
@@ -56,7 +56,7 @@ therefore not merely undocumented but actively countermanded.
 | B2 | G2 Taste / User-Challenge questions | `dev-workflow` gate table | `dev-plan-review` Step 5 | — |
 | B3 | G3 pre-flight plan contradictions | `dev-workflow` gate table | `dev-execute` pre-flight plan review | — |
 | B4 | G4 `PLAN-CONFLICT` arbitration | `dev-workflow` gate table | `dev-execute` fix loop step 4; INLINE mode step 3 | `10`, `11` |
-| B5 | G5 spec approval (dev-discover) | `dev-workflow` gate table | `dev-discover` Write-spec step ("Wait for explicit approval") | `01`, `02` |
+| B5 | G5 spec approval (dev-discover) | `dev-workflow` gate table | `dev-discover` Step 7 self-review/user-review ("Wait for explicit approval") | `01`, `02` |
 | B6 | G6 task-breakdown quiz | `dev-workflow` gate table | `dev-plan` Step 6 | — |
 | B7 | G7 Success Criteria live confirmation | `dev-workflow` gate table | `dev-finish` Part 2 | — |
 | B8 | G8 branch-integration choice | `dev-workflow` gate table | `dev-finish` Part 3 | — |
@@ -119,8 +119,8 @@ context fork.
 |---|------|-------------|-------------|---------|
 | F1 | Every agent pins its own `model:` | `dev-workflow` roster note | all 15 `agents/*.md` frontmatter | — |
 | F2 | Every agent pins its own `tools:` | `dev-workflow` roster note | all 15 `agents/*.md` frontmatter | — |
-| F3 | Reviewers / lenses / skeptics / researchers are read-only | `dev-workflow` roster note, `README` | each agent's `tools:` list (no write tools; Bash restricted to read-only commands) | — |
-| F4 | No `general-purpose` dispatch inside the pipeline | `dev-workflow` roster heading | pre-dispatch self-check `dev-workflow` pre-dispatch self-check | — |
+| F3 | Reviewers / lenses / skeptics / researchers are read-only | `dev-workflow` roster note, `README` | each agent's `tools:` list — lenses/skeptics/designer/researcher hold no shell at all; the 3 diff reviewers hold Bash restricted in their own text to `git diff`/`log`/`show`, `which`, and the project's existing test command (which does execute, so this tier is a weaker guarantee than the no-shell one) | — |
+| F4 | No `general-purpose` dispatch inside the pipeline | `dev-workflow` roster heading | `dev-workflow` pre-dispatch self-check | — |
 | F5 | Every dispatched `subagent_type` is a roster row | `dev-workflow` pre-dispatch self-check | same | — |
 | F6 | No `model` override at any dispatch site | `dev-workflow` roster note | every skill's dispatch instruction | — |
 | F7 | Fan-out ceiling | `dev-workflow` fan-out note (concurrency), `dev-execute` Fan-out ceiling (per task loop) | each stage | — |
@@ -154,3 +154,10 @@ covered.
 
 When editing a skill file, run the fixtures for every rule whose `Declared at`
 or `Enforced at` points into that file.
+
+## Current coverage
+
+**Enforced: 46/46 rules.** **Fixture-covered: 28/46 (61%).** These are the
+two numbers `dev-execute`'s Finish step reports as `FIXTURE COVERAGE`; the
+denominator is the row count of the tables above. Recount them when rows are
+added — a stale total is the same failure this file exists to catch.
