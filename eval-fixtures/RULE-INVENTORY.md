@@ -133,6 +133,29 @@ context fork.
 | F6 | No `model` override at any dispatch site | `keel-workflow` roster note | every skill's dispatch instruction | `check-structure.sh` |
 | F7 | Fan-out ceiling | `keel-workflow` fan-out note (concurrency), `keel-execute` Fan-out ceiling (per task loop) | each stage | `check-structure.sh` |
 
+## P. Plan-field contracts
+
+`keel-plan` writes nine structured fields. Each needs three things: something
+that **produces** it, something that **consumes** it, and something that
+**verifies** it is present and right. A field with a producer and a consumer
+and no verifier is the defect shape that has recurred most often in this repo
+— `Skills:` had one for months, and `Depends on:` was worse: the user was
+asked to confirm its edges at G2 and then nothing ever read them.
+
+Add a row here whenever a field is added to the plan template.
+
+| # | Field | Produced by | Consumed by | Verified by | Fixture |
+|---|-------|-------------|-------------|-------------|---------|
+| P1 | `Delivers:` | `keel-plan` Step 3 | implementer; staleness relocation | `keel-exec-reviewer-spec` — the whole axis is "did it do what this says" | `06` |
+| P2 | `Files:` | `keel-plan` Step 3 | implementer staleness check | `keel-execute` drift threshold (accumulates relocations) | `06` |
+| P3 | `Interfaces:` | `keel-plan` Step 3 | `keel-execute` brief extraction | `keel-exec-reviewer-spec` interface-drift check | — |
+| P4 | `Skills:` | `keel-plan` Step 3 | implementer invokes them | `keel-plan-lens-design` §C — **UI surfaces only**; a non-UI task naming the wrong domain skill is still unverified | `21` |
+| P5 | `Depends on:` | `keel-plan` Step 3 | `keel-execute` step 0 — order, parallelism, which Interfaces to include | user at G2 (edge correctness); `BLOCKED` on an edge naming a nonexistent task | `22` |
+| P6 | `[Risk: …]` | `keel-plan` Step 3 | `keel-execute` R4 condition 3; `keel-plan-lens-eng` error registry | `keel-plan-lens-eng` — rollback present on every High, and grade-sanity against what the task actually does | `22` |
+| P7 | `Spec Version:` | `keel-plan` Step 2 header | `keel-execute` pre-flight drift check | same check (mismatch routes back) | `03` |
+| P8 | `Success Criteria:` | `keel-plan` Step 2 header | `keel-finish` Part 2; final `code-reviewer` spec axis | user at G7, one criterion at a time | `19` |
+| P9 | `Global Constraints:` | `keel-plan` Step 2 header | `keel-execute` brief extraction | `keel-execute` pre-flight (tasks violating them) | — |
+
 ## V. Evidence rules (verification discipline)
 
 | # | Rule | Declared at | Enforced at | Fixture |
@@ -165,7 +188,7 @@ or `Enforced at` points into that file.
 
 ## Current coverage
 
-**63 rules. 43 verified (68%)** — 36 by scenario fixture, 7 by
+**72 rules. 50 verified (69%)** — 43 by scenario fixture, 7 by
 `check-structure.sh`. Recount with:
 
 ```
@@ -184,8 +207,8 @@ plausible number in a table reads as verified.
 
 ## This is the ceiling, and it is deliberate
 
-68% is not a milestone on the way to 100% — it is the intended end state. The
-remaining 20 rows should stay uncovered:
+69% is not a milestone on the way to 100% — it is the intended end state. The
+remaining 22 rows should stay uncovered:
 
 **V1–V5** (Iron Law, red-green regression, the evidence gate, "an agent's
 success report is not evidence", untrusted search results) and **H1–H5**

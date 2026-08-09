@@ -62,6 +62,7 @@ proceed with a known regression.
 | `19-finish-user-confirmations.md` | Per-criterion confirmation and integration choice (G7/G8) | `keel-finish` Part 2 / Part 3 |
 | `20-prior-art-scan-at-discovery.md` | Prior-art scan at discovery; build vs adopt as a decision | `keel-discover` Step 2b |
 | `21-design-lens-visual-routing.md` | Visual source of truth + design-skill routing on UI tasks | `keel-plan-lens-design` |
+| `22-plan-field-contracts.md` | `Depends on:` consumption; rollback + risk-grade verification | `keel-execute`, `keel-plan-lens-eng` |
 
 Adding a rule that is a **fact about files**? Add a check to
 `check-structure.sh`, not a fixture — a test nobody runs is worse than no test,

@@ -137,6 +137,28 @@ else
   bad "stale identifiers in:"; echo "$leftover" | sed 's/^/         /'
 fi
 
+# ── maintainer-only: repo vs. installed copy ────────────────────────────────
+# Skips entirely when no keel install is present, so it is a no-op for anyone
+# who just cloned this. For the maintainer, who edits both sides, silent drift
+# between them means the pipeline you actually run is not the one you commit.
+if [ -d "$HOME/.claude/skills/keel-workflow" ]; then
+  head_ "install  repo matches the installed copy"
+  drift=""
+  for f in skills/*/SKILL.md; do
+    n=$(basename "$(dirname "$f")")
+    d="$HOME/.claude/skills/$n/SKILL.md"
+    [ -f "$d" ] || { drift="$drift $n(missing)"; continue; }
+    cmp -s "$f" "$d" || drift="$drift $n"
+  done
+  for f in agents/*.md; do
+    d="$HOME/.claude/agents/$(basename "$f")"
+    [ -f "$d" ] || { drift="$drift $(basename "$f" .md)(missing)"; continue; }
+    cmp -s "$f" "$d" || drift="$drift $(basename "$f" .md)"
+  done
+  [ -z "$drift" ] && ok "all skills and agents byte-identical to ~/.claude" \
+    || bad "installed copy has drifted →$drift"
+fi
+
 # ── summary ─────────────────────────────────────────────────────────────────
 printf '\n\033[1m%d passed, %d failed\033[0m\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ] || exit 1

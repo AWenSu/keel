@@ -108,10 +108,29 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
 
 ### Per task loop
 
+0. **Read the dependency graph before dispatching anything.** Every task
+   carries a `Depends on:` line — that is the plan's statement of what must
+   finish first, and the user confirmed those edges at G2. It governs three
+   decisions here, and nothing else in this stage can substitute for it:
+   - **Order.** Never dispatch a task whose `Depends on:` names a task the
+     ledger does not yet record as DONE. Task number is not dependency order.
+   - **Parallelism.** The mode decision above asks whether tasks are "mostly
+     independent" — read that off the graph, not off intuition. Two tasks may
+     run concurrently only when neither depends on the other (directly or
+     transitively) **and** their `Files:` do not overlap. File overlap alone
+     is the weaker of the two tests; a dependency edge is a hard bar even
+     when the files are disjoint.
+   - **Which Interfaces to include** in step 1's brief — precisely the tasks
+     named in `Depends on:`.
+
+   `Depends on: none` on every task is a legitimate graph, not a missing one.
+   A task naming a dependency that does not exist in the plan is a plan bug →
+   `BLOCKED: Depends on 指向不存在的 task → 退回 keel-plan`.
+
 1. **Extract the task brief** — the task's own text plus the plan header
-   (Goal, Global Constraints) plus the Interfaces blocks of completed tasks
-   it consumes. Pass briefs as *file paths*, never pasted into the prompt —
-   pasted history bloats every downstream dispatch.
+   (Goal, Global Constraints) plus the Interfaces blocks of the tasks its
+   `Depends on:` names. Pass briefs as *file paths*, never pasted into the
+   prompt — pasted history bloats every downstream dispatch.
 2. **Dispatch a fresh `keel-exec-implementer`** with the brief. If the task
    names domain skills (its `Skills:` field), the implementer invokes them
    before writing code. It implements, tests, commits, and reports status.

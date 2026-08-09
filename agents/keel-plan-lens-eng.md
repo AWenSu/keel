@@ -46,6 +46,18 @@ verdict, even when clean.
   what can go wrong → named exception (a catch-all is always a smell) →
   rescued? → rescue action → **what the user sees**. Include LLM-call failure
   modes (empty response / refusal / malformed JSON) where relevant.
+- **Rollback on every `[Risk: High]` task.** `keel-plan` requires high-risk
+  tasks to carry a named rollback step — and nothing else in the pipeline
+  checks that they do. For each task tagged `[Risk: High]`, confirm a rollback
+  step exists and is *named*: an actual command or procedure, not "revert if
+  needed". A migration whose rollback is "restore from backup" needs the
+  backup step to appear earlier in the same plan, or the rollback is fiction.
+  Missing or unnamed → finding, with the concrete step as the proposed edit.
+- **Risk grade sanity.** A task that migrates data, touches an
+  authentication/authorization path, or performs an irreversible operation and
+  is graded `Low` or `Med` is a finding in its own right — the grade drives
+  `keel-execute`'s security-axis trigger (R4 condition 3) and this stage's own
+  registry above, so an understated grade silently disables both.
 
 If the repo is indexed by CodeGraph, query it before grep/Read to find callers
 and blast radius. Query in English — Chinese queries silently return empty.
