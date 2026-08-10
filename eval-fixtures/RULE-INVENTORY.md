@@ -141,7 +141,7 @@ context fork.
 
 ## P. Plan-field contracts
 
-`keel-plan` writes ten structured fields. Each needs three things: something
+`keel-plan` writes eleven structured fields. Each needs three things: something
 that **produces** it, something that **consumes** it, and something that
 **verifies** it is present and right. A field with a producer and a consumer
 and no verifier is the defect shape that has recurred most often in this repo
@@ -163,6 +163,23 @@ Add a row here whenever a field is added to the plan template.
 | P9 | `Global Constraints:` | `keel-plan` Step 2 header | `keel-execute` brief extraction | `keel-execute` pre-flight (tasks violating them) | — |
 | P11 | `## Signals` section reserved in the plan | `keel-plan` Step 2a | `keel-finish` Part 2d writes into it; `keel-workflow` and `keel-discover` read it | `check-structure.sh` (F9) | `23` |
 | P10 | `Visual source of truth:` | `keel-plan` Step 2b (same UI trigger as the feature matrix) | implementer; sets the bar the built screen is judged against | `keel-plan-lens-design` §B | `21` |
+
+## S. Spec-artifact contracts
+
+Sections `keel-discover` writes into the spec that later stages treat as
+binding. Catalogued 2026-08-10: the mattpocock mechanisms merged 2026-07-22
+were wired into the skills and never given rows here, so the denominator
+below excluded them — the same laundering of an unverified claim into a
+verified-looking number this file exists to stop.
+
+| # | Rule | Declared at | Enforced at | Fixture |
+|---|------|-------------|-------------|---------|
+| S1 | Confirmed test seams go in the spec's `## Test seams` section | `keel-discover` step 5b | spec template | `check-structure.sh` (section defined) |
+| S2 | `keel-plan` may only place tests at a confirmed seam; an unconfirmed seam is a spec change | `keel-plan` task rules | `keel-plan` "Tests only at confirmed seams" | — |
+| S3 | `keel-debug` reproduces through a seam, not through internals | `keel-debug` loop-first section | same | — |
+| S4 | `CONTEXT.md` glossary vocabulary binds task names, symbols, and Interfaces blocks | `keel-discover` glossary step | `keel-plan` step 1; `keel-execute` brief rule | — |
+| S5 | Every implementer/reviewer brief carries the `CONTEXT.md` path when the file exists | `keel-execute` universal rules | `keel-exec-implementer`, `keel-exec-reviewer-quality` | — |
+| S6 | New domain terms introduced by the work are added to `CONTEXT.md` before integration | `keel-finish` Part 2 | same | — |
 
 ## V. Evidence rules (verification discipline)
 
@@ -198,15 +215,15 @@ or `Enforced at` points into that file.
 
 ## Current coverage
 
-**82 rules. 57 verified (70%)** — 47 by scenario fixture, 10 by
+**88 rules. 58 verified (66%)** — 47 by scenario fixture, 11 by
 `check-structure.sh`. Every number on this line is produced by the commands
 below — including the split, which used to be the one figure no command
 emitted and was wrong by one in each direction for a week. Recount with:
 
 ```
 bash eval-fixtures/check-structure.sh                                   # F series, live
-grep -cE '^\|\s*[A-HPV][0-9]+\s*\|' eval-fixtures/RULE-INVENTORY.md      # total rows
-grep -E '^\|\s*[A-HPV][0-9]+\s*\|' eval-fixtures/RULE-INVENTORY.md \
+grep -cE '^\|\s*[A-HPVS][0-9]+\s*\|' eval-fixtures/RULE-INVENTORY.md      # total rows
+grep -E '^\|\s*[A-HPVS][0-9]+\s*\|' eval-fixtures/RULE-INVENTORY.md \
   | grep -vcE '\|\s*—\s*\|?\s*$'                                     # rows with any verifier
 ```
 
@@ -219,7 +236,7 @@ plausible number in a table reads as verified.
 
 ## This is the ceiling, and it is deliberate
 
-69% is not a milestone on the way to 100% — it is the intended end state. The
+66% is not a milestone on the way to 100% — it is the intended end state. The
 remaining 25 rows:
 
 **V1–V5** (Iron Law, red-green regression, the evidence gate, "an agent's

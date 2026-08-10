@@ -216,9 +216,20 @@ four-category table — the category decides mock vs stand-in vs real
 mechanically, so keel-plan doesn't answer it ad hoc per task.
 
 The confirmed list (seams + dependency categories) goes in the spec's
-**Test seams** section. Downstream, keel-plan may only place tests at these
-seams — a task that needs an unconfirmed seam is a spec change, not a
-planning decision.
+`## Test seams` section, written verbatim as:
+
+```markdown
+## Test seams
+
+| Seam | Observed through | Dependency category | Mock / stand-in / real |
+|------|------------------|---------------------|------------------------|
+| <interface> | <how a test observes it> | <design.md category> | <decision> |
+```
+
+Downstream, keel-plan may only place tests at these seams — a task that needs
+an unconfirmed seam is a spec change, not a planning decision. `keel-plan`
+greps for that exact heading; a seam list under any other name reads to it as
+a spec with no seams, and every task then invents its own.
 
 ### 6. Write the spec
 

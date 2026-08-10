@@ -59,7 +59,7 @@ proceed with a known regression.
 | `04-feature-matrix-trigger.md` | UI-heavy feature matrix | `keel-plan/SKILL.md` |
 | `05-adr-offer-trigger.md` | ADR offer criteria | `keel-finish/SKILL.md` |
 | `06-plan-contradicts-code-routes-back.md` | backward route: plan vs. code | `keel-workflow/SKILL.md` |
-| `07-review-round-3-unresolved-routes-to-discover.md` | backward route: round-3 unresolved | `keel-plan-review/SKILL.md` |
+| `07-review-pass-3-unresolved-routes-to-discover.md` | backward route: round-3 unresolved | `keel-plan-review/SKILL.md` |
 | `08-finish-evidence-gap-routes-to-debug.md` | backward route: evidence gap | `keel-finish/SKILL.md` |
 | `09-debug-wrong-requirement-routes-to-discover.md` | backward route: wrong requirement | `keel-workflow/SKILL.md` |
 | `10-plan-conflict-gate-orchestrated.md` | PLAN-CONFLICT gate (G6), ORCHESTRATED | `keel-execute/SKILL.md` |

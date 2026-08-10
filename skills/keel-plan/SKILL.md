@@ -132,6 +132,18 @@ matrix (table form) and save it under a new `## Feature Matrix` section in
 the plan file (or in `CONTEXT.md` if the project already has one, with the
 plan file linking to it).
 
+The section this produces, verbatim — `keel-plan-lens-design` greps for this
+exact heading, and a matrix saved under any other name reads to it as a plan
+with no matrix at all:
+
+```
+## Feature Matrix
+
+| Feature | State | Role | Platform | Notes |
+|---------|-------|------|----------|-------|
+| <name>  | empty / loading / error / populated | <who sees it> | <web/mobile> | <edge cases> |
+```
+
 Under the same trigger, add one line to the plan header:
 
 ```

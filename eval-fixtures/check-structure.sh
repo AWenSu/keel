@@ -131,13 +131,24 @@ ROSTER=$(grep -oE '^\| `keel-[a-z-]+`' skills/keel-workflow/SKILL.md | tr -d '|`
 
 # Written without `case` inside the pipeline — bash 3.2, which is what
 # /bin/bash is on macOS, aborts the whole script there with a syntax error.
-# Derived from the roster itself: anything the keel-workflow roster lists that
-# has no file in agents/ is external by definition. The previous derivation
-# used a dispatch-verb proximity regex and found 2 of 6 — it replaced a
-# hardcoded six that was at least complete.
-EXTERNAL=$(grep -oE '^\| `[A-Za-z][A-Za-z0-9_-]+`' skills/keel-workflow/SKILL.md \
-  | tr -d '|` ' | sort -u \
-  | while read -r n; do [ -f "agents/$n.md" ] || echo "$n"; done)
+#
+# Candidate agent names come from the SKILLS, never from the roster. Deriving
+# them from the roster and then asserting they are in the roster is `X ∈ S ⇒
+# X ∈ S`: the previous two versions were a proximity regex that found 2 of 6,
+# and then a roster derivation that found 6 of 6 and could not fail. Deleting
+# `test-engineer`'s roster row while keel-plan-review still dispatched it
+# passed both.
+#
+# Hyphenated backticked tokens are agent-shaped; these are the ones that are
+# not agents. Anything new that lands here needs a deliberate line, which is
+# the point — an unrecognised agent-shaped name should stop the build.
+NONAGENT="general-purpose plan-global doubt-driven-development frontend-workflow planning-with-files model subagent_type inherit opus sonnet haiku"
+CANDIDATES=$( {
+  grep -rhoE '`[a-z][a-z0-9]*(-[a-z0-9]+)+`' skills/*/SKILL.md | tr -d '`'
+  # single-word names are only recognisable by their dispatch context
+  grep -rhoE '`[a-z][a-z0-9]+` +agent|(dispatch|Dispatch|dispatches|subagent_type)[^.`]{0,30}`[a-z][a-z0-9]+`' skills/*/SKILL.md \
+    | grep -oE '`[a-z][a-z0-9]+`' | tr -d '`'
+} | sort -u )
 
 missing=""
 for a in "${AGENTS[@]}"; do
@@ -160,12 +171,14 @@ done
 [ -z "$ghosts" ] && ok "every agent named in a skill has a definition file" \
   || bad "named but missing from agents/ →$ghosts"
 
-# external agents referenced must be declared as external, not silently assumed
+# every agent-shaped name a skill uses must be rostered — shipped ones by
+# having a file (checked above) and a roster row, external ones by the row alone
 undecl=""
-for n in $EXTERNAL; do
-  if grep -rqE "\`$n\`" skills/*/SKILL.md; then
-    grep -q "\`$n\`" skills/keel-workflow/SKILL.md || undecl="$undecl $n"
-  fi
+for n in $CANDIDATES; do
+  in_list "$n" "$NONAGENT" && continue
+  in_list "$n" "$(echo $SKILL_NAMES)" && continue
+  echo "$n" | grep -q '^keel-' && continue      # shipped: covered by the two checks above
+  grep -qE "^\| \`$n\`" skills/keel-workflow/SKILL.md || undecl="$undecl $n"
 done
 [ -z "$undecl" ] && ok "external agents used are declared in the roster" \
   || bad "dispatched but absent from roster →$undecl"
@@ -173,19 +186,38 @@ done
 # F4 proper: the rule is "no general-purpose dispatch inside the pipeline", and
 # until now nothing checked it — the section header claimed F4/F5 while only F5
 # had code behind it, and RULE-INVENTORY credited this script for the coverage.
+# The negation must reach the term without crossing a comma or clause break:
+# "When no keel agent fits, just dispatch a general-purpose agent" satisfied a
+# comma-tolerant window while endorsing exactly what the rule forbids.
 # Judged over a 2-line window: the prohibition often wraps onto the next line
 # ("a `general-purpose` agent inside\n this pipeline is a bug").
-gp=$(for f in $( { git ls-files 'skills/**/*.md' 'agents/*.md'; git ls-files -o --exclude-standard 'skills/**/*.md' 'agents/*.md'; } | sort -u); do
+# READMEs included: F3's README leg exists because the defect recurred "in the
+# untranslated half", and F4/F6 did not inherit that scoping — "when no keel
+# agent fits, just dispatch a general-purpose agent" could be added to either
+# README with the board green.
+gp=$(for f in $( { git ls-files 'skills/**/*.md' 'agents/*.md' 'README.md' 'README.zh-TW.md'; git ls-files -o --exclude-standard 'skills/**/*.md' 'agents/*.md'; } | sort -u); do
   grep -n 'general-purpose' "$f" | while IFS=: read -r ln rest; do
     # flattened: the negation and the term routinely sit on different lines,
     # and a line-oriented grep can only see them together if the window is one line
     ctx=$(sed -n "$((ln>1?ln-1:1)),$((ln+1))p" "$f" | tr '\n' ' ')
-    echo "$ctx" | grep -qiE '(never|not|no|avoid|instead of|rather than|forbidden|絕不|不要)[^.]{0,30}`?general-purpose`?|`?general-purpose`?[^.]{0,40}(is a bug|forbidden|falls back|fallback|silently)' \
+    echo "$ctx" | grep -qiE '(never|not|no|avoid|instead of|rather than|forbidden|falls? back|silently|degrad|絕不|不要|降級|偷偷|不再)[^.。,，;；]{0,40}`?general-purpose`?|`?general-purpose`?[^.。]{0,40}(is a bug|forbidden|falls? back|fallback|silently|no pinned|沒釘死|沒鎖)' \
       || echo "$f:$ln:$rest"
   done
 done)
 [ -z "$gp" ] && ok "no file endorses a general-purpose dispatch" \
   || { bad "general-purpose named without a prohibition:"; echo "$gp" | sed 's/^/         /'; }
+
+# F4's other half — the one F6 got and F4 did not. The check above only fires
+# on an endorsement, so deleting every prohibition (roster heading, "a
+# `general-purpose` dispatch inside this pipeline is a bug", and the
+# pre-dispatch self-check) left the board green with the rule gone entirely.
+# RULE-INVENTORY names the pre-dispatch self-check as F4's enforcement point;
+# that point must exist.
+gpstated=$(tr '\n' ' ' < skills/keel-workflow/SKILL.md \
+  | grep -ciE '(never|not|no)[^.]{0,40}`?general-purpose`?|`?general-purpose`?[^.]{0,40}(is a bug|forbidden)')
+[ "${gpstated:-0}" -ge 1 ] \
+  && ok "keel-workflow still states the general-purpose prohibition" \
+  || bad "the general-purpose prohibition has been deleted from keel-workflow"
 
 # ── F6: no model override at any dispatch site ──────────────────────────────
 # The previous version grepped a pattern with zero pre-filter matches, so its
@@ -210,7 +242,7 @@ for f in $DISPATCHERS; do
   # including "Never re-dispatch the same prompt to the same model" — retry
   # discipline, not override policy. The prohibition must name the override.
   tr '\n' ' ' < "skills/$f/SKILL.md" \
-    | grep -qiE '(do \*{0,2}not\*{0,2}|never|no)[^.]{0,40}(`?model`? +(override|parameter)|pass[^.]{0,20}`?model`?)' \
+    | grep -qiE '(do \*{0,2}not\*{0,2}|never|\bno\b)[^.]{0,40}(`?model`? +(override|parameter)|pass[^.]{0,20}`?model`?)' \
     || norule="$norule $f"
 done
 ndisp=$(echo "$DISPATCHERS" | grep -c . || true)
@@ -229,7 +261,10 @@ fi
 # frontmatter exemption is resolved per file by line number rather than by the
 # substring `:model:`, which a body line beginning `model:` also satisfies.
 override_hits() {
-  for f in $( { git ls-files 'skills/**/*.md' 'agents/*.md'; git ls-files -o --exclude-standard 'skills/**/*.md' 'agents/*.md'; } | sort -u); do
+  # READMEs included for the same reason F4 now includes them: "dispatch the
+  # reviewer with model: haiku to save cost" could be added to either README
+  # with the board green.
+  for f in $( { git ls-files 'skills/**/*.md' 'agents/*.md' 'README.md' 'README.zh-TW.md'; git ls-files -o --exclude-standard 'skills/**/*.md' 'agents/*.md'; } | sort -u); do
     fmend=$(awk 'NR>1 && /^---$/{print NR; exit}' "$f"); : "${fmend:=0}"
     grep -nE '["`]?model["`]? *[:=] *["`]?[a-z][a-z0-9.-]+' "$f" \
       | awk -F: -v e="$fmend" '$1 > e' \
@@ -262,10 +297,10 @@ noscope=$(for f in $( { git ls-files '*.md'; git ls-files -o --exclude-standard 
     { L[NR] = $0 }
     END {
       for (i = 1; i <= NR; i++) {
-        if (L[i] !~ /總量|[0-9]+ +total/) continue
+        if (L[i] !~ /總量|總計|[0-9]+ +total|in total/) continue
         ctx = (i>1 ? L[i-1] : "") " " L[i] " " (i<NR ? L[i+1] : "")
         clause = L[i]
-        if (match(clause, /總量|[0-9]+ +total/)) clause = substr(clause, RSTART)
+        if (match(clause, /總量|總計|[0-9]+ +total|in total/)) clause = substr(clause, RSTART)
         if (match(clause, /[。.，,；;（(]/)) clause = substr(clause, 1, RSTART - 1)
         if (ctx ~ /agent|隻|個|skeptic/ &&
             clause !~ /task loop|每個 ?task|per round|每輪|skeptics per/)
@@ -274,8 +309,26 @@ noscope=$(for f in $( { git ls-files '*.md'; git ls-files -o --exclude-standard 
     }
   ' "$f"
 done)
-nb=$(grep -rocE '總量|[0-9]+ +total' --include='*.md' . 2>/dev/null \
+nb=$(grep -rocE '總量|總計|[0-9]+ +total|in total' --include='*.md' . 2>/dev/null \
      | grep -v '^\./docs/plans/' | awk -F: '{t+=$2} END{print t+0}')
+# A silently shrinking count reads the same as a clean board: rephrasing one
+# ceiling out of the detector's reach dropped nb from 3 to 2 and still said
+# PASS. Every statement of the concurrency half must have a total half in the
+# same file, so losing one is a mismatch rather than a smaller green number.
+pairing=""
+for f in $( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } \
+            | sort -u | grep -v '^docs/plans/' ); do
+  c=$(grep -cE '[0-9]+ +concurrent|同時[^。]{0,6}[0-9]+' "$f")
+  t=$(grep -cE '總量|總計|[0-9]+ +total|in total' "$f")
+  # keel-workflow states the concurrency half and explicitly delegates the
+  # total half to the stages; that delegation is the exemption, and it has to
+  # be written down to count
+  grep -qiE '[Tt]otal-agent budgets belong to|總量.{0,10}由各階段' "$f" && continue
+  [ "$c" -eq "$t" ] || pairing="$pairing $f(concurrent=$c,total=$t)"
+done
+[ -z "$pairing" ] && ok "every concurrency ceiling is paired with a total ceiling" \
+  || bad "concurrency/total ceilings unpaired →$pairing"
+
 if [ "${nb:-0}" -eq 0 ]; then
   bad "no fan-out ceiling stated anywhere — the rule has been deleted, not satisfied"
 elif [ -z "$noscope" ]; then
@@ -340,8 +393,21 @@ for sec in $(echo "$allmd" | xargs grep -hoE '`## [A-Z][A-Za-z0-9 -]{1,30}`' 2>/
   expr "$name" : 'Task ' >/dev/null && continue
   # sections a stage tells a *plan or spec file* to create live in those
   # artifacts, not here — recognised by the instruction verb near the mention
-  echo "$allmd" | xargs grep -hE "(save it under|write it under|goes in|writes|written into|create|add|produce)( a new| the)? \`?## ${name}\`?" \
-    >/dev/null 2>&1 && continue
+  # The exemption must name the artifact it writes into. Without that, the
+  # verb list alone was a repo-global kill switch: one sentence anywhere
+  # saying "keel-finish writes `## Signals` into the plan" re-exempted a
+  # section that had just been demoted to a `**Signals:**` header field.
+  # flattened per file: the artifact word routinely lands on the next line
+  # ("save it under a new `## Feature Matrix` section in\nthe plan file")
+  # ...and the stage that claims to produce it must carry the section's
+  # template. A claim with no template is the same "declared, not wired"
+  # shape this whole file exists for: one sentence anywhere could otherwise
+  # re-exempt a section that had just been demoted to a header field.
+  echo "$allmd" | grep -v '^eval-fixtures/[0-9]' \
+    | xargs grep -lE "^## ${name}([[:space:]]|$)" >/dev/null 2>&1 && \
+  echo "$allmd" | tr '\n' ' ' | xargs -n1 sh -c 'tr "\n" " " < "$0"' 2>/dev/null \
+    | grep -qE "(save it under|write it under|goes in|go into|writes|written into|create|add|produce)( a new| the)? \`?## ${name}\`?[^.]{0,60}(plan|spec|計畫|規格)|(plan|spec|計畫|規格)[^.]{0,80}(save it under|write it under|goes in|go into|writes|written into|create|add|produce)( a new| the)? \`?## ${name}\`?" \
+    && continue
   echo "$allmd" | grep -v '^docs/plans/' | grep -v '^eval-fixtures/[0-9]' \
     | xargs grep -lE "^## ${name}([[:space:]]|\\(|$)" >/dev/null 2>&1 \
     || missing_sec="$missing_sec [$name]"
@@ -362,8 +428,19 @@ badq=$(for fx in eval-fixtures/[0-9]*.md; do
   awk '/^>/{sub(/^> ?/,""); gsub(/[*`]/,""); if (length($0)>12) print}' "$fx" \
   | while read -r q; do
       frag=$(echo "$q" | sed 's/  */ /g; s/^ *//; s/ *$//')
-      # elisions and mid-sentence excerpts are deliberate, not misquotes
-      echo "$frag" | grep -q '\.\.\.\|…' && continue
+      # Elisions are deliberate, but skipping the whole quote made three
+      # characters a bypass: a blockquote of pure invention passed by
+      # containing "...". Each segment either side of an elision must still
+      # appear verbatim in the source.
+      if echo "$frag" | grep -q '\.\.\.\|…'; then
+        echo "$frag" | sed 's/\.\.\./\n/g; s/…/\n/g' | while read -r seg; do
+          seg=$(echo "$seg" | sed 's/^ *//; s/ *$//')
+          [ "${#seg}" -ge 12 ] || continue
+          echo "$flat" | grep -qF "$seg" \
+            || echo "$fx → ${srcs%% *}: \"$(echo "$seg"|cut -c1-50)\""
+        done
+        continue
+      fi
       echo "$flat" | grep -qF "$frag" \
         || echo "$fx → ${srcs%% *}: \"$(echo "$frag"|cut -c1-50)\""
     done
@@ -380,12 +457,74 @@ head_ "F11  backward routes documented everywhere"
 rows_after() {   # rows of the first table following the given heading match
   awk -v pat="$2" '$0 ~ pat {f=1; next} f && /^\|/ {if ($0 !~ /^\|[- :|]+\|$/ && $0 !~ /Trigger|發生什麼/) n++; next} f && n {exit} END {print n+0}' "$1"
 }
+# Row counts are the weak form; the destinations are the content. A route
+# whose text was replaced wholesale kept the count intact, so the `back to`
+# column is compared as a multiset too.
+routes_of() {
+  awk -v pat="$2" '$0 ~ pat {f=1; next}
+       f && /^\|/ {if ($0 !~ /^\|[- :|]+\|$/ && $0 !~ /Trigger|發生什麼/) {print; n++} next}
+       f && n {exit}' "$1" \
+    | awk -F'|' '{ d=$(NF-1); gsub(/[` ]/,"",d)
+                   # one destination is prose in both languages ("the stage
+                   # that owes the missing artifact"); compare it as a slot,
+                   # not as text, or the zh table can never match
+                   print (d ~ /keel-/ ? d : "<prose>") }' | sort
+}
 wf=$(rows_after skills/keel-workflow/SKILL.md 'Backward routes')
 en=$(rows_after README.md 'Backward routes')
 zh=$(rows_after README.zh-TW.md '回退路由')
 [ "$wf" = "$en" ] && [ "$wf" = "$zh" ] && [ "$wf" -gt 0 ] \
   && ok "all three backward-route tables list $wf routes" \
   || bad "backward-route count differs → keel-workflow=$wf README=$en README.zh-TW=$zh"
+
+rt_wf=$(routes_of skills/keel-workflow/SKILL.md 'Backward routes')
+rt_en=$(routes_of README.md 'Backward routes')
+rt_zh=$(routes_of README.zh-TW.md '回退路由')
+if [ "$rt_wf" = "$rt_en" ] && [ "$rt_wf" = "$rt_zh" ]; then
+  ok "every route's destination matches across all three tables"
+else
+  bad "route destinations differ:"
+  diff <(echo "$rt_wf") <(echo "$rt_en") | sed 's/^/         en: /'
+  diff <(echo "$rt_wf") <(echo "$rt_zh") | sed 's/^/         zh: /'
+fi
+
+# ── F12: the gate table is enumerated in three documents ────────────────────
+# keel-workflow calls it "a closed list" that forbids everything not on it, so
+# a gate present in one document and absent from two is actively countermanded
+# by the other two — a worse shape than the A7 route drift F11 was written for.
+head_ "F12  gate list identical in all three documents"
+gates_of() { grep -oE '^\| \*{0,2}G[0-9]+\*{0,2} \|' "$1" | tr -d '|* ' | sort -u; }
+g_wf=$(gates_of skills/keel-workflow/SKILL.md)
+g_en=$(gates_of README.md)
+g_zh=$(gates_of README.zh-TW.md)
+if [ -n "$g_wf" ] && [ "$g_wf" = "$g_en" ] && [ "$g_wf" = "$g_zh" ]; then
+  ok "all three documents list the same $(echo "$g_wf" | wc -l | tr -d ' ') gates"
+else
+  bad "gate list differs:"
+  diff <(echo "$g_wf") <(echo "$g_en") | sed 's/^/         en: /'
+  diff <(echo "$g_wf") <(echo "$g_zh") | sed 's/^/         zh: /'
+fi
+
+# ── F13: the READMEs' agent rosters match agents/ ───────────────────────────
+# F5 compares agents/ to keel-workflow only, and the ghost check reads
+# skills/ only, so both READMEs could lose a shipped agent or advertise one
+# that does not exist.
+head_ "F13  README rosters match the shipped agents"
+shipped=$(for a in "${AGENTS[@]}"; do basename "$a" .md; done | sort)
+roster_of() {   # agent rows in the roster section only
+  awk '/^## Subagent (roster|名冊)/ {f=1; next} f && /^## / {exit} f' "$1" \
+    | grep -oE '^\| `keel-[a-z-]+`' | tr -d '|` ' | sort -u
+}
+bad_roster=""
+for f in README.md README.zh-TW.md; do
+  [ "$(roster_of "$f")" = "$shipped" ] || bad_roster="$bad_roster $f"
+done
+if [ -z "$bad_roster" ]; then
+  ok "both READMEs list exactly the $N_AGENTS shipped agents"
+else
+  bad "README roster does not match agents/ →$bad_roster"
+  for f in $bad_roster; do diff <(echo "$shipped") <(roster_of "$f") | sed "s|^|         $f: |"; done
+fi
 
 # ── maintainer-only: repo vs. installed copy ────────────────────────────────
 # Skips entirely when no keel install is present, so it is a no-op for anyone
