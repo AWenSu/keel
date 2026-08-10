@@ -252,6 +252,18 @@ as mechanical coverage anywhere in this file:
    fixer may auto-resolve a plan conflict, for instance. F12 compares gate IDs
    and the stage column; meaning is not a lexical property.
 
+3. **Any restriction on an agent that holds Bash.** Four agents hold it — the
+   three diff reviewers and `keel-auditor` — because none of them can do their
+   job without running something. Bash writes files. So "read-only inspection
+   only, never write, delete, move, install, push" is prose, and
+   `reviewer-shell-prose` verifies **that the sentence is present**, never that
+   it was obeyed. The seventh audit put this plainly about itself: removing
+   `Edit`/`Write` from its own grant changed which tool name appeared in its
+   transcript and nothing else, and it wrote files all session with `perl -i`
+   and heredocs. The one structural gain is real but narrow — `write-grant`
+   catches a *declared* `Write` in frontmatter, which is a guard against a
+   careless edit, not against an agent that decides otherwise.
+
 Both are covered, to the extent they are covered at all, by the scenario
 fixtures graded by walkthrough and by periodic adversarial audit. The earlier
 attempt to reach them with regexes produced the opposite of coverage: checks
