@@ -82,7 +82,15 @@ done
 # The 3 reviewers keep Bash, so their restriction lives in prose — verify it exists.
 missr=""
 for n in keel-exec-reviewer-spec keel-exec-reviewer-quality keel-exec-reviewer-security; do
-  grep -q 'read-only inspection only' "agents/$n.md" || missr="$missr $n"
+  body=$(tr '\n' ' ' < "agents/$n.md")
+  case "$body" in
+    *"read-only inspection only"*) : ;;
+    *) missr="$missr $n"; continue ;;
+  esac
+  case "$body" in
+    *"Never write, delete, move, install, push"*) : ;;
+    *) missr="$missr $n(no command restriction)" ;;
+  esac
 done
 [ -z "$missr" ] && ok "each Bash-holding reviewer states its read-only shell restriction" \
   || bad "Bash granted with no stated restriction →$missr"
@@ -121,7 +129,7 @@ done
 # subtract the skills/ directory listing before deciding a name is a ghost.
 SKILL_NAMES=$(basename -a skills/*/)
 ghosts=""
-for n in $(grep -rhoE '`keel-(exec|plan|discover|wayfind)-[a-z-]+`' skills/*/SKILL.md \
+for n in $(grep -rhoE '`keel-[a-z-]+`' skills/*/*.md \
            | tr -d '`' | sort -u); do
   in_list "$n" "$(echo $SKILL_NAMES)" && continue
   [ -f "agents/$n.md" ] || ghosts="$ghosts $n"
@@ -170,10 +178,12 @@ done)
 # rule must still be stated, and no override syntax may appear at a call site.
 head_ "F6  no model override at dispatch sites"
 norule=""
-for f in keel-workflow keel-execute keel-plan-review; do
+# every stage that dispatches, not the three that happened to be listed
+for f in $(grep -rl 'general-purpose' skills/*/SKILL.md | xargs -n1 dirname | xargs -n1 basename); do
   # tolerate emphasis markup and wording variants; require a real prohibition
-  grep -qiE '(do \*{0,2}not\*{0,2}|never)[^.]{0,40}(`?model`? +(override|parameter)|pass[^.]{0,15}`?model`?)' \
-    "skills/$f/SKILL.md" || norule="$norule $f"
+  tr '\n' ' ' < "skills/$f/SKILL.md" \
+    | grep -qiE '(do \*{0,2}not\*{0,2}|never|no) [^.]{0,40}`?model`?( +override| +parameter|\b)' \
+    || norule="$norule $f"
 done
 [ -z "$norule" ] && ok "the no-override rule is still stated in all 3 dispatching stages" \
   || bad "no-override rule weakened or deleted in →$norule"
@@ -207,19 +217,36 @@ fi
 # was live in both READMEs. A green light certifying a live defect is worse than
 # no check, so this now sweeps every file that states a total.
 head_ "F7  fan-out ceiling consistent repo-wide"
-if hits=$(grep -rnE '≤ ?16|16 total|總量.{0,4}16' --include='*.md' . \
-          | grep -v '^./docs/plans/' \
-          | grep -viE 'task loop|每個 task|per round|skeptics per' || true); [ -z "$hits" ]; then
-  ok "every stated 16-agent budget is scoped to a task loop or a round"
+# Rewritten twice. v1 asserted one literal string was ABSENT from one file and
+# passed while the defect was live elsewhere. v2 hardcoded the number 16 in
+# three patterns (renumbering the ceiling silently disarmed it), missed
+# README.zh-TW entirely because its Chinese pattern assumed <5 chars between
+# 總量 and the digits, and treated four literal phrases as a scope whitelist.
+# v3 finds any total-agent budget by shape, then requires a scope word near it.
+# Only counts that are explicitly about agents — `confidence ≤5` and
+# `≤15 lines` are not fan-out budgets.
+# Judged per *clause*, not per line: a line can legitimately state a
+# concurrency cap and a total in the same sentence, and matching scope words
+# anywhere on the line let the concurrency word rescue a mis-scoped total.
+# Window ends at the budget's own quantifier — a 40-char window swallowed the
+# NEXT clause, and its scope word ("每輪") then rescued the mis-scoped total.
+noscope=$(grep -rnoE '(總量|[0-9]+ +total)[^.。，,；;（(]{0,28}' --include='*.md' . 2>/dev/null \
+          | grep -v '^\./docs/plans/' \
+          | grep -iE 'agent|隻|個' \
+          | grep -viE 'task loop|每個 ?task|per round|每輪|skeptics per' || true)
+if [ -z "$noscope" ]; then
+  n=$(grep -rocE '總量|[0-9]+ +total agents' --include='*.md' . 2>/dev/null \
+      | grep -v '^\./docs/plans/' | awk -F: '{t+=$2} END{print t+0}')
+  ok "all $n stated total-agent budgets are scoped to a task loop or a round"
 else
-  bad "16-agent budget stated with a non-task-loop scope:"; echo "$hits" | sed 's/^/         /'
+  bad "total-agent budget with no task-loop/round scope:"; echo "$noscope" | sed 's/^/         /'
 fi
 
 # ── bonus: prefix hygiene — no pre-rename names survive ─────────────────────
 head_ "naming  no pre-rename identifiers survive"
 # This script necessarily contains the pattern it searches for, so exclude it.
 STALE='dev-(discover|plan|execute|finish|debug|wayfind|workflow|exec)|unified-dev-skills'
-if leftover=$(git ls-files -z | xargs -0 grep -lE "\b($STALE)" 2>/dev/null \
+if leftover=$( { git ls-files -z; git ls-files -zo --exclude-standard; } | xargs -0 grep -lE "\b($STALE)" 2>/dev/null \
               | grep -v '^eval-fixtures/check-structure.sh$' || true); [ -z "$leftover" ]; then
   ok "no dev-* or unified-dev-skills references in tracked files"
 else
@@ -231,12 +258,24 @@ fi
 # one of them drifted inside the very commit that was auditing it. A grader
 # following eval-fixtures/README.md ("open the cited Rule source file:line")
 # then walks the wrong rule and grades PASS on text unrelated to the fixture.
-head_ "fixtures  Rule source cites an anchor, not a line number"
-if cites=$(grep -nE '^\*\*Rule source:\*\*|^\*\*Rule source' eval-fixtures/[0-9]*.md \
-           | grep -E 'SKILL\.md:[0-9]|\.md:[0-9]+-[0-9]' || true); [ -z "$cites" ]; then
-  ok "no fixture pins a rule to a line number"
+head_ "fixtures  Rule source cites a resolvable anchor"
+nfix=$(ls eval-fixtures/[0-9]*.md 2>/dev/null | wc -l | tr -d ' ')
+if [ "$nfix" -eq 0 ]; then
+  bad "no fixture files found — check ran against nothing"
 else
-  bad "line-number citation will drift:"; echo "$cites" | sed 's/^/         /'
+  cites=$(grep -hnE '^\*{0,2}Rule source' eval-fixtures/[0-9]*.md | grep -E '\.md:[0-9]' || true)
+  [ -z "$cites" ] && ok "none of the $nfix fixtures pins a rule to a line number" \
+    || { bad "line-number citation will drift:"; echo "$cites" | sed 's/^/         /'; }
+
+  # every file named in a Rule source must exist — a dangling path sends the
+  # grader somewhere that is not merely stale but absent
+  missf=""
+  for f in $(grep -hoE '`(skills|agents)/[A-Za-z0-9_./-]+\.md`' eval-fixtures/[0-9]*.md \
+             | tr -d '`' | sort -u); do
+    [ -f "$f" ] || missf="$missf $f"
+  done
+  [ -z "$missf" ] && ok "every file cited by a fixture exists" \
+    || bad "fixture cites a nonexistent file →$missf"
 fi
 
 # ── maintainer-only: repo vs. installed copy ────────────────────────────────
@@ -246,9 +285,9 @@ fi
 if [ -d "$HOME/.claude/skills/keel-workflow" ]; then
   head_ "install  repo matches the installed copy"
   drift=""
-  for f in skills/*/SKILL.md; do
-    n=$(basename "$(dirname "$f")")
-    d="$HOME/.claude/skills/$n/SKILL.md"
+  for f in skills/*/*.md; do
+    n="$(basename "$(dirname "$f")")/$(basename "$f")"
+    d="$HOME/.claude/skills/$n"
     [ -f "$d" ] || { drift="$drift $n(missing)"; continue; }
     cmp -s "$f" "$d" || drift="$drift $n"
   done
