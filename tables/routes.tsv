@@ -1,8 +1,8 @@
-# key	from_workflow	from_readme_en	from_readme_zh	to_workflow	to_readme_en	to_readme_zh
-R1	keel-execute	`keel-execute`	`keel-execute`	`keel-plan`	`keel-plan`	`keel-plan`
-R2	keel-execute	`keel-execute`	`keel-execute`	`keel-plan`	`keel-plan`	`keel-plan`
-R3	keel-plan-review	`keel-plan-review`	`keel-plan-review`	`keel-discover`	`keel-discover`	`keel-discover`
-R4	keel-finish	`keel-finish`	`keel-finish`	`keel-debug`	`keel-debug`	`keel-debug`
-R5	keel-debug	`keel-debug`	`keel-debug`	`keel-discover`	`keel-discover`	`keel-discover`
-R6	post-merge reality	post-merge reality	上線後的真實回饋	`keel-discover`	`keel-discover`	`keel-discover`
-R7	any	any stage	任何階段	the stage that owes the missing artifact	the stage that owes the missing artifact	欠交那份產物的階段
+# key	trigger_workflow	trigger_readme_en	trigger_readme_zh	from_workflow	from_readme_en	from_readme_zh	to_workflow	to_readme_en	to_readme_zh
+R1	Execution finds the plan contradicts the code as it now is (beyond one task's fix)	Execution finds the plan contradicts the code as it now stands (beyond one task's fix)	執行時發現計畫跟現況不合，而且不是改一個 task 就能收尾的	keel-execute	`keel-execute`	`keel-execute`	`keel-plan`	`keel-plan`	`keel-plan`
+R2	Spec body changed during execution and no longer matches plan's recorded Spec Version	The plan's `Spec Version` doesn't match the current spec	計畫引用的 `Spec Version` 跟現行 spec 對不上	keel-execute	`keel-execute`	`keel-execute`	`keel-plan`	`keel-plan`	`keel-plan`
+R3	Plan review pass 3 still has unresolved decisions — the plan is fighting the spec	Plan review pass 3 still has unresolved decisions — the plan is fighting the spec	計畫審查完整跑到第 3 遍還沒共識——代表計畫在跟 spec 打架	keel-plan-review	`keel-plan-review`	`keel-plan-review`	`keel-discover`	`keel-discover`	`keel-discover`
+R4	keel-finish gate cannot produce the evidence a claim requires	`keel-finish`'s evidence gate can't produce proof for a claim	`keel-finish` 查證據時，某個宣稱怎麼都拿不出證明	keel-finish	`keel-finish`	`keel-finish`	`keel-debug`	`keel-debug`	`keel-debug`
+R5	Debugging concludes the requirement itself is wrong	Debugging concludes the requirement itself is wrong	debug 到最後發現，根本是需求本身就錯了	keel-debug	`keel-debug`	`keel-debug`	`keel-discover`	`keel-discover`	`keel-discover`
+R6	Shipped work's `## Signals` say it did not work — the requirement was wrong, not the code	Shipped work's `## Signals` say it did not work — the requirement was wrong, not the code	已上線的東西，`## Signals` 顯示沒效——是需求錯了，不是程式錯	post-merge reality	post-merge reality	上線後的真實回饋	`keel-discover`	`keel-discover`	`keel-discover`
+R7	A stage's INPUT contract is unsatisfiable (see below)	A stage's INPUT contract cannot be satisfied	某階段的 INPUT 契約無法滿足	any	any stage	任何階段	the stage that owes the missing artifact	the stage that owes the missing artifact	欠交那份產物的階段

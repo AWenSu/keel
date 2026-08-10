@@ -1,10 +1,10 @@
-# id	where_workflow	where_readme_en	where_readme_zh
-G1	keel-discover	`keel-discover`	`keel-discover`
-G2	keel-plan Step 6	`keel-plan`, Step 6	`keel-plan` Step 6
-G3	keel-plan-review Step 0	`keel-plan-review`, Step 0	`keel-plan-review` Step 0
-G4	keel-plan-review Step 5	`keel-plan-review`, Step 5	`keel-plan-review` Step 5
-G5	keel-execute pre-flight	`keel-execute`, pre-flight	`keel-execute` pre-flight
-G6	keel-execute per-task review	`keel-execute`, per-task review	`keel-execute` 每個 task 審查
-G7	keel-finish Part 2	`keel-finish`, Part 2	`keel-finish` Part 2
-G8	keel-finish Part 3	`keel-finish`, Part 3	`keel-finish` Part 3
-G9	any stage	any stage	任何階段
+# id	where_workflow	where_readme_en	where_readme_zh	what_workflow	what_readme_en	what_readme_zh
+G1	keel-discover	`keel-discover`	`keel-discover`	Spec approval — no code before the user approves; no exceptions for "simple" projects	Spec approval. No code before you approve it; no exception for "simple" projects.	spec 核准。你沒點頭就不准寫程式碼，「這案子很簡單」也不例外。
+G2	keel-plan Step 6	`keel-plan`, Step 6	`keel-plan` Step 6	Task-breakdown granularity and `Depends on` edges (skipped only when the plan is heading into keel-plan-review anyway)	Task-breakdown granularity and dependency edges — skipped only when the plan is going through `keel-plan-review` anyway.	拆票的粒度跟依賴邊對不對——只有計畫本來就要進 keel-plan-review 時才略過。
+G3	keel-plan-review Step 0	`keel-plan-review`, Step 0	`keel-plan-review` Step 0	Premise confirmation — the one always-asked question	"This plan assumes X, Y, Z — correct?" The one always-asked premise check; wrong premises make every downstream finding worthless.	「這計畫假設 X、Y、Z 對不對？」——永遠會問的前提確認，前提錯了，後面查再多也白搭。
+G4	keel-plan-review Step 5	`keel-plan-review`, Step 5	`keel-plan-review` Step 5	Each surviving Taste / User Challenge, asked one finding per question, batched by dependency frontier (never all at once, never forced serial past the frontier)	Every surviving Taste decision and User Challenge, one finding per question, **batched by dependency frontier** (see below), full context + options + consequence.	每個活下來的 Taste 決定、每個 User Challenge，一條發現一題，**依決策依賴關係分批**（見下），附完整脈絡、選項、後果。
+G5	keel-execute pre-flight	`keel-execute`, pre-flight	`keel-execute` pre-flight	Batched plan-contradiction questions before Task 1	Batched plan-contradiction questions, asked once before Task 1 — not mid-task.	計畫矛盾的問題先打包，Task 1 開工前一次問完——不是做到一半才冒出來煩你。
+G6	keel-execute per-task review	`keel-execute`, per-task review	`keel-execute` 每個 task 審查	`PLAN-CONFLICT` finding arbitration	A finding that contradicts the plan's own text (`PLAN-CONFLICT`) — never auto-resolved, never auto-applied.	發現跟計畫原文對不上（`PLAN-CONFLICT`）——絕不自己決定怎麼修，也不自己套。
+G7	keel-finish Part 2	`keel-finish`, Part 2	`keel-finish` Part 2	Each Success Criterion, confirmed on the spot by the user — the agent's own assessment never closes a box	Each Success Criterion, confirmed by you on the spot. The agent's own assessment never closes a box.	每一條 Success Criteria 請你當場核對。agent 自己的判斷永遠不算數。
+G8	keel-finish Part 3	`keel-finish`, Part 3	`keel-finish` Part 3	Branch-integration choice, and the typed `discard` confirmation if that option is taken	Which integration option — and the literal typed `discard` if that's the one.	選哪種整合方式——選 discard 的話還要逐字打出那個字。
+G9	any stage	any stage	任何階段	An irreversible operation outside the repo — deploy, migration against a non-ephemeral database, data deletion, external publication, credential rotation, push/merge to a protected branch. Named target + exact command, asked at the point of action, **even when the plan already specifies it**	An irreversible operation outside the repo: deploy, migration against a non-ephemeral database, data deletion, external publication, credential rotation, push/merge to a protected branch. Named target, exact command, asked at the point of action — **even when the plan already says to do it.**	repo 之外的不可逆操作：部署、對非暫時性資料庫做 migration、刪資料、對外發布、憑證輪替、push/merge 到受保護分支。指名目標與確切指令，在動手當下問，**就算計畫裡已經寫了也要問**。

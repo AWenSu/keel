@@ -76,6 +76,8 @@ fi
 
 rc=0
 stale=""
+rendered=0
+declared=$(printf '%s\n' "$BLOCKS" | grep -c .)
 for spec in $BLOCKS; do
   doc=${spec%%:*}; rest=${spec#*:}; table=${rest%%:*}; key=${rest#*:}
   case "$table" in
@@ -85,9 +87,11 @@ for spec in $BLOCKS; do
   esac
   out=$(printf '%s\n' "$models" \
         | awk -v TABLE="$table" -v DOCKEY="$key" -v TSV="$tsv" -v DOC="$doc" -f "$AWK" "$doc")
-  if [ -z "$out" ]; then
-    echo "FATAL: render produced nothing for $doc:$table"; exit 2
+  arc=$?
+  if [ "$arc" -ne 0 ] || [ -z "$out" ]; then
+    echo "FATAL: render failed for $doc:$table (awk exit $arc)"; exit 2
   fi
+  rendered=$((rendered + 1))
   if [ "$MODE" = "--check" ]; then
     printf '%s\n' "$out" | cmp -s - "$doc" || { stale="$stale $doc:$table"; rc=1; }
   else
@@ -95,14 +99,21 @@ for spec in $BLOCKS; do
   fi
 done
 
+# The success line used to say "9" as a string literal while the loop could
+# have located zero blocks: one space in front of a marker made render an
+# identity function and cmp reported the document up to date.
+if [ "$rendered" -ne "$declared" ]; then
+  echo "FATAL: rendered $rendered of $declared declared blocks"; exit 2
+fi
+
 if [ "$MODE" = "--check" ]; then
   if [ "$rc" -eq 0 ]; then
-    echo "all 9 generated blocks are up to date"
+    echo "all $rendered generated blocks are up to date"
   else
     echo "stale generated blocks →$stale"
     echo "run: bash tables/render.sh"
   fi
 else
-  echo "rendered 9 blocks from tables/*.tsv"
+  echo "rendered $rendered blocks from tables/*.tsv"
 fi
 exit "$rc"

@@ -1,16 +1,16 @@
-# name	stage_en	stage_zh   — model comes from agents/<name>.md frontmatter
-keel-discover-designer	1 discover	1 探索
-keel-plan-lens-ceo	3 review	3 審查
-keel-plan-lens-design	3 review	3 審查
-keel-plan-lens-eng	3 review	3 審查
-keel-plan-lens-security	3 review	3 審查
-keel-plan-lens-dx	3 review	3 審查
-keel-plan-skeptic	3 review	3 審查
-keel-plan-skeptic-critical	3 review	3 審查
-keel-exec-implementer	4 execute	4 執行
-keel-exec-reviewer-spec	4 execute	4 執行
-keel-exec-reviewer-quality	4 execute	4 執行
-keel-exec-reviewer-security	4 execute	4 執行
-keel-exec-fixer	4 execute	4 執行
-keel-exec-fixer-critical	4 execute	4 執行
-keel-wayfind-researcher	pre-stage	前置階段
+# name	stage_en	stage_zh	role_workflow	role_readme_en	role_readme_zh	tools_readme_en	tools_readme_zh
+keel-discover-designer	1 discover	1 探索	Parallel approach proposals	One of 3 parallel approach proposals, each under a different constraint	三個平行方案之一，各自守著不同限制想	read-only	唯讀
+keel-plan-lens-ceo	3 review	3 審查	Should this exist + prior-art scan	Should this exist at all — plus a mandatory prior-art web scan	這件事到底該不該做，還要上網先查有沒有人做過、有沒有人撞過牆	read-only + tavily, exa, context7	唯讀 + tavily、exa、context7
+keel-plan-lens-design	3 review	3 審查	User-visible states (conditional)	Every user-visible state named (conditional: UI-heavy plans)	使用者看得到的每個狀態都想到了沒（只在 UI 相關計畫才會開）	read-only	唯讀
+keel-plan-lens-eng	3 review	3 審查	Buildable as written + API currency	Buildable as written — plus an API-currency check against live docs	照這樣寫真的做得出來嗎，還要查一下用到的 API 是不是早就被棄用了	read-only + context7, Ref	唯讀 + context7、Ref
+keel-plan-lens-security	3 review	3 審查	STRIDE threat modeling (design-time, conditional)	Design-time STRIDE threat modeling (conditional: 2+ security keywords, high-risk marker, or new external endpoint)	設計期做 STRIDE 威脅建模（只在命中 2+ 資安詞彙、有高風險標記、或新增對外端點時才會開）	read-only	唯讀
+keel-plan-lens-dx	3 review	3 審查	Developer onboarding cost (conditional)	Developer onboarding cost (conditional: API/CLI/SDK-facing plans)	開發者要花多少力氣才能上手（只在面向 API/CLI/SDK 的計畫才會開）	read-only + context7	唯讀 + context7
+keel-plan-skeptic	3 review	3 審查	Refute one High finding — single-point check	Refute one High finding — single-point evidence check	挑一條 High 等級的發現來反駁——單點查證就搞得定的那種	read-only, **no search**	唯讀，**不給它上網查**
+keel-plan-skeptic-critical	3 review	3 審查	Refute one Critical / security / cross-file finding	Refute one Critical / security / cross-file-reasoning finding	反駁 Critical 等級、碰到安全/資料遺失/不可逆操作、或要跨檔案推理才能判斷的發現	read-only, **no search**	唯讀，**不給它上網查**
+keel-exec-implementer	4 execute	4 執行	Build one task	Build one task, test-first enforced	把一個 task 做出來，強制測試先行	full	完整權限
+keel-exec-reviewer-spec	4 execute	4 執行	Spec-compliance axis	Spec-compliance axis only	只看有沒有照規格做	read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests	唯讀 + shell 僅限 `git diff`/`log`/`show`、`which`、既有測試指令
+keel-exec-reviewer-quality	4 execute	4 執行	Code-quality axis	Code-quality axis only	只看寫得好不好	read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests	唯讀 + shell 僅限 `git diff`/`log`/`show`、`which`、既有測試指令
+keel-exec-reviewer-security	4 execute	4 執行	Security review axis (R4 conditional trigger)	Security axis only, dispatched conditionally when an R4 trigger is hit	只看資安軸——命中 R4 條件才會派工	read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests	唯讀 + shell 僅限 `git diff`/`log`/`show`、`which`、既有測試指令
+keel-exec-fixer	4 execute	4 執行	Apply review findings	Apply only the findings it was given	只修拿到手的那幾條發現，不順手改別的	full	完整權限
+keel-exec-fixer-critical	4 execute	4 執行	Fix-loop round 4-5 — standard tier stalled	Fix-loop rounds 4-5 only, after the standard tier stalls twice	只在修復迴圈第 4-5 輪出手——標準層卡了兩次才輪到它	full	完整權限
+keel-wayfind-researcher	pre-stage	前置階段	Resolve one research ticket	Resolve one externally-answerable research ticket	解一張能靠外部資料查出答案的研究票	read-only + full search	唯讀 + 完整檢索工具
