@@ -18,10 +18,9 @@ like a defect count and is not: it is roughly what one agent produces in an
 hour of mutation testing. Reading a work rate as a defect rate kept the work
 open indefinitely.
 
-The number that does converge is **defect classes**. Six audits have produced eight. The fifth produced none; the sixth produced
-two, both in machinery built between the fifth and the sixth — which is where
-new classes come from. So the brief changed: your job is to find a
-class nobody has encoded, not to re-find instances of the eight below. Instances
+The number that does converge is **defect classes**. Seven audits have produced ten. The fifth produced none; the sixth and seventh produced two each, all four in
+machinery built between audits — which is where new classes come from. So the brief changed: your job is to find a
+class nobody has encoded, not to re-find instances of the ten below. Instances
 are cheap now — they are a missing file in `mutations/`, not a work stream.
 
 ## Before you start: get the current state yourself
@@ -43,7 +42,13 @@ If the first three are not clean before you touch anything, stop and report
 that — it is a more interesting finding than anything you were going to look
 for.
 
-## The eight known classes
+There is no rule → check-id map in this repo, and you will want one to answer
+"can the denominator shrink". Build it from `ok "<id>"` call sites in
+`check-structure.sh` and the `Fixture` column of `RULE-INVENTORY.md`; the
+absence of that mapping is itself why one check id can silently carry five
+rules.
+
+## The known classes
 
 Each has red tests in `eval-fixtures/mutations/`; the `# class:` header names
 which. Read three or four of them before you begin.
@@ -58,11 +63,13 @@ which. Read three or four of them before you begin.
 | `self-disarm` | the apparatus switched off from inside its own inputs | emptying `rules/anti-patterns.txt`, which the rule-file validator explicitly skipped |
 | `unattributed-red` | a red light taken as proof without establishing what caused it | a mutation that edited the checker's own allowlist, graded as evidence the check enforces the rule |
 | `round-trip-laundering` | a provenance stamp wider than what the generator derives | the table generator read prose back out of the document and joined it to the source by position |
+| `co-deletion-blind` | every consistency check is an equality, and an equality survives deleting the same member from both sides | a backward route removed from its source and from its independent record together, with every board green |
+| `lane-dependent-verdict` | the verdict depends on the execution model, not on the artifact | contamination visible only inside one worker lane: `JOBS=1` said DIRTY, `JOBS=8` said clean |
 
 ## What counts as a new class
 
 A finding is a **new class** only if fixing it requires a different *kind* of
-countermeasure than the eight above — not a wider regex, not another derivation
+countermeasure than the ten above — not a wider regex, not another derivation
 input, not one more validated file. If your fix is "add this string to the
 blocklist" or "scan this directory too", it is an instance of an existing
 class. Say which one.
@@ -110,11 +117,22 @@ not execute as UNVERIFIED and say so plainly.
   once — three earlier defects only appeared there
 - the install-drift line fires on any edit under `skills/` or `agents/`; ignore
   it when judging whether your mutation fired
-- revert with `git checkout`, and confirm `git status --short` is empty before
-  you finish. Never commit, never push, never leave the tree dirty.
-- `eval-fixtures/run-mutations.sh` is the safe way to run many mutations: it
-  works in a throwaway copy. Reverting in the live tree ate real edits twice
-  while this repo was being built.
+- **Mutate in a throwaway copy, never in the live tree.** `cp -R` the repo to
+  a temp directory, or use `eval-fixtures/run-mutations.sh`, which makes one
+  for you. An earlier version of this brief said "revert with `git checkout`"
+  two lines above the sentence explaining that reverting in the live tree ate
+  real edits twice — contradictory advice, and the dangerous half was the
+  actionable one.
+- `git status --short` in the live tree must be empty when you finish, and your
+  report must show it. Never commit, never push.
+- **The harness is in scope.** `run-mutations.sh` and its controls, the
+  registry, `CHECK-IDS.txt`, the ratchet in `HIGH-WATER.txt` and
+  `tables/render.*` are all fair targets — the last two audits found their new
+  classes there, not in the pipeline.
+- **Verdicts are lane-dependent by construction.** The harness assigns worker
+  slots by position in the filtered list modulo `JOBS` (default 8), so
+  filtering or renaming a mutation reshuffles every lane. Run anything you
+  suspect of cross-mutation interference at `JOBS=1` as well.
 
 ## Report
 

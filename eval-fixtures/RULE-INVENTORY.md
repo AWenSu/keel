@@ -127,8 +127,8 @@ context fork.
 
 | # | Rule | Declared at | Enforced at | Fixture |
 |---|------|-------------|-------------|---------|
-| F1 | Every agent pins its own `model:` | `keel-workflow` roster note | all 15 `agents/*.md` frontmatter | `check-structure.sh` |
-| F2 | Every agent pins its own `tools:` | `keel-workflow` roster note | all 15 `agents/*.md` frontmatter | `check-structure.sh` |
+| F1 | Every agent pins its own `model:` | `keel-workflow` roster note | every `agents/*.md` frontmatter | `check-structure.sh` |
+| F2 | Every agent pins its own `tools:` | `keel-workflow` roster note | every `agents/*.md` frontmatter | `check-structure.sh` |
 | F3 | Reviewers / lenses / skeptics / researchers are read-only | `keel-workflow` roster note, `README` | each agent's `tools:` list — lenses/skeptics/designer/researcher hold no shell at all; the 3 diff reviewers hold Bash restricted in their own text to `git diff`/`log`/`show`, `which`, and the project's existing test command (which does execute, so this tier is a weaker guarantee than the no-shell one) | `check-structure.sh` |
 | F4 | No `general-purpose` dispatch inside the pipeline | `rules/no-general-purpose.txt` (canonical) | `keel-workflow`, verbatim | `check-structure.sh` (byte comparison + literal anti-pattern blocklist) |
 | F5 | Every shipped agent appears in the roster | `agents/` | `tables/agents.tsv` → generated rosters | `check-structure.sh` (generated-block check) |

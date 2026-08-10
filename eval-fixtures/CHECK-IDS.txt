@@ -13,6 +13,7 @@ manifest-fanout
 no-anti-pattern
 no-ghost-agent
 no-stale-names
+ratchet
 readme-shell-grant
 reviewer-shell-prose
 rule-file-usable

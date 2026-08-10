@@ -14,7 +14,7 @@ Every mutation here is a defect that was **actually live in this repo**, or
 that an audit demonstrated could be made live with the board green. None are
 hypothetical.
 
-## The eight defect classes
+## The ten defect classes
 
 | class | what it is |
 |---|---|
@@ -26,6 +26,8 @@ hypothetical.
 | `self-disarm` | the checking apparatus turned off from inside its own inputs |
 | `unattributed-red` | a check goes red and that is taken as proof it enforces the property — without establishing the red was caused by the injected defect. The first class about a **false red**; the other seven are about false greens |
 | `round-trip-laundering` | a block carries a whole-block provenance stamp while the generator produces some cells by reading them out of the document and writing them back. For those cells the freshness check is a tautology |
+| `co-deletion-blind` | every consistency check is an equality between two sets, and an equality survives deleting the same member from both sides. The apparatus detects divergence and is blind to shrinkage |
+| `lane-dependent-verdict` | correctness depends on the execution model — worker lane, `JOBS`, filename order — rather than on the artifact under test |
 
 ## Adding a check
 

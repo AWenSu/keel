@@ -70,3 +70,5 @@
 68-generated-header-columns-swapped.sh
 69-reviewer-restriction-only-in-a-comment.sh
 70-readme-documents-an-unrestricted-shell.sh
+71-rule-and-its-record-deleted-together.sh
+72-check-and-all-its-evidence-deleted-together.sh

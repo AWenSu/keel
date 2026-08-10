@@ -590,6 +590,37 @@ else
   bad "tables-generated" "tables/render.sh is missing — the three duplicated tables have no source"
 fi
 
+# ── the ratchet ─────────────────────────────────────────────────────────────
+# See eval-fixtures/HIGH-WATER.txt: every other check here is an equality, and
+# equalities survive co-deletion.
+head_ "ratchet  nothing shrank without saying so"
+shrunk=""
+count_of() {
+  case "$1" in
+    checks)    wc -w < eval-fixtures/CHECK-IDS.txt ;;
+    mutations) ls eval-fixtures/mutations/*.sh | wc -l ;;
+    rules)     grep -cE '^\|[[:space:]]*[A-HPVS][0-9]+[[:space:]]*\|' eval-fixtures/RULE-INVENTORY.md ;;
+    routes)    grep -cv '^#' tables/routes.tsv ;;
+    gates)     grep -cv '^#' tables/gates.tsv ;;
+    agents)    ls agents/*.md | wc -l ;;
+    fixtures)  ls eval-fixtures/[0-9]*.md | wc -l ;;
+  esac
+}
+while read -r what floor; do
+  echo "$what" | grep -q '^#' && continue
+  [ -n "${what:-}" ] || continue
+  now=$(count_of "$what" | tr -d ' ')
+  [ "${now:-0}" -ge "${floor:-0}" ] \
+    || shrunk="$shrunk $what($now<$floor)"
+done < <(grep -v '^#' eval-fixtures/HIGH-WATER.txt | grep -v '^[[:space:]]*$' | grep -v '^shrink:')
+justified=$(grep -c '^shrink:' eval-fixtures/HIGH-WATER.txt || true)
+if [ -z "$shrunk" ]; then
+  ok "ratchet" "nothing below its floor$([ "${justified:-0}" -gt 0 ] && echo " ($justified declared shrink(s))")"
+else
+  bad "ratchet" "below the floor with no declared shrink →$shrunk"
+  echo "         lower the number in eval-fixtures/HIGH-WATER.txt and add a \`shrink:\` line saying why"
+fi
+
 # ── the check-id registry ───────────────────────────────────────────────────
 # The mutation harness derives its denominator from the ids this script PRINTS,
 # so a check behind an environment guard (the install-drift one) vanishes from

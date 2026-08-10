@@ -18,7 +18,7 @@
 #   bash eval-fixtures/run-mutations.sh route      # only ids matching 'route'
 #   JOBS=4 bash eval-fixtures/run-mutations.sh     # fewer parallel copies
 #
-# One full check run costs ~14s, so 54 mutations serially is ~13 minutes. Each
+# One full check run costs ~14s, so the full suite serially would be ~15 minutes. Each
 # worker gets its own throwaway copy and runs a slice.
 #
 # Exit 0 = every mutation went red and every check id is covered.
