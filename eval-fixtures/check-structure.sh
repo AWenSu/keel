@@ -591,34 +591,75 @@ else
 fi
 
 # ── the ratchet ─────────────────────────────────────────────────────────────
-# See eval-fixtures/HIGH-WATER.txt: every other check here is an equality, and
-# equalities survive co-deletion.
-head_ "ratchet  nothing shrank without saying so"
-shrunk=""
-count_of() {
+# Every other check here is an equality between two things in this working
+# tree, and an equality survives deleting the same member from both sides. The
+# first answer to that was a hand-written floor in HIGH-WATER.txt — which was
+# born one below the real check count, was never reconciled with it, listed
+# only seven of the countable dimensions, and could not tell a deletion from a
+# substitution because it compared totals. A hand-written reference that
+# nothing compares to the quantity it bounds is not a ratchet.
+#
+# The reference is git now: the previous commit's contents, which the edit
+# being audited cannot reach. Every dimension is compared as a SET, so
+# swapping a row for a placeholder is a removal too.
+head_ "ratchet  nothing left the repo without saying so"
+
+# <dimension>|<extractor over a file list or a stream>
+set_now() {
   case "$1" in
-    checks)    wc -w < eval-fixtures/CHECK-IDS.txt ;;
-    mutations) ls eval-fixtures/mutations/*.sh | wc -l ;;
-    rules)     grep -cE '^\|[[:space:]]*[A-HPVS][0-9]+[[:space:]]*\|' eval-fixtures/RULE-INVENTORY.md ;;
-    routes)    grep -cv '^#' tables/routes.tsv ;;
-    gates)     grep -cv '^#' tables/gates.tsv ;;
-    agents)    ls agents/*.md | wc -l ;;
-    fixtures)  ls eval-fixtures/[0-9]*.md | wc -l ;;
+    check-ids)    tr ' ' '\n' < eval-fixtures/CHECK-IDS.txt ;;
+    rule-ids)     grep -oE '^\|[[:space:]]*[A-HPVS][0-9]+' eval-fixtures/RULE-INVENTORY.md | tr -d '| ' ;;
+    mutations)    ls eval-fixtures/mutations/*.sh | xargs -n1 basename ;;
+    rule-files)   ls rules/*.txt | xargs -n1 basename ;;
+    manifest)     grep -v '^#' rules/manifest.tsv | grep -v '^[[:space:]]*$' | tr '\t' '~' ;;
+    anti-patterns) grep -v '^[[:space:]]*$' rules/anti-patterns.txt ;;
+    routes)       grep -v '^#' tables/routes.tsv | cut -f1 ;;
+    gates)        grep -v '^#' tables/gates.tsv | cut -f1 ;;
+    agents)       ls agents/*.md | xargs -n1 basename ;;
+    fixtures)     ls eval-fixtures/[0-9]*.md | xargs -n1 basename ;;
+    skills)       ls -d skills/*/ | xargs -n1 basename ;;
   esac
 }
-while read -r what floor; do
-  echo "$what" | grep -q '^#' && continue
-  [ -n "${what:-}" ] || continue
-  now=$(count_of "$what" | tr -d ' ')
-  [ "${now:-0}" -ge "${floor:-0}" ] \
-    || shrunk="$shrunk $what($now<$floor)"
-done < <(grep -v '^#' eval-fixtures/HIGH-WATER.txt | grep -v '^[[:space:]]*$' | grep -v '^shrink:')
-justified=$(grep -c '^shrink:' eval-fixtures/HIGH-WATER.txt || true)
-if [ -z "$shrunk" ]; then
-  ok "ratchet" "nothing below its floor$([ "${justified:-0}" -gt 0 ] && echo " ($justified declared shrink(s))")"
+set_head() {
+  case "$1" in
+    check-ids)    git show HEAD:eval-fixtures/CHECK-IDS.txt 2>/dev/null | tr ' ' '\n' ;;
+    rule-ids)     git show HEAD:eval-fixtures/RULE-INVENTORY.md 2>/dev/null | grep -oE '^\|[[:space:]]*[A-HPVS][0-9]+' | tr -d '| ' ;;
+    mutations)    git ls-tree --name-only HEAD eval-fixtures/mutations/ 2>/dev/null | grep '\.sh$' | xargs -n1 basename ;;
+    rule-files)   git ls-tree --name-only HEAD rules/ 2>/dev/null | grep '\.txt$' | grep -v anti-patterns | xargs -n1 basename ;;
+    manifest)     git show HEAD:rules/manifest.tsv 2>/dev/null | grep -v '^#' | grep -v '^[[:space:]]*$' | tr '\t' '~' ;;
+    anti-patterns) git show HEAD:rules/anti-patterns.txt 2>/dev/null | grep -v '^[[:space:]]*$' ;;
+    routes)       git show HEAD:tables/routes.tsv 2>/dev/null | grep -v '^#' | cut -f1 ;;
+    gates)        git show HEAD:tables/gates.tsv 2>/dev/null | grep -v '^#' | cut -f1 ;;
+    agents)       git ls-tree --name-only HEAD agents/ 2>/dev/null | xargs -n1 basename ;;
+    fixtures)     git ls-tree --name-only HEAD eval-fixtures/ 2>/dev/null | xargs -n1 basename | grep -E '^[0-9]' ;;
+    skills)       git ls-tree -d --name-only HEAD skills/ 2>/dev/null | xargs -n1 basename ;;
+  esac
+}
+
+DIMENSIONS="check-ids rule-ids mutations rule-files manifest anti-patterns routes gates agents fixtures skills"
+gone=""; slack=""
+for dim in $DIMENSIONS; do
+  now=$(set_now "$dim" | grep -v '^[[:space:]]*$' | sort -u)
+  was=$(set_head "$dim" | grep -v '^[[:space:]]*$' | sort -u)
+  # nothing at HEAD (first commit of a dimension) is growth, not shrinkage
+  [ -n "$was" ] || continue
+  lost=$(comm -23 <(printf '%s\n' "$was") <(printf '%s\n' "$now"))
+  nnow=$(printf '%s\n' "$now" | grep -c .)
+  nwas=$(printf '%s\n' "$was" | grep -c .)
+  slack="$slack $dim=$nnow"
+  [ -z "$lost" ] && continue
+  # a removal is legal when SHRINK-LOG.md names this dimension and this member
+  for member in $lost; do
+    grep -qE "^shrink: +${dim} +${member}( |$)" eval-fixtures/SHRINK-LOG.md 2>/dev/null \
+      || gone="$gone ${dim}/${member}"
+  done
+done
+if [ -z "$gone" ]; then
+  ok "ratchet" "nothing in$slack left since HEAD without a SHRINK-LOG entry"
 else
-  bad "ratchet" "below the floor with no declared shrink →$shrunk"
-  echo "         lower the number in eval-fixtures/HIGH-WATER.txt and add a \`shrink:\` line saying why"
+  bad "ratchet" "removed since HEAD with no declared shrink:"
+  for g in $gone; do echo "         $g"; done
+  echo "         declare it: shrink: <dimension> <member> <why> <date>  in eval-fixtures/SHRINK-LOG.md"
 fi
 
 # ── the check-id registry ───────────────────────────────────────────────────
