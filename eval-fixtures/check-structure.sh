@@ -31,6 +31,18 @@ BASH_OK="$WRITERS keel-exec-reviewer-spec keel-exec-reviewer-quality keel-exec-r
 in_list() { case " $2 " in *" $1 "*) return 0;; *) return 1;; esac; }
 fm() { sed -n '/^---$/,/^---$/p' "$1"; }   # frontmatter only
 
+# Every tool an agent is granted, one per line. Handles both the inline
+# comma form and the YAML block form — reading only the `tools:` LINE let a
+# block-list grant Edit, Write and Bash to a read-only agent with all three
+# assertions still reporting green.
+tools_of() {
+  fm "$1" | awk '
+    /^tools:/ { inline=$0; sub(/^tools: */,"",inline); if (inline!="") {print inline; next} blk=1; next }
+    blk && /^[[:space:]]*-[[:space:]]*/ { sub(/^[[:space:]]*-[[:space:]]*/,""); print; next }
+    blk && /^[^[:space:]]/ { blk=0 }
+  ' | tr ',' '\n' | sed 's/^ *//; s/ *$//' | grep -v '^$'
+}
+
 printf '\033[1mkeel structural checks\033[0m  (%s agents, %s skills)\n' \
   "$N_AGENTS" "$(ls -d skills/*/ | wc -l | tr -d ' ')"
 
@@ -43,19 +55,22 @@ for a in "${AGENTS[@]}"; do fm "$a" | grep -q '^model:' || miss="$miss $(basenam
 # ── F2: every agent pins its own tools ──────────────────────────────────────
 head_ "F2  every agent pins tools:"
 miss=""
-for a in "${AGENTS[@]}"; do fm "$a" | grep -q '^tools:' || miss="$miss $(basename "$a")"; done
-[ -z "$miss" ] && ok "all $N_AGENTS agents pin a tool list" \
+for a in "${AGENTS[@]}"; do
+  { fm "$a" | grep -q '^tools:' && [ -n "$(tools_of "$a")" ]; } \
+    || miss="$miss $(basename "$a")"
+done
+[ -z "$miss" ] && ok "all $N_AGENTS agents pin a non-empty tool list" \
   || bad "no tools: pin (inherits the ambient set) →$miss"
 
 # ── F3: read-only is a grant, not a promise ─────────────────────────────────
 head_ "F3  read-only enforced by tool list"
 badw=""; badb=""
 for a in "${AGENTS[@]}"; do
-  n=$(basename "$a" .md); t=$(fm "$a" | grep '^tools:' || true)
-  if echo "$t" | grep -qE '\b(Edit|Write|NotebookEdit)\b'; then
+  n=$(basename "$a" .md); t=$(tools_of "$a")
+  if echo "$t" | grep -qxE '(Edit|Write|NotebookEdit)'; then
     in_list "$n" "$WRITERS" || badw="$badw $n"
   fi
-  if echo "$t" | grep -q '\bBash\b'; then
+  if echo "$t" | grep -qx 'Bash'; then
     in_list "$n" "$BASH_OK" || badb="$badb $n"
   fi
 done
@@ -78,7 +93,12 @@ done
 missd=""
 for f in README.md README.zh-TW.md; do
   for n in spec quality security; do
-    grep -E "keel-exec-reviewer-$n\`" "$f" | grep -qiE 'shell|Bash' || missd="$missd $f:$n"
+    row=$(grep -E "keel-exec-reviewer-$n\`" "$f" | head -1)
+    # must positively describe a restricted shell, and must not deny holding one
+    echo "$row" | grep -qiE 'restricted|僅限|受限' &&
+      echo "$row" | grep -qiE 'shell|bash' &&
+      ! echo "$row" | grep -qiE 'no shell|without shell|沒有 ?shell|不含 ?shell' \
+      || missd="$missd $f:$n"
   done
 done
 [ -z "$missd" ] && ok "both READMEs describe the 3 reviewers' shell grant" \
@@ -119,6 +139,30 @@ done
 [ -z "$undecl" ] && ok "external agents used are declared in the roster" \
   || bad "dispatched but absent from roster →$undecl"
 
+# F4 proper: the rule is "no general-purpose dispatch inside the pipeline", and
+# until now nothing checked it — the section header claimed F4/F5 while only F5
+# had code behind it, and RULE-INVENTORY credited this script for the coverage.
+# Judged over a 2-line window: the prohibition often wraps onto the next line
+# ("a `general-purpose` agent inside\n this pipeline is a bug").
+gp=$(for f in $(git ls-files 'skills/**/*.md' 'agents/*.md'); do
+  awk -v F="$f" '
+    { win = prev "\n" $0 "\n" nextline }
+    /general-purpose/ {
+      ctx = prev " " $0 " " getline_next
+      hits[NR]=$0; ctxs[NR]=prev " " $0
+    }
+    { prev=$0 }
+    END{}
+  ' "$f" >/dev/null 2>&1
+  grep -n 'general-purpose' "$f" | while IFS=: read -r ln rest; do
+    ctx=$(sed -n "$((ln>1?ln-1:1)),$((ln+1))p" "$f")
+    echo "$ctx" | grep -qiE 'never|not |no |avoid|instead of|rather than|falls back|fallback|is a bug|forbidden|silently|絕不|不要' \
+      || echo "$f:$ln:$rest"
+  done
+done)
+[ -z "$gp" ] && ok "no file endorses a general-purpose dispatch" \
+  || { bad "general-purpose named without a prohibition:"; echo "$gp" | sed 's/^/         /'; }
+
 # ── F6: no model override at any dispatch site ──────────────────────────────
 # The previous version grepped a pattern with zero pre-filter matches, so its
 # whole exclusion list was dead code guarding nothing — and, worse, deleting
@@ -137,9 +181,20 @@ done
 # Override *syntax* at a call site. Roster/matrix table cells legitimately name
 # models, so exclude table rows; frontmatter legitimately pins one, so exclude
 # lines starting `model:`.
-if hits=$(grep -rnE 'model *[:=] *"?(opus|sonnet|haiku)' --include='*.md' skills agents \
-          | grep -v ':model:' | grep -vE ':[0-9]+:\|' \
-          | grep -viE 'do not|never|instead of|rather than|not by passing' || true); [ -z "$hits" ]; then
+# Any model name, not an enumerated three; `"model":` JSON form included; the
+# frontmatter exemption is resolved per file by line number rather than by the
+# substring `:model:`, which a body line beginning `model:` also satisfies.
+override_hits() {
+  for f in $(git ls-files 'skills/**/*.md' 'agents/*.md'); do
+    fmend=$(awk 'NR>1 && /^---$/{print NR; exit}' "$f"); : "${fmend:=0}"
+    grep -nE '["`]?model["`]? *[:=] *["`]?[a-z][a-z0-9.-]+' "$f" \
+      | awk -F: -v e="$fmend" '$1 > e' \
+      | grep -vE '^[0-9]+:\|' \
+      | grep -viE 'do not|never|instead of|rather than|not by passing|pins its own|model matrix' \
+      | sed "s|^|$f:|"
+  done
+}
+if hits=$(override_hits || true); [ -z "$hits" ]; then
   ok "no dispatch site carries model-override syntax"
 else
   bad "model-override syntax at a call site:"; echo "$hits" | sed 's/^/         /'

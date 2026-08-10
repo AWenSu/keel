@@ -130,7 +130,7 @@ context fork.
 | F1 | Every agent pins its own `model:` | `keel-workflow` roster note | all 15 `agents/*.md` frontmatter | `check-structure.sh` |
 | F2 | Every agent pins its own `tools:` | `keel-workflow` roster note | all 15 `agents/*.md` frontmatter | `check-structure.sh` |
 | F3 | Reviewers / lenses / skeptics / researchers are read-only | `keel-workflow` roster note, `README` | each agent's `tools:` list — lenses/skeptics/designer/researcher hold no shell at all; the 3 diff reviewers hold Bash restricted in their own text to `git diff`/`log`/`show`, `which`, and the project's existing test command (which does execute, so this tier is a weaker guarantee than the no-shell one) | `check-structure.sh` |
-| F4 | No `general-purpose` dispatch inside the pipeline | `keel-workflow` roster heading | `keel-workflow` pre-dispatch self-check | `check-structure.sh` |
+| F4 | No `general-purpose` dispatch inside the pipeline | `keel-workflow` roster heading | `keel-workflow` pre-dispatch self-check | `check-structure.sh` (added 2026-08-10 — the section header claimed F4 for months while only F5 had code) |
 | F5 | Every dispatched `subagent_type` is a roster row | `keel-workflow` pre-dispatch self-check | same | `check-structure.sh` |
 | F6 | No `model` override at any dispatch site | `keel-workflow` roster note | every skill's dispatch instruction | `check-structure.sh` |
 | F7 | Fan-out ceiling | `keel-workflow` fan-out note (concurrency), `keel-execute` Fan-out ceiling (per task loop) | each stage | `check-structure.sh` |
