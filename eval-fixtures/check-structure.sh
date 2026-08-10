@@ -72,6 +72,18 @@ done
 [ -z "$missr" ] && ok "each Bash-holding reviewer states its read-only shell restriction" \
   || bad "Bash granted with no stated restriction →$missr"
 
+# The READMEs are declaration sites for F3 (RULE-INVENTORY says so), and the
+# "reviewer described as plain read-only while holding Bash" defect recurred
+# in the untranslated half because this check only ever read agents/*.md.
+missd=""
+for f in README.md README.zh-TW.md; do
+  for n in spec quality security; do
+    grep -E "keel-exec-reviewer-$n\`" "$f" | grep -qiE 'shell|Bash' || missd="$missd $f:$n"
+  done
+done
+[ -z "$missd" ] && ok "both READMEs describe the 3 reviewers' shell grant" \
+  || bad "README calls a Bash-holding reviewer plain read-only →$missd"
+
 # ── F4/F5: dispatch names resolve to a roster row ───────────────────────────
 head_ "F4/F5  dispatched subagent_types exist and are rostered"
 ROSTER=$(grep -oE '^\| `keel-[a-z-]+`' skills/keel-workflow/SKILL.md | tr -d '|` ')

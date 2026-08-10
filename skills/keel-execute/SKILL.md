@@ -380,7 +380,10 @@ read-only grants, roster completeness) mechanically, and a non-zero exit is
 a real failure, not a report. Then, if `eval-fixtures/RULE-INVENTORY.md`
 exists: also report
 `FIXTURE COVERAGE: N/M rules fixture-covered (X%)` from that file's
-`## Current coverage` totals, alongside its enforced count, and list
+the two `grep -c` commands that file's `## Current coverage` section
+documents — **run them, do not copy the prose figure**, which that same
+section forbids carrying forward and which has been wrong four times. A
+computed value that disagrees with the prose is itself a finding. Also list
 any rule this plan added or changed that the table doesn't yet have a row
 for — an unlisted new rule is the same silent-regression risk the inventory
 exists to catch, one release earlier. This is a report, not a gate: a plan

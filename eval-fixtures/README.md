@@ -18,6 +18,10 @@ not by prose. One second, exact filenames on failure. Both real defects in the
 bash eval-fixtures/check-structure.sh     # exit 0 = all pass
 ```
 
+The last check compares this repo against a `~/.claude` install and is
+skipped when there isn't one — so a fresh clone reports one check fewer
+than a maintainer's run. That is not a regression.
+
 **`NN-*.md` — walk them.** Scenario fixtures pin trigger/no-trigger boundaries
 that no script can judge ("does a spec marked draft block `keel-plan`?"). These
 need a human or an agent reading the rule text against the scenario.

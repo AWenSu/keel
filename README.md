@@ -244,9 +244,12 @@ reviewing" structural instead of a prompt that can be ignored.
 evidence strength (existing test > described contract > unverified claim)
 rather than taking the plan's word for it.
 
-Plus two general-purpose specialists this pipeline dispatches by their
-existing names when a finding calls for them: `test-engineer`,
-`silent-failure-hunter`. `security-auditor` is a separate, ad-hoc specialist —
+Plus six agents this pipeline dispatches by name but does not ship — their
+model and tools are whatever your install defines, which is why the roster
+above cannot pin them: `planner` (Medium-task one-shot plan),
+`code-reviewer` (final whole-branch review), `test-engineer`,
+`silent-failure-hunter`, `build-error-resolver` (dispatched by `keel-debug`
+when the symptom is a build error). `security-auditor` is a separate, ad-hoc specialist —
 it is invoked by `/security-review` or `/ship`, never dispatched by
 `keel-plan-review` or `keel-execute`; the pipeline's own security coverage in
 those two stages now lives in `keel-plan-lens-security` (stage 3) and
@@ -330,7 +333,7 @@ ran.
 
 These are **syntheses, not forks** — upstream keeps evolving. Every SKILL.md
 records its sources and their versions in frontmatter. Snapshot at synthesis
-time (2026-07-14; subagent roster and prior-art scanning added 2026-07-30):
+time (2026-07-14; subagent roster 2026-07-30; discovery-stage prior-art scan and the design lens's visual/routing checks 2026-08-10):
 
 | Upstream | Version | Repo |
 |----------|---------|------|

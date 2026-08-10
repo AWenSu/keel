@@ -162,9 +162,9 @@ G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續
 | `keel-plan-skeptic` | 3 審查 | 挑一條 High 等級的發現來反駁——單點查證就搞得定的那種 | sonnet | 唯讀，**不給它上網查** |
 | `keel-plan-skeptic-critical` | 3 審查 | 反駁 Critical 等級、碰到安全/資料遺失/不可逆操作、或要跨檔案推理才能判斷的發現 | **opus** | 唯讀，**不給它上網查** |
 | `keel-exec-implementer` | 4 執行 | 把一個 task 做出來，強制測試先行 | sonnet | 完整權限 |
-| `keel-exec-reviewer-spec` | 4 執行 | 只看有沒有照規格做 | sonnet | 唯讀 |
-| `keel-exec-reviewer-quality` | 4 執行 | 只看寫得好不好 | sonnet | 唯讀 |
-| `keel-exec-reviewer-security` | 4 執行 | 只看資安軸——命中 R4 條件才會派工 | **opus** | 唯讀 |
+| `keel-exec-reviewer-spec` | 4 執行 | 只看有沒有照規格做 | sonnet | 唯讀 + shell 僅限 `git diff`/`log`/`show`、`which`、既有測試指令 |
+| `keel-exec-reviewer-quality` | 4 執行 | 只看寫得好不好 | sonnet | 唯讀 + shell 僅限 `git diff`/`log`/`show`、`which`、既有測試指令 |
+| `keel-exec-reviewer-security` | 4 執行 | 只看資安軸——命中 R4 條件才會派工 | **opus** | 唯讀 + shell 僅限 `git diff`/`log`/`show`、`which`、既有測試指令 |
 | `keel-exec-fixer` | 4 執行 | 只修拿到手的那幾條發現，不順手改別的 | sonnet | 完整權限 |
 | `keel-exec-fixer-critical` | 4 執行 | 只在修復迴圈第 4-5 輪出手——標準層卡了兩次才輪到它 | **opus** | 完整權限 |
 | `keel-wayfind-researcher` | 前置階段 | 解一張能靠外部資料查出答案的研究票 | sonnet | 唯讀 + 完整檢索工具 |
