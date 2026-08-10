@@ -46,6 +46,7 @@ the executing agent's improvisation. The second is worse, and both fixture
 | A3 | Plan review round 3 still unresolved → keel-discover | `keel-workflow` Backward routes | `keel-plan-review` Step 5 exit gate | `07` |
 | A4 | keel-finish can't produce required evidence → keel-debug | `keel-workflow` Backward routes | `keel-finish` Part 1 gate-function failure branch | `08` |
 | A5 | Debugging concludes the requirement is wrong → keel-discover | `keel-workflow` Backward routes | `keel-debug` Phase 2 third outcome | `09` |
+| A7 | Shipped work's Signals say the requirement was wrong → keel-discover | `keel-workflow` Backward routes | `keel-finish` Part 2d writes the signal; `keel-discover` intake reads it on arrival | `23` |
 | A6 | A stage's INPUT contract is unsatisfiable → the owing stage | `keel-workflow` Backward routes | `BLOCKED: 缺 <field>` line in all seven stages; `keel-wayfind` additionally states the wrong-stage case as prose | — |
 
 ## B. Gates that may stop for a user answer
@@ -91,6 +92,7 @@ does not bind a subagent.
 | D4 | Security lens dispatch (2+ keywords / high-risk / new endpoint) | `keel-plan-review` Step 1 | `keel-plan-review` Step 2 roster | `14` |
 | D5 | Design lens dispatch (2+ UI keywords) | `keel-plan-review` Step 1 | Step 2 roster | — |
 | D6 | DX lens dispatch (2+ API/CLI/SDK keywords) | `keel-plan-review` Step 1 | Step 2 roster | — |
+| D12 | Success and failure signals are named before integrating | `keel-finish` Part 2d | same — one question, written to the plan's `## Signals` | `23` |
 | D10 | Design lens checks the visual source of truth exists | `keel-plan-lens-design` §B | same | `21` |
 | D11 | Design lens checks UI tasks route to a design skill via `Skills:` | `keel-plan-lens-design` §C | same | `21` |
 | D7 | Release Runbook when the project has a real (non-preview) deploy step | `PROJECT-TYPE-GUIDE.md` cross-cutting | `keel-finish` Part 3 option 2 | `18` |
@@ -192,7 +194,7 @@ or `Enforced at` points into that file.
 
 ## Current coverage
 
-**76 rules. 51 verified (67%)** — 44 by scenario fixture, 7 by
+**78 rules. 53 verified (67%)** — 46 by scenario fixture, 7 by
 `check-structure.sh`. Recount with:
 
 ```

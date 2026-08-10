@@ -19,6 +19,14 @@ OUTPUT  a user-approved spec: scope locked, test seams agreed, every
         requirement grounded in evidence rather than recollection
 ```
 
+**Arriving from a negative signal?** When the entry point is shipped work
+whose `## Signals` came back wrong, the first question is not "what should we
+build" but **"which part of the original requirement was mistaken"** — quote
+the plan's Signals line and the observation that contradicted it before
+re-running the intake below. A requirement that failed in reality has
+evidence a fresh one does not; wasting it is how the same wrong thing gets
+specified twice.
+
 Missing INPUT → `BLOCKED: 缺 <idea | codebase access> → 退回 the requester`.
 This stage is the pipeline's entry point, so there is no earlier stage to
 route to: an idea too vague to state at all goes back to the person who

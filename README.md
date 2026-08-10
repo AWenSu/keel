@@ -19,6 +19,9 @@
         ▲                                  │                     │
         └──────────── keel-discover ◀───────┘   keel-plan ◀────────┘   keel-debug ◀── keel-finish
                 (round 3 still unresolved)   (contradicts plan)   (evidence can't be produced)
+        ▲
+        └──────────────────────────────────────────── post-merge Signals came back negative
+                                                      (the requirement was wrong, not the code)
 ```
 
 `keel-workflow` sits above all five stages as the router: it detects which

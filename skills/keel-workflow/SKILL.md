@@ -21,6 +21,7 @@ truth, no inlined copies to go stale).
 | Implementation done, wrapping up / about to claim done / PR time | FINISH | `keel-finish` |
 | Idea too big for one session AND the route is still foggy | WAYFIND | `keel-wayfind` (decision map; exits to keel-discover once clear) |
 | Bug, test failure, unexpected behavior | DEBUG | `keel-debug` (loop-first: no hypothesis without a red repro command) |
+| Something shipped and you want to know whether it worked | SIGNALS | read the plan's `## Signals` (written at `keel-finish` Part 2d); a negative signal routes to `keel-discover`, a defect routes to `keel-debug` |
 | Frontend/UI task | UI | `frontend-workflow` (own router; don't mix pipelines) |
 | Output should be a GitHub issue / backlog item | ISSUE | gstack `spec` |
 | Very large plan (>15 files, new product surface) needing dual-model review | HEAVY REVIEW | gstack `/autoplan` instead of keel-plan-review |
@@ -36,6 +37,7 @@ truth, no inlined copies to go stale).
 | Plan review round 3 still has unresolved decisions — the plan is fighting the spec | keel-plan-review | `keel-discover` |
 | keel-finish gate cannot produce the evidence a claim requires | keel-finish | `keel-debug` |
 | Debugging concludes the requirement itself is wrong | keel-debug | `keel-discover` |
+| Shipped work's `## Signals` say it did not work — the requirement was wrong, not the code | post-merge reality | `keel-discover` |
 | A stage's INPUT contract is unsatisfiable (see below) | any | the stage that owes the missing artifact |
 
 ## Stage contracts

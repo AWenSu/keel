@@ -236,6 +236,37 @@ were addressed, not to run a second one; two whole-branch reviews at
 inherit-strongest is the most expensive way to duplicate work in this
 pipeline.
 
+## Part 2d: Name the signal, before it becomes unaskable
+
+Everything above verifies the change against a **test** environment. Nothing
+so far asks whether it works where it will actually live, and after
+integration nobody is holding the question any more — the context that knew
+what "working" meant is about to end.
+
+So, in one line each, before integrating:
+
+- **What would tell us this worked?** A metric, a log line, a support-ticket
+  category that should shrink, a screen someone actually uses. Name where it
+  is read, not just that it exists.
+- **What would tell us this was wrong?** Not "a bug appears" — the specific
+  observation that would mean the *requirement* was mistaken rather than the
+  code. That is the signal that routes back to `keel-discover`, and it is
+  almost impossible to recognise later if nobody wrote it down now.
+- **Is anything instrumented to produce either?** If the answer is no and the
+  change is worth watching, that is a `TODOS.md` entry, not a shrug.
+
+Both lines go into the plan file under `## Signals`, next to the Success
+Criteria they outlive. **One question, asked once** — this is not a new gate
+and it does not block integration; a user who answers "nothing to watch, it's
+a docs fix" has answered it correctly.
+
+Why it sits here rather than in a sixth stage: the pipeline ends at merge,
+which is where the code's life starts. A full post-release stage would be a
+scope this repo cannot honestly claim to run — but the *cheap* half of a
+product loop is writing down, while the context still exists, what reality
+would have to show for the work to count. Skipping that is what makes the
+loop unclosable, not the absence of a stage.
+
 All boxes checked, evidence fresh — present the user exactly these options:
 
 1. **Merge** back to the base branch locally
