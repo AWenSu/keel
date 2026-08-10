@@ -51,7 +51,17 @@ WRITERS="keel-exec-implementer keel-exec-fixer keel-exec-fixer-critical"
 BASH_OK="$WRITERS keel-exec-reviewer-spec keel-exec-reviewer-quality keel-exec-reviewer-security"
 
 in_list() { case " $2 " in *" $1 "*) return 0;; *) return 1;; esac; }
-fm() { sed -n '/^---$/,/^---$/p' "$1"; }   # frontmatter only
+# Frontmatter is lines 2..first `---`, and only when line 1 is `---`. The old
+# sed range re-triggered on any `---`…`---` pair in the body, so an agent could
+# drop `model:`/`tools:` from its real frontmatter, paste a decoy block under an
+# appendix, and pass F1, F2, F3 and F14 while inheriting the ambient model and
+# the full ambient tool set — the exact defect this file's header cites as one
+# of the two real findings that started it.
+fm() {
+  awk 'NR==1 { if ($0 != "---") exit; next }
+       /^---$/ { exit }
+       { print }' "$1"
+}
 
 # Every tool an agent is granted, one per line. Handles both the inline
 # comma form and the YAML block form — reading only the `tools:` LINE let a
@@ -159,10 +169,10 @@ NONAGENT="general-purpose plan-global doubt-driven-development frontend-workflow
 CANDIDATES=$( {
   grep -rhoE '`[a-z][a-z0-9]*(-[a-z0-9]+)+`' skills/*/*.md | tr -d '`'
   # single-word and unbackticked names are only recognisable by their context
-  grep -rhoE '`[a-z][a-z0-9]+` +agent|(dispatch|Dispatch|dispatches|subagent_type)[^.`]{0,30}`[a-z][a-z0-9]+`' skills/*/*.md \
+  grep -rhoE '`[a-z][a-z0-9]+` +agent|(dispatch|Dispatch|dispatches|launch|Launch|spawn|Spawn|fire|Fire|delegate|Delegate|subagent_type)[^.`]{0,30}`[a-z][a-z0-9]+`' skills/*/*.md \
     | grep -oE '`[a-z][a-z0-9]+`' | tr -d '`'
-  grep -rhoE '(dispatch|Dispatch|dispatches|dispatching) +(the +|a +|an +)?[a-z][a-z0-9]*(-[a-z0-9]+)* +agent' skills/*/*.md \
-    | sed -E 's/^(dispatch|Dispatch|dispatches|dispatching) +(the +|a +|an +)?//; s/ +agent$//'
+  grep -rhoE '(dispatch|Dispatch|dispatches|dispatching|launch|Launch|spawn|Spawn) +(the +|a +|an +)?[a-z][a-z0-9]*(-[a-z0-9]+)* +agent' skills/*/*.md \
+    | sed -E 's/^(dispatch|Dispatch|dispatches|dispatching|launch|Launch|spawn|Spawn) +(the +|a +|an +)?//; s/ +agent$//'
 } | sort -u )
 
 # The exemption list is itself unguarded input: adding a real agent's name to
@@ -216,6 +226,18 @@ done
 # endorsement. So the rule text is a constant now, not a pattern: rules/*.txt
 # holds it once, the files that owe it carry it verbatim, and this compares
 # bytes. See rules/README.md for what that does and does not buy.
+# A copy inside an HTML comment or a fenced block is present and inert: three
+# lines later the file can say the opposite. Live text only.
+uncommented() {
+  awk '/<!--/ { c = 1 } c { if (/-->/) c = 0; next } { print }' "$1"
+}
+live_text() {
+  awk '/^[[:space:]]*```/ { fence = !fence; next }
+       fence { next }
+       /<!--/ { c = 1 }
+       c { if (/-->/) c = 0; next }
+       { print }' "$1"
+}
 head_ "rules  canonical rule text present verbatim where it is owed"
 # The rule files themselves are checked first. An empty one makes `grep -F ""`
 # match everything, and a two-line one makes `grep -F` an OR of the lines —
@@ -223,14 +245,40 @@ head_ "rules  canonical rule text present verbatim where it is owed"
 # lists in the manifest is enforced nowhere and would sit here looking
 # authoritative.
 badrule=""
+# The blocklist used to be skipped here — the one file the anti-pattern leg
+# depends on was the one file never validated, and `grep -F -f /dev/null`
+# matches nothing while exiting 1, indistinguishable from a clean repo.
+apn=$(grep -c . rules/anti-patterns.txt)
+apblank=$(grep -c '^[[:space:]]*$' rules/anti-patterns.txt)
+[ "$apn" -ge 5 ] || badrule="$badrule anti-patterns.txt(only $apn entries — the blocklist is the catchable half of a stated boundary)"
+[ "$apblank" -eq 0 ] || badrule="$badrule anti-patterns.txt(blank line makes grep -F match everything)"
+while IFS= read -r apline; do
+  [ ${#apline} -ge 12 ] || badrule="$badrule anti-patterns.txt(entry too short to be distinctive: '$apline')"
+done < rules/anti-patterns.txt
+
 for rf in rules/*.txt; do
   base=$(basename "$rf")
   [ "$base" = "anti-patterns.txt" ] && continue
-  n=$(grep -c . "$rf")
-  [ "$n" -eq 1 ] || badrule="$badrule $base(must be exactly one non-empty line, has $n)"
-  grep -qF "$base" rules/manifest.tsv \
-    || badrule="$badrule $base(orphan — no manifest entry, enforced nowhere)"
+  # total lines, not non-empty lines: a leading blank line kept `grep -c .` at
+  # 1 while `$(cat …)` still produced a multi-line pattern, and `grep -F` reads
+  # that as an OR whose first alternative is the empty string
+  total=$(wc -l < "$rf" | tr -d ' ')
+  nonblank=$(grep -c . "$rf")
+  [ "$total" = "1" ] && [ "$nonblank" = "1" ] \
+    || badrule="$badrule $base(must be exactly one line with no blanks: $total lines, $nonblank non-empty)"
+  # and it has to be a sentence, not a character: one byte in rules/ used to
+  # turn all eight copies of a rule green
+  len=$(head -1 "$rf" | tr -d '[:space:]' | wc -c | tr -d ' ')
+  [ "$len" -ge 20 ] || badrule="$badrule $base(rule text too short to be distinctive: $len non-space chars)"
+  # exact field match, and a commented-out row is not a claim: `grep -F` used
+  # to match the filename inside the `#` comment that disabled it
+  awk -F"$(printf '\t')" -v b="$base" '$1==b {found=1} END{exit !found}' rules/manifest.tsv \
+    || badrule="$badrule $base(orphan — no uncommented manifest row, enforced nowhere)"
 done
+
+dupes=$(grep -v '^#' rules/manifest.tsv | grep -v '^[[:space:]]*$' | sort | uniq -d)
+[ -z "$dupes" ] || badrule="$badrule manifest.tsv(duplicate rows)"
+
 [ -z "$badrule" ] && ok "every canonical rule file is one line and is claimed by the manifest" \
   || { bad "canonical rule file unusable:"; for b in $badrule; do echo "         $b"; done; }
 
@@ -246,8 +294,11 @@ while IFS="$(printf '\t')" read -r rule target deriv; do
   [ -f "$target" ] || { missing_rule="$missing_rule $target(no such file)"; continue; }
   text=$(cat "rules/$rule")
   [ -n "$text" ] || { missing_rule="$missing_rule $rule(empty rule file)"; continue; }
-  grep -qF "$text" "$target" \
-    || missing_rule="$missing_rule $target(missing $rule)"
+  # not `| grep -q`: with `set -o pipefail`, grep -q exits on first match and
+  # the upstream awk takes SIGPIPE, so a HIT reads as a pipeline failure
+  found=$(live_text "$target" | grep -cF "$text")
+  [ "${found:-0}" -ge 1 ] \
+    || missing_rule="$missing_rule $target(missing $rule, or present only in a comment/code fence)"
 done < rules/manifest.tsv
 [ -z "$missing_rule" ] && ok "every file owing a canonical rule carries it verbatim" \
   || { bad "canonical rule text missing or paraphrased:"; \
@@ -258,8 +309,14 @@ done < rules/manifest.tsv
 # how the hardcoded-six external agent list stayed wrong for a month.
 declared_for() { awk -F"$(printf '\t')" -v d="$1" '$3==d && $0 !~ /^#/ {print $2}' rules/manifest.tsv | sort -u; }
 
-derived_dispatchers=$(grep -rlE '`keel-(exec|plan-lens|plan-skeptic|discover-designer|wayfind-researcher)[a-z-]*`|\b(dispatch|Dispatch|dispatches|dispatching)\b' \
-                      skills/*/SKILL.md | sort -u)
+# skills/*/*.md, and a verb set wider than the literal token `dispatch`: a new
+# stage that said "Launch four subagents" in a PLAYBOOK.md was a real
+# dispatcher, carried no rule, and left the derived set equal to the declared
+# one. F4/F5 already widened their own glob for exactly this and the
+# derivation never inherited it.
+derived_dispatchers=$(grep -rlE '`keel-(exec|plan-lens|plan-skeptic|discover-designer|wayfind-researcher)[a-z-]*`|\b(dispatch|Dispatch|dispatches|dispatching|launch|Launch|spawn|Spawn|delegate|Delegate|fire|Fire)\b|subagent_type' \
+                      skills/*/*.md | xargs -n1 dirname | xargs -n1 basename | sort -u \
+                      | while IFS= read -r d; do echo "skills/$d/SKILL.md"; done | sort -u)
 declared_dispatchers=$(declared_for dispatching-stage)
 if [ "$derived_dispatchers" = "$declared_dispatchers" ]; then
   ok "the manifest lists every dispatching stage ($(echo "$declared_dispatchers" | wc -l | tr -d ' '))"
@@ -271,7 +328,10 @@ fi
 derived_fanout=$( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } \
   | sort -u | grep -v '^docs/plans/' | grep -v '^eval-fixtures/' | grep -v '^rules/' \
   | while IFS= read -r f; do
-      [ -f "$f" ] && grep -qiE '^#+ .*([Ff]an-out|扇出)|\*\*[Ff]an-out' "$f" && echo "$f"
+      # a section that caps or uncaps concurrency is a fan-out section whatever
+      # it calls itself: "## Concurrency ceiling" raising the limit to 20 was
+      # invisible to a heading match on "fan-out" alone
+      [ -f "$f" ] && grep -qiE '^#+ .*([Ff]an-out|扇出|[Cc]oncurrenc|並發|併發|平行|[Pp]arallelis)|\*\*[Ff]an-out' "$f" && echo "$f"
       true
     done | sort -u )
 declared_fanout=$(declared_for fanout-section)
@@ -437,7 +497,18 @@ PRODUCER_LIST
   # makes the whole pipeline non-zero, which reported every section undefined
   defined=$(echo "$allmd" | grep -v '^docs/plans/' | grep -v '^eval-fixtures/[0-9]' \
     | while IFS= read -r m; do
-        [ -f "$m" ] && grep -lE "^## ${name}([[:space:]]|\(|$)" "$m" 2>/dev/null
+        # A heading in live prose is a definition anywhere. A heading inside a
+        # fenced block is a template, and a template is only a definition in a
+        # skill that owns the artifact — pasting one into a README code fence
+        # (plus an HTML comment) was how an undefined section passed.
+        if [ -f "$m" ]; then
+          if [ "$(live_text "$m" | grep -cE "^## ${name}([[:space:]]|\(|$)")" -ge 1 ]; then
+            echo "$m"
+          elif echo "$m" | grep -q '^skills/' \
+               && [ "$(uncommented "$m" | grep -cE "^## ${name}([[:space:]]|\(|$)")" -ge 1 ]; then
+            echo "$m"
+          fi
+        fi
         true
       done)
   [ -n "$defined" ] || missing_sec="$missing_sec [$name]"
@@ -487,6 +558,13 @@ done)
 # two documents users actually read did not. Counting rows catches that without
 # needing to match wording across two languages.
 head_ "F11  backward routes documented everywhere"
+# The three tables were cross-checked against each other and against nothing
+# else, so deleting a route from all three passed while RULE-INVENTORY's A
+# section still claimed it and a fixture still graded it.
+inv_routes=$(grep -cE '^\| A[0-9]+ \|' eval-fixtures/RULE-INVENTORY.md)
+inv_gates=$(grep -cE '^\| B[0-9]+ \|' eval-fixtures/RULE-INVENTORY.md)
+
+
 rows_after() {   # rows of the first table following the given heading match
   awk -v pat="$2" '$0 ~ pat {f=1; next} f && /^\|/ {if ($0 !~ /^\|[- :|]+\|$/ && $0 !~ /Trigger|發生什麼/) n++; next} f && n {exit} END {print n+0}' "$1"
 }
@@ -506,9 +584,9 @@ routes_of() {
 wf=$(rows_after skills/keel-workflow/SKILL.md 'Backward routes')
 en=$(rows_after README.md 'Backward routes')
 zh=$(rows_after README.zh-TW.md '回退路由')
-[ "$wf" = "$en" ] && [ "$wf" = "$zh" ] && [ "$wf" -gt 0 ] \
-  && ok "all three backward-route tables list $wf routes" \
-  || bad "backward-route count differs → keel-workflow=$wf README=$en README.zh-TW=$zh"
+[ "$wf" = "$en" ] && [ "$wf" = "$zh" ] && [ "$wf" -gt 0 ] && [ "$wf" = "$inv_routes" ] \
+  && ok "all three backward-route tables list $wf routes, matching RULE-INVENTORY section A" \
+  || bad "backward-route count differs → keel-workflow=$wf README=$en README.zh-TW=$zh RULE-INVENTORY=$inv_routes"
 
 # Compared in order, not sorted: swapping two destinations left the sorted
 # multiset identical while both rows pointed at the wrong stage.
@@ -553,10 +631,11 @@ gates_of() {
 g_wf=$(gates_of skills/keel-workflow/SKILL.md)
 g_en=$(gates_of README.md)
 g_zh=$(gates_of README.zh-TW.md)
-if [ -n "$g_wf" ] && [ "$g_wf" = "$g_en" ] && [ "$g_wf" = "$g_zh" ]; then
-  ok "all three documents list the same $(echo "$g_wf" | wc -l | tr -d ' ') gates"
+ngates=$(echo "$g_wf" | grep -c .)
+if [ -n "$g_wf" ] && [ "$g_wf" = "$g_en" ] && [ "$g_wf" = "$g_zh" ] && [ "$ngates" = "$inv_gates" ]; then
+  ok "all three documents list the same $ngates gates, matching RULE-INVENTORY section B"
 else
-  bad "gate list differs:"
+  bad "gate list differs (documents=$ngates, RULE-INVENTORY section B=$inv_gates):"
   diff <(echo "$g_wf") <(echo "$g_en") | sed 's/^/         en: /'
   diff <(echo "$g_wf") <(echo "$g_zh") | sed 's/^/         zh: /'
 fi
@@ -588,7 +667,13 @@ for f in README.md README.zh-TW.md skills/keel-workflow/SKILL.md; do
       n=$(echo "$row" | grep -oE '^\| `keel-[a-z-]+`' | tr -d '|` ')
       [ -f "agents/$n.md" ] || continue
       real=$(sed -n '/^---$/,/^---$/p' "agents/$n.md" | sed -n 's/^model: *//p' | head -1)
-      shown=$(echo "$row" | grep -oiE '\b(opus|sonnet|haiku|inherit)\b' | head -1 | tr 'A-Z' 'a-z')
+      # from the model COLUMN, not the first match in the row: putting the
+      # word "haiku" in the description column laundered a real haiku pin past
+      # a roster that still displayed opus
+      shown=$(echo "$row" | awk -F'|' '{ for (i = NF; i > 0; i--) {
+                 c = $i; gsub(/[ *`]/, "", c)
+                 if (c ~ /^(opus|sonnet|haiku|inherit)$/) { print tolower(c); exit }
+               } }')
       [ -n "$shown" ] || continue
       [ "$shown" = "$real" ] || echo "$f:$n(doc=$shown,file=$real)"
     done
