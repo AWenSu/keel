@@ -241,7 +241,12 @@ So, in one line each, before integrating:
 
 All three answers go into the plan file under `## Signals`, next to the
 Success Criteria they outlive — the instrumentation one as a `TODOS.md`
-reference when the answer was "not instrumented yet". **One question, asked once** — this is not a new gate
+reference when the answer was "not instrumented yet".
+
+**No plan file?** The Small and Medium shortcuts skip `keel-plan` and still
+route here. Then the answers go in the PR body, or `TODOS.md` if there is no
+PR — the question is about the work, not about which artifact happens to
+exist. Part 2c check 0 makes the same allowance for its own missing input. **One question, asked once** — this is not a new gate
 and it does not block integration; a user who answers "nothing to watch, it's
 a docs fix" has answered it correctly.
 

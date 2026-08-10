@@ -96,6 +96,9 @@ Save to `docs/plans/YYYY-MM-DD-<feature>.md` with this header:
 **Architecture:** <2-3 sentences, ASCII diagram if data flows>
 **Global Constraints:** <exact values copied verbatim from the spec —
   limits, formats, naming, versions. Never paraphrase.>
+**Signals:** <left empty by keel-plan; keel-finish Part 2d fills it in before
+  integrating — what would show this worked, what would show the requirement
+  was wrong, and whether either is instrumented>
 **Success Criteria:** <checklist copied from the spec's "how will we know
   it's done" — the final gate checks these boxes. Format follows the spec's
   Given-When-Then three-part form (scenario / condition / expected result),
@@ -123,8 +126,9 @@ Under the same trigger, add one line to the plan header:
 One of those four, named. Without it the plan can specify every state and
 still leave every visual decision to whoever picks up the ticket — and three
 tasks will answer it three different ways. `keel-plan-lens-design` §B checks
-this field exists; nothing produced it until now, so that check fired on
-every UI plan, which is how a reviewer learns to skim an axis.
+that one of those four is named *somewhere* in the plan; this header line is
+the cheapest way to satisfy it, and until it existed that check fired on
+nearly every UI plan — which is how a reviewer learns to skim an axis.
 
 Plans that do not hit the criterion skip this step entirely — no matrix, no
 visual-source line, no added planning overhead.

@@ -1,6 +1,6 @@
 # Fixture 06: execution finds the plan contradicts current code
 
-**Rule source:** `skills/keel-workflow/SKILL.md` Backward routes (Backward routes) —
+**Rule source:** `skills/keel-workflow/SKILL.md` Backward routes —
 `Execution finds the plan contradicts the code as it now is (beyond one
 task's fix) | keel-execute | keel-plan`
 
