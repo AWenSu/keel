@@ -54,10 +54,11 @@ git -c user.email=harness@local -c user.name=harness commit -q -m "mutation-harn
 # empty directory made that check skip itself — and a skipped check never
 # appears in the baseline, so the coverage assertion could not see that it had
 # no mutation. Give the copy a real install instead.
-export HOME="$WORK/home"
-mkdir -p "$HOME/.claude/skills" "$HOME/.claude/agents"
-cp -R skills/. "$HOME/.claude/skills/"
-cp -R agents/. "$HOME/.claude/agents/"
+BASE_HOME="$WORK/home"
+mkdir -p "$BASE_HOME/.claude/skills" "$BASE_HOME/.claude/agents"
+cp -R skills/. "$BASE_HOME/.claude/skills/"
+cp -R agents/. "$BASE_HOME/.claude/agents/"
+export HOME="$BASE_HOME"
 
 run_checks() { /bin/bash eval-fixtures/check-structure.sh 2>&1 | sed 's/\x1b\[[0-9;]*m//g'; }
 
@@ -74,9 +75,18 @@ if [ "$base_fail" -ne 0 ]; then
   printf '%s\n' "$baseline" | grep '^  FAIL'
   exit 2
 fi
-ALL_IDS=$(printf '%s\n' "$baseline" | grep -oE '^  PASS  \[[a-z0-9-]+\]' \
-          | sed 's/.*\[//; s/\]//' | sort -u)
+# The denominator is the registry, not what this run happened to print. A
+# check behind an environment guard (install-drift) disappears from a printed
+# baseline on a machine where the guard is false — and its coverage
+# requirement disappeared with it.
+ALL_IDS=$(sort "$REPO/eval-fixtures/CHECK-IDS.txt")
 N_IDS=$(printf '%s\n' "$ALL_IDS" | grep -c .)
+printed=$(printf '%s\n' "$baseline" | grep -oE '^  PASS  \[[a-z0-9-]+\]' | sed 's/.*\[//; s/\]//' | sort -u)
+if [ "$ALL_IDS" != "$printed" ]; then
+  echo "FATAL: the baseline did not print every registered check id —"
+  diff <(echo "$ALL_IDS") <(echo "$printed") | sed 's/^/  /'
+  exit 2
+fi
 
 printf '\033[1mkeel mutation harness\033[0m  (%s checks, %s mutations)\n\n' \
   "$N_IDS" "$(ls "$MUT_DIR"/*.sh 2>/dev/null | wc -l | tr -d ' ')"
@@ -90,28 +100,77 @@ for m in "$MUT_DIR"/*.sh; do
   expect=$(sed -n 's/^# expect: *//p' "$m" | head -1)
   class=$(sed -n 's/^# class: *//p' "$m" | head -1)
   [ -n "$expect" ] || { echo "FATAL: $name has no \`# expect:\` header"; exit 2; }
-  COVERED="$COVERED $expect"
+  case "$expect" in none|refused) : ;; *) COVERED="$COVERED $expect" ;; esac
   if [ -n "$FILTER" ]; then
     case "$name$expect$class" in *"$FILTER"*) : ;; *) continue ;; esac
   fi
   MUTS="$MUTS $name"
 done
 NMUT=$(echo $MUTS | wc -w | tr -d ' ')
+if [ "$NMUT" -eq 0 ]; then
+  echo "FATAL: no mutation matched '${FILTER}' — a run that executes nothing used to report PASS and exit 0"
+  exit 2
+fi
+
+# A filename registry. Coverage is denominated in check ids, and one id can
+# stand for many properties: after the table refactor, fourteen mutations
+# expected `tables-generated`, so deleting thirteen of them left coverage PASS
+# and exit 0 — the thirteen the refactor offers as its evidence.
+ondisk=$(ls "$MUT_DIR"/*.sh | xargs -n1 basename | sort)
+regd=$(grep -v '^#' "$MUT_DIR/REGISTRY.txt" | grep -v '^[[:space:]]*$' | sort)
+if [ "$ondisk" != "$regd" ]; then
+  echo "FATAL: mutations/ does not match its registry —"
+  diff <(echo "$regd") <(echo "$ondisk") | sed 's/^/  /'
+  exit 2
+fi
 
 worker() {   # worker <slot>: its own copy, its own slice, its own result file
   slot=$1
   dir="$WORK/w$slot"
   cp -R "$WORK/keel" "$dir" || return 2
+  # one HOME per worker: eight workers used to share a single install, so one
+  # mutation's contamination was visible to the other seven
+  MYHOME="$WORK/h$slot"; cp -R "$BASE_HOME" "$MYHOME" || return 2
+  export HOME="$MYHOME"
   cd "$dir" || return 2
   n=0
   for name in $MUTS; do
     n=$((n + 1))
     [ $(( (n - 1) % JOBS )) -eq "$slot" ] || continue
     ( /bin/bash "$MUT_DIR/$name.sh" ) >/dev/null 2>&1
+    # A mutation that edits the checker proves nothing: "I broke the check" is
+    # not "the check enforces the rule". Opt in per file when the apparatus
+    # itself is the subject (mutation 14 disarms the exemption list on purpose).
+    touched=$(git status --porcelain | awk '{print $NF}')
+    selfedit=""
+    if ! grep -q '^# touches-checker: yes' "$MUT_DIR/$name.sh"; then
+      selfedit=$(printf '%s\n' "$touched" | grep -E '^(eval-fixtures/(check-structure|run-mutations)\.sh|eval-fixtures/CHECK-IDS\.txt|eval-fixtures/mutations/|tables/render\.)' || true)
+    fi
     out=$(run_checks)
-    v=$(verdict_of "$(sed -n 's/^# expect: *//p' "$MUT_DIR/$name.sh" | head -1)" "$out")
+    exp=$(sed -n 's/^# expect: *//p' "$MUT_DIR/$name.sh" | head -1)
+    if [ "$exp" = "refused" ]; then
+      # a negative control: the harness itself is on trial, and passing means
+      # this mutation was rejected rather than graded
+      v=$([ -n "$selfedit" ] && echo REFUSED_OK || echo REFUSED_MISS)
+    elif [ "$exp" = "none" ]; then
+      # a control: this one must leave the board exactly as it found it
+      nf=$(printf '%s\n' "$out" | grep -c '^  FAIL')
+      v=$([ "$nf" -eq 0 ] && echo CONTROL_OK || echo CONTROL_DIRTY)
+    else
+      v=$(verdict_of "$exp" "$out")
+    fi
+    [ -n "$selfedit" ] && [ "$exp" != "refused" ] && v="SELFEDIT"
     git checkout -- . >/dev/null 2>&1
-    git clean -fdq >/dev/null 2>&1
+    # -x too: .gitignore lists progress.md, findings.md and .keel/, all present
+    # in the copy, all previously outside the revert
+    git clean -fdxq >/dev/null 2>&1
+    # and the fake install, which lives outside the git copy entirely: mutation
+    # 55 appends to it, the append survived every later mutation in the run,
+    # and a no-op mutation then inherited the red it caused
+    rm -rf "$MYHOME/.claude"
+    mkdir -p "$MYHOME/.claude/skills" "$MYHOME/.claude/agents"
+    cp -R skills/. "$MYHOME/.claude/skills/"
+    cp -R agents/. "$MYHOME/.claude/agents/"
     printf '%s\t%s\t%s\n' "$n" "$v" "$name" >> "$WORK/res"
   done
 }
@@ -129,13 +188,23 @@ RED=0; GREEN=0
 while IFS="$(printf '\t')" read -r idx v name; do
   exp=$(sed -n 's/^# expect: *//p' "$REPO/$MUT_DIR/$name.sh" | head -1)
   case "$v" in
+    REFUSED_OK)    printf '  \033[32mrefused\033[0m  %-42s → harness declined to grade a checker edit\n' "$name"; GREEN=$((GREEN+1)) ;;
+    REFUSED_MISS)  printf '  \033[31mGRADED IT  \033[0m  %-34s → a mutation that edits the checker was accepted as proof\n' "$name"; RED=$((RED+1)) ;;
+    CONTROL_OK)    printf '  \033[32mcontrol\033[0m  %-42s → board unchanged\n' "$name"; GREEN=$((GREEN+1)) ;;
+    CONTROL_DIRTY) printf '  \033[31mDIRTY BOARD\033[0m  %-34s → a previous mutation was not fully reverted\n' "$name"; RED=$((RED+1)) ;;
     FAIL)   printf '  \033[32m red \033[0m  %-42s → [%s]\n' "$name" "$exp"; GREEN=$((GREEN+1)) ;;
     PASS)   printf '  \033[31mSTILL GREEN\033[0m  %-34s → [%s] did not fire\n' "$name" "$exp"; RED=$((RED+1)) ;;
+    SELFEDIT) printf '  \033[31mSELF-EDIT  \033[0m  %-34s → edits the checker; add `# touches-checker: yes` if that is the point\n' "$name"; RED=$((RED+1)) ;;
     *)      printf '  \033[31mNO SUCH ID \033[0m  %-34s → [%s] never printed\n' "$name" "$exp"; RED=$((RED+1)) ;;
   esac
 done < <(sort -n "$WORK/res")
 
 SKIP=0
+got=$(grep -c . "$WORK/res")
+if [ "$got" -ne "$NMUT" ]; then
+  printf '  \033[31mFAIL\033[0m  %s mutations selected but %s results came back — a worker died silently\n' "$NMUT" "$got"
+  RED=$((RED+1))
+fi
 
 # COVERAGE — the assertion that makes this more than a pile of tests
 printf '\n\033[1mcoverage\033[0m\n'

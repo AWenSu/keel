@@ -582,6 +582,21 @@ else
   bad "tables-generated" "tables/render.sh is missing — the three duplicated tables have no source"
 fi
 
+# ── the check-id registry ───────────────────────────────────────────────────
+# The mutation harness derives its denominator from the ids this script PRINTS,
+# so a check behind an environment guard (the install-drift one) vanishes from
+# the denominator on a machine where the guard is false, and its coverage
+# requirement vanishes with it. The registry is the fixed denominator.
+head_ "registry  every check id is declared"
+declared_ids=$(sort eval-fixtures/CHECK-IDS.txt)
+actual_ids=$(grep -oE 'ok "[a-z0-9-]+"' eval-fixtures/check-structure.sh | sed 's/ok "//; s/"//' | sort)
+if [ "$declared_ids" = "$actual_ids" ]; then
+  ok "check-id-registry" "all $(echo "$actual_ids" | grep -c .) check ids are listed in CHECK-IDS.txt"
+else
+  bad "check-id-registry" "CHECK-IDS.txt is out of step with the script:"
+  diff <(echo "$declared_ids") <(echo "$actual_ids") | sed 's/^/         /'
+fi
+
 # ── maintainer-only: repo vs. installed copy ────────────────────────────────
 # Skips entirely when no keel install is present, so it is a no-op for anyone
 # who just cloned this. For the maintainer, who edits both sides, silent drift
