@@ -47,7 +47,8 @@ multiple sessions or by subagents.
 **The lightweight path still owes the four fields.** `keel-execute` consumes
 `Delivers:` (spec-axis review + staleness relocation), `Files:` (brief
 extraction + staleness check), `Interfaces:` (downstream task briefs), and
-`Skills:` (domain-skill invocation). State the required shape in the `planner`
+`Skills:` (domain-skill invocation), and `Depends on:` (dispatch order,
+parallelism, and which Interfaces reach a brief). State the required shape in the `planner`
 dispatch, and check the return. Any field missing → the shortcut is void; write
 the full artifact here. A plan that omits them doesn't fail loudly at
 execution — it silently disables three of that stage's safety mechanisms.

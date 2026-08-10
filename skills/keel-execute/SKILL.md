@@ -18,9 +18,9 @@ provenance:
 
 ```
 INPUT   a plan file with a header carrying Spec Version + Success Criteria,
-        and every task carrying Delivers / Files / Interfaces / Skills; if it
-        came from keel-plan-review, a REVIEW REPORT ending in
-        NO UNRESOLVED DECISIONS
+        and every task carrying Delivers / Files / Depends on /
+        Interfaces / Skills; if it came from keel-plan-review, a REVIEW
+        REPORT ending in NO UNRESOLVED DECISIONS
 OUTPUT  all tasks committed and reviewed on a non-main branch; ledger complete
         in .keel/progress.md; final whole-branch review passed
 ```
@@ -110,7 +110,8 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
 
 0. **Read the dependency graph before dispatching anything.** Every task
    carries a `Depends on:` line — that is the plan's statement of what must
-   finish first, and the user confirmed those edges at G2. It governs three
+   finish first — confirmed by the user at G2, or re-examined by
+   `keel-plan-review`'s breakdown pass when G2 was skipped. It governs three
    decisions here, and nothing else in this stage can substitute for it:
    - **Order.** Never dispatch a task whose `Depends on:` names a task the
      ledger does not yet record as DONE. Task number is not dependency order.
@@ -123,12 +124,18 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
    - **Which Interfaces to include** in step 1's brief — precisely the tasks
      named in `Depends on:`.
 
+   A task with **no `Depends on:` line at all** is a different thing from one
+   reading `none` → `BLOCKED: 缺 Depends on → 退回 keel-plan`. The Medium
+   shortcut can produce plans without it, and those are exactly the plans G2
+   never confirmed.
+
    `Depends on: none` on every task is a legitimate graph, not a missing one.
    A task naming a dependency that does not exist in the plan is a plan bug →
    `BLOCKED: Depends on 指向不存在的 task → 退回 keel-plan`.
 
 1. **Extract the task brief** — the task's own text plus the plan header
-   (Goal, Global Constraints) plus the Interfaces blocks of the tasks its
+   (Goal, Global Constraints, and `Visual source of truth:` when the plan has
+   one) plus the Interfaces blocks of the tasks its
    `Depends on:` names. Pass briefs as *file paths*, never pasted into the
    prompt — pasted history bloats every downstream dispatch.
 2. **Dispatch a fresh `keel-exec-implementer`** with the brief. If the task
@@ -393,9 +400,9 @@ summary line** — it verifies the structural guarantees (model/tool pins,
 read-only grants, roster completeness) mechanically, and a non-zero exit is
 a real failure, not a report. Then, if `eval-fixtures/RULE-INVENTORY.md`
 exists: also report
-`FIXTURE COVERAGE: N/M rules fixture-covered (X%)` from that file's
-the two `grep -c` commands that file's `## Current coverage` section
-documents — **run them, do not copy the prose figure**, which that same
+`FIXTURE COVERAGE: N/M rules fixture-covered (X%)`, computed by running the
+grep commands that file's `## Current coverage` section documents —
+**run them, do not copy the prose figure**, which that same
 section forbids carrying forward and which has been wrong four times. A
 computed value that disagrees with the prose is itself a finding. Also list
 any rule this plan added or changed that the table doesn't yet have a row
@@ -446,6 +453,14 @@ the stage that reads it. → **keel-finish**.
    whole-branch `code-reviewer`, its coverage diagram, the `FIXTURE COVERAGE`
    report when this repo's own rule files were touched, then one fix pass for
    its findings. Write the closing `final-review:` ledger line.
+
+   **If subagents are genuinely unavailable** (the reason you are in INLINE
+   at all), you cannot dispatch `code-reviewer`. Then do the whole-branch
+   review yourself against the merge-base diff — same two axes, same coverage
+   diagram — and record in the `final-review:` line that it was self-reviewed,
+   because that is materially weaker and the reader deserves to know. Telling
+   the user the branch ships without an independent reader, and writing a
+   `TODOS.md` entry, is the other acceptable answer. Silently skipping is not.
 
    INLINE removes the *per-task* reviewers. It does not remove the
    branch-level one — and it is the mode that needs it most, because here the

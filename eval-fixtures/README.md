@@ -31,7 +31,9 @@ need a human or an agent reading the rule text against the scenario.
 For each fixture:
 
 1. Read `Scenario` — the hypothetical INPUT/state.
-2. Open the cited `Rule source` file:line.
+2. Open the cited `Rule source` — a file plus a section anchor, never a line
+   number; line numbers drift and four fixtures once cited text unrelated to
+   the rule they tested.
 3. Walk the rule's text against the scenario exactly as an agent following
    it would — no interpretation beyond what the text says.
 4. Compare the result to `Expected`. Record PASS/FAIL with the actual

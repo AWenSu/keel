@@ -70,8 +70,9 @@ failure in this pipeline; checking on entry is nearly free.
   list: `keel-finish` Part 2 opens that checklist unconditionally, and a plan
   without one arrives at the final gate with nothing to check. (`Spec
   Version` is genuinely exempt on this path — there is no spec file — and
-  that exemption is stated, not an oversight.) **Plus the four fields
-  keel-execute consumes** — `Delivers:`, `Files:`, `Interfaces:`, `Skills:` —
+  that exemption is stated, not an oversight.) **Plus the five fields
+  keel-execute consumes** — `Delivers:`, `Files:`, `Depends on:`,
+  `Interfaces:`, `Skills:` —
   so say so in the planner dispatch. Without them, keel-execute's brief
   extraction, staleness check, and spec-axis review all fail silently. Any
   field missing on return → do not enter keel-execute; go through `keel-plan`.

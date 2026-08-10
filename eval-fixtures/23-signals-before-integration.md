@@ -13,9 +13,10 @@ all.
 ## A — the question is asked before integrating, not after
 
 **Scenario:** all Success Criteria confirmed, Part 2b clean, Part 2c no
-BLOCKED. About to present the integration options.
+BLOCKED. Part 3 has not been reached yet.
 
-**Expected:** Part 2d runs first — two one-line answers written to the plan's
+**Expected:** Part 2d runs first — it sits between Part 2c and Part 3 for
+exactly this reason — and writes three one-line answers to the plan's
 `## Signals` section. After integration the context that knew what "working"
 meant is gone, and the question becomes unaskable.
 

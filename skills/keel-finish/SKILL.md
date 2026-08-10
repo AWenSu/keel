@@ -220,22 +220,6 @@ the time, and the timestamp is recoverable from the commit or the `TODOS.md`
 entry itself, so a dedicated "decider"/"time" field would be ceremony with no
 reader.
 
-## Part 3: Integrate the branch
-
-**Never merge, rebase, push, or force-push into `main`/`master` without
-explicit user consent** — the rule is defined in keel-workflow and binds this
-stage exactly as it binds keel-execute. Integration is where the pipeline's
-work becomes irreversible; the branch protection does not lapse at the finish
-line.
-
-**`keel-execute` dispatches the final whole-branch `code-reviewer`, not this
-stage** — it holds the base commit and the ledger context that reviewer needs.
-By the time work reaches here, that review and its one fix pass have already
-happened. keel-finish's job is to confirm the review exists and its findings
-were addressed, not to run a second one; two whole-branch reviews at
-inherit-strongest is the most expensive way to duplicate work in this
-pipeline.
-
 ## Part 2d: Name the signal, before it becomes unaskable
 
 Everything above verifies the change against a **test** environment. Nothing
@@ -255,8 +239,9 @@ So, in one line each, before integrating:
 - **Is anything instrumented to produce either?** If the answer is no and the
   change is worth watching, that is a `TODOS.md` entry, not a shrug.
 
-Both lines go into the plan file under `## Signals`, next to the Success
-Criteria they outlive. **One question, asked once** — this is not a new gate
+All three answers go into the plan file under `## Signals`, next to the
+Success Criteria they outlive — the instrumentation one as a `TODOS.md`
+reference when the answer was "not instrumented yet". **One question, asked once** — this is not a new gate
 and it does not block integration; a user who answers "nothing to watch, it's
 a docs fix" has answered it correctly.
 
@@ -266,6 +251,25 @@ scope this repo cannot honestly claim to run — but the *cheap* half of a
 product loop is writing down, while the context still exists, what reality
 would have to show for the work to count. Skipping that is what makes the
 loop unclosable, not the absence of a stage.
+
+## Part 3: Integrate the branch
+
+**Never merge, rebase, push, or force-push into `main`/`master` without
+explicit user consent** — the rule is defined in keel-workflow and binds this
+stage exactly as it binds keel-execute. Integration is where the pipeline's
+work becomes irreversible; the branch protection does not lapse at the finish
+line.
+
+**`keel-execute` dispatches the final whole-branch `code-reviewer`, not this
+stage** — it holds the base commit and the ledger context that reviewer needs.
+By the time work reaches here, that review and its one fix pass have already
+happened. keel-finish's job is to confirm it did: **read the `final-review:`
+line from `.keel/progress.md`** — verdict, findings with their `file:line`,
+each one's disposition, and the coverage figure. No such line is a **gap, not
+a pass**; say so and go get it, the same way Part 2c check (2) treats a
+missing `security:` field. Confirming, not re-running; two whole-branch reviews at
+inherit-strongest is the most expensive way to duplicate work in this
+pipeline.
 
 All boxes checked, evidence fresh — present the user exactly these options:
 

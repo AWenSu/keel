@@ -86,6 +86,9 @@ Missing → confidence ≤5, appendix only.
 ```
 SCORE: <0-10>
 API 時效查核: <library → 版本 → 計畫假設是否成立 → URL>
+High-risk rollback: <每個 [Risk: High] task → 具名 rollback 步驟，或「缺」>
+風險等級合理性: <有無低報；低報會靜默關掉 R4 條件 3 與上面的 error registry>
+Skills 路由（非 UI）: <每個平台／協定 task → 已命名的 skill，或「未命名」>
 FINDINGS:
   [<Critical|High|Medium|Low>] <one-line claim>
     證據: <file:line + 引文  |  URL + 日期 + 引文>

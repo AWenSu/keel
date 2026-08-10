@@ -93,7 +93,7 @@ does not bind a subagent.
 | D5 | Design lens dispatch (2+ UI keywords) | `keel-plan-review` Step 1 | Step 2 roster | — |
 | D6 | DX lens dispatch (2+ API/CLI/SDK keywords) | `keel-plan-review` Step 1 | Step 2 roster | — |
 | D12 | Success and failure signals are named before integrating | `keel-finish` Part 2d | same — one question, written to the plan's `## Signals` | `23` |
-| D10 | Design lens checks the visual source of truth exists | `keel-plan-lens-design` §B | same | `21` |
+| D10 | Design lens checks the visual source of truth exists | `keel-plan-lens-design` §B *(only when keel-plan-review runs — most plans skip it)* | same | `21` |
 | D11 | Design lens checks UI tasks route to a design skill via `Skills:` | `keel-plan-lens-design` §C | same | `21` |
 | D7 | Release Runbook when the project has a real (non-preview) deploy step | `PROJECT-TYPE-GUIDE.md` cross-cutting | `keel-finish` Part 3 option 2 | `18` |
 | D8 | Prior-art scan at discovery — internal + external, three sections, 差異點 as a hard gate | `keel-discover` Step 2b | same; consumed by `keel-plan-lens-ceo` Step A | `20` |
@@ -138,7 +138,7 @@ context fork.
 
 ## P. Plan-field contracts
 
-`keel-plan` writes nine structured fields. Each needs three things: something
+`keel-plan` writes ten structured fields. Each needs three things: something
 that **produces** it, something that **consumes** it, and something that
 **verifies** it is present and right. A field with a producer and a consumer
 and no verifier is the defect shape that has recurred most often in this repo
@@ -152,9 +152,9 @@ Add a row here whenever a field is added to the plan template.
 | P1 | `Delivers:` | `keel-plan` Step 3 | implementer; staleness relocation | `keel-exec-reviewer-spec` — the whole axis is "did it do what this says" | `06` |
 | P2 | `Files:` | `keel-plan` Step 3 | implementer staleness check | `keel-execute` drift threshold (accumulates relocations) | `06` |
 | P3 | `Interfaces:` | `keel-plan` Step 3 | `keel-execute` brief extraction | `keel-exec-reviewer-spec` interface-drift check | — |
-| P4 | `Skills:` | `keel-plan` Step 3 | implementer invokes them | `keel-plan-lens-design` §C for user-visible surfaces; `keel-plan-lens-eng` for platform / protocol / tooling work | `21` |
+| P4 | `Skills:` | `keel-plan` Step 3 | implementer invokes them | `keel-plan-lens-design` §C for user-visible surfaces; `keel-plan-lens-eng` for platform / protocol / tooling work *(only when keel-plan-review runs — most plans skip it)* | `21` |
 | P5 | `Depends on:` | `keel-plan` Step 3 | `keel-execute` step 0 — order, parallelism, which Interfaces to include | user at G2 (edge correctness); `BLOCKED` on an edge naming a nonexistent task | `22` |
-| P6 | `[Risk: …]` | `keel-plan` Step 3 | `keel-execute` R4 condition 3; `keel-plan-lens-eng` error registry | `keel-plan-lens-eng` — rollback present on every High, and grade-sanity against what the task actually does | `22` |
+| P6 | `[Risk: …]` | `keel-plan` Step 3 | `keel-execute` R4 condition 3; `keel-plan-lens-eng` error registry | `keel-plan-lens-eng` — rollback present on every High, and grade-sanity against what the task actually does *(only when keel-plan-review runs — most plans skip it)* | `22` |
 | P7 | `Spec Version:` | `keel-plan` Step 2 header | `keel-execute` pre-flight drift check | same check (mismatch routes back) | `03` |
 | P8 | `Success Criteria:` | `keel-plan` Step 2 header | `keel-finish` Part 2; final `code-reviewer` spec axis | user at G7, one criterion at a time | `19` |
 | P9 | `Global Constraints:` | `keel-plan` Step 2 header | `keel-execute` brief extraction | `keel-execute` pre-flight (tasks violating them) | — |
@@ -179,7 +179,7 @@ Add a row here whenever a field is added to the plan template.
 | H3 | `.keel/` added to `.gitignore` on creation | `keel-workflow` Pipeline state file, `keel-execute` universal rules | same | — |
 | H4 | Deferred work written to `TODOS.md` | `keel-plan-review` Step 5 deferrals | same; `keel-finish` Part 2 + risk-acceptance | — |
 | H5 | Implementer writes its full report to a file, returns ≤15 lines | `keel-execute` per-task step 2 | `keel-exec-implementer` Report section | — |
-| H6 | Final whole-branch review is persisted to the ledger | `keel-execute` Finish | same (`final-review:` line) | `keel-finish` Part 3 reads it | — |
+| H6 | Final whole-branch review is persisted to the ledger | `keel-execute` Finish | same (`final-review:` line); `keel-finish` Part 3 reads it and treats a missing line as a gap | — |
 | H7 | Pre-flight and the final review run in **both** modes, not only ORCHESTRATED | `keel-execute` INLINE steps 1 and 4 | same | — |
 
 ## Maintenance
@@ -225,7 +225,7 @@ expected result — tautological, zero information. And they fail loudly in
 normal use: a run that skips the ledger is visibly broken by the next
 compaction, which is a faster and harsher test than any document.
 
-**B2–B5, D5–D6, E7–E9, P3, P9, F8, H6–H7** are in the same family — gates and dispatch
+**A6, B2–B5, D5–D6, E7–E9, P3, P9, F8, H6–H7** are in the same family — gates and dispatch
 triggers that fire on ordinary runs, or persistence rules whose absence is
 immediately apparent.
 
