@@ -1,6 +1,6 @@
 ---
 name: keel-plan-lens-ceo
-description: 【計畫審查／CEO 視角】這件事該不該做。挑戰前提、範圍野心、未考慮的替代方案、與既有能力重複，並做外部先驗（prior-art）掃描找現成方案與已知撞牆。有權建議「整個砍掉」。Stage 3 of the dev pipeline (keel-plan-review), CEO lens.
+description: 【計畫審查／CEO 視角】這件事該不該做。挑戰前提、範圍野心、未考慮的替代方案、與既有能力重複，並做外部先驗（prior-art）掃描找現成方案與已知撞牆。有權建議「整個砍掉」。Stage 3 of the keel pipeline (keel-plan-review), CEO lens.
 tools: Read, Grep, Glob, WebFetch, mcp__tavily__tavily_search, mcp__exa__web_search_exa, mcp__context7__resolve-library-id, mcp__context7__query-docs
 model: opus
 ---

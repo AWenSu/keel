@@ -1,6 +1,6 @@
 ---
 name: keel-exec-reviewer-security
-description: 【執行／資安軸審查】這個 diff 有沒有引入資安漏洞。secrets、認證授權（含 session 管理）、注入、輸入驗證、輸出編碼、SSRF、加密、錯誤與日誌洩漏、相依套件（含存在性驗證防 slopsquatting）、檔案上傳。不看規格符合度與程式碼品質——那是另兩軸的工作，三軸不得合併排名。Stage 4 of the dev pipeline (keel-execute), security reviewer (R4 條件觸發之第三軸).
+description: 【執行／資安軸審查】這個 diff 有沒有引入資安漏洞。secrets、認證授權（含 session 管理）、注入、輸入驗證、輸出編碼、SSRF、加密、錯誤與日誌洩漏、相依套件（含存在性驗證防 slopsquatting）、檔案上傳。不看規格符合度與程式碼品質——那是另兩軸的工作，三軸不得合併排名。Stage 4 of the keel pipeline (keel-execute), security reviewer (R4 條件觸發之第三軸).
 tools: Read, Grep, Glob, Bash
 model: opus
 ---

@@ -1,6 +1,6 @@
 ---
 name: keel-wayfind
-description: Use when a piece of work is too big for one session AND the route to it is still foggy — chart it as a local map of decision tickets, then resolve them one per session until the way is clear. Pre-stage of the unified dev pipeline; hands off to keel-discover or keel-plan once the fog is gone.
+description: Use when a piece of work is too big for one session AND the route to it is still foggy — chart it as a local map of decision tickets, then resolve them one per session until the way is clear. Pre-stage of the keel pipeline; hands off to keel-discover or keel-plan once the fog is gone.
 provenance:
   synthesized: 2026-07-22
   sources:
@@ -17,7 +17,8 @@ OUTPUT  docs/maps/<topic>/MAP.md with zero open tickets and no fogged
         section, exiting to keel-discover or keel-plan
 ```
 
-Missing INPUT → this is the wrong stage. Work that is merely large but whose
+Missing INPUT → `BLOCKED: 缺 <foggy oversized idea> → 退回 the requester`.
+In practice the miss is the other way round: this is the wrong stage. Work that is merely large but whose
 route is visible goes straight to `keel-discover`; the fog is the entry
 condition, not the size.
 

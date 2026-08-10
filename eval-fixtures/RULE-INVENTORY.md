@@ -160,6 +160,7 @@ Add a row here whenever a field is added to the plan template.
 | P7 | `Spec Version:` | `keel-plan` Step 2 header | `keel-execute` pre-flight drift check | same check (mismatch routes back) | `03` |
 | P8 | `Success Criteria:` | `keel-plan` Step 2 header | `keel-finish` Part 2; final `code-reviewer` spec axis | user at G7, one criterion at a time | `19` |
 | P9 | `Global Constraints:` | `keel-plan` Step 2 header | `keel-execute` brief extraction | `keel-execute` pre-flight (tasks violating them) | — |
+| P11 | `## Signals` section reserved in the plan | `keel-plan` Step 2a | `keel-finish` Part 2d writes into it; `keel-workflow` and `keel-discover` read it | `check-structure.sh` (F9) | `23` |
 | P10 | `Visual source of truth:` | `keel-plan` Step 2b (same UI trigger as the feature matrix) | implementer; sets the bar the built screen is judged against | `keel-plan-lens-design` §B | `21` |
 
 ## V. Evidence rules (verification discipline)
@@ -196,7 +197,7 @@ or `Enforced at` points into that file.
 
 ## Current coverage
 
-**80 rules. 55 verified (68%)** — 46 by scenario fixture, 9 by
+**81 rules. 56 verified (69%)** — 46 by scenario fixture, 10 by
 `check-structure.sh`. Recount with:
 
 ```
@@ -215,8 +216,8 @@ plausible number in a table reads as verified.
 
 ## This is the ceiling, and it is deliberate
 
-68% is not a milestone on the way to 100% — it is the intended end state. The
-remaining 25 rows should stay uncovered:
+69% is not a milestone on the way to 100% — it is the intended end state. The
+remaining 25 rows:
 
 **V1–V5** (Iron Law, red-green regression, the evidence gate, "an agent's
 success report is not evidence", untrusted search results) and **H1–H5**

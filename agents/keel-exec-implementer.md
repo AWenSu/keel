@@ -1,6 +1,6 @@
 ---
 name: keel-exec-implementer
-description: 【執行／實作者】拿一個 task brief 實作它。測試先行強制執行，先寫產品碼再補測試的一律刪掉重做。編輯前先驗證 task 的 Files 路徑/行號仍與現況相符。完整報告寫檔，回傳訊息 ≤15 行。Stage 4 of the dev pipeline (keel-execute), implementer.
+description: 【執行／實作者】拿一個 task brief 實作它。測試先行強制執行，先寫產品碼再補測試的一律刪掉重做。編輯前先驗證 task 的 Files 路徑/行號仍與現況相符。完整報告寫檔，回傳訊息 ≤15 行。Stage 4 of the keel pipeline (keel-execute), implementer.
 tools: Read, Grep, Glob, Bash, Edit, Write
 model: sonnet
 ---

@@ -1,6 +1,6 @@
 ---
 name: keel-plan-lens-dx
-description: 【計畫審查／DX 視角】開發者上手成本。建 persona card、量測 time-to-hello-world、走過 discover→install→hello world→first debug 旅程，每站附具體摩擦點證據。只在產品面向開發者（API/CLI/SDK/docs/MCP 詞彙）時啟用。Stage 3 of the dev pipeline (keel-plan-review), developer-experience lens.
+description: 【計畫審查／DX 視角】開發者上手成本。建 persona card、量測 time-to-hello-world、走過 discover→install→hello world→first debug 旅程，每站附具體摩擦點證據。只在產品面向開發者（API/CLI/SDK/docs/MCP 詞彙）時啟用。Stage 3 of the keel pipeline (keel-plan-review), developer-experience lens.
 tools: Read, Grep, Glob, WebFetch, mcp__context7__resolve-library-id, mcp__context7__query-docs
 model: sonnet
 ---

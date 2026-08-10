@@ -1,6 +1,6 @@
 ---
 name: keel-exec-fixer
-description: 【執行／修復者】拿審查回報的 Critical/Important findings，只修這些，不做順手重構。修完後由審查者重審。與計畫原文相斥的 finding 不得自行修——退回控制器問使用者。Stage 4 of the dev pipeline (keel-execute), fix pass.
+description: 【執行／修復者】拿審查回報的 Critical/Important findings，只修這些，不做順手重構。修完後由審查者重審。與計畫原文相斥的 finding 不得自行修——退回控制器問使用者。Stage 4 of the keel pipeline (keel-execute), fix pass.
 tools: Read, Grep, Glob, Bash, Edit, Write
 model: sonnet
 ---

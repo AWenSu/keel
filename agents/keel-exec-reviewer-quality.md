@@ -1,6 +1,6 @@
 ---
 name: keel-exec-reviewer-quality
-description: 【執行／品質軸審查】這個 diff 寫得好不好。repo 既有標準優先，加上 keel-execute/smells.md 的 Fowler smell 基線與 keel-discover/design.md 的設計判準。不看規格符合度——那是另一軸，兩軸不得合併排名。Stage 4 of the dev pipeline (keel-execute), code-quality reviewer.
+description: 【執行／品質軸審查】這個 diff 寫得好不好。repo 既有標準優先，加上 keel-execute/smells.md 的 Fowler smell 基線與 keel-discover/design.md 的設計判準。不看規格符合度——那是另一軸，各軸不得合併排名。Stage 4 of the keel pipeline (keel-execute), code-quality reviewer.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---

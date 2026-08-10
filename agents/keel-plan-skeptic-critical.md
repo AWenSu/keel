@@ -1,6 +1,6 @@
 ---
 name: keel-plan-skeptic-critical
-description: 【計畫審查／反駁者·重案】高強度反駁。用於 Critical finding，或觸及安全／資料遺失／不可逆操作／跨檔案推理的 finding。除了查核證據與推論，還必須主動搜尋既有防護、構造具體失效情境、評估影響半徑。刻意不給檢索工具。Stage 3 of the dev pipeline (keel-plan-review), heavy adversarial verification.
+description: 【計畫審查／反駁者·重案】高強度反駁。用於 Critical finding，或觸及安全／資料遺失／不可逆操作／跨檔案推理的 finding。除了查核證據與推論，還必須主動搜尋既有防護、構造具體失效情境、評估影響半徑。刻意不給檢索工具。Stage 3 of the keel pipeline (keel-plan-review), heavy adversarial verification.
 tools: Read, Grep, Glob
 model: opus
 ---

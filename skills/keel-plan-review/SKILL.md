@@ -1,6 +1,6 @@
 ---
 name: keel-plan-review
-description: Use after keel-plan produces a plan for large or risky work — runs multi-lens automated review (business, engineering, plus design/DX/security when in scope) with adversarial verification, auto-deciding routine choices and escalating only genuine judgment calls. Stage 3 of the unified dev pipeline; hands off to keel-execute.
+description: Use after keel-plan produces a plan for large or risky work — runs multi-lens automated review (business, engineering, plus design/DX/security when in scope) with adversarial verification, auto-deciding routine choices and escalating only genuine judgment calls. Stage 3 of the keel pipeline; hands off to keel-execute.
 provenance:
   synthesized: 2026-07-14
   sources:

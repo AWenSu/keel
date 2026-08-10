@@ -1,6 +1,6 @@
 ---
 name: keel-exec-reviewer-spec
-description: 【執行／規格軸審查】這個 diff 有沒有做到 task 的 Delivers 說的事。只看規格符合度：缺漏行為、範圍蔓延、做了但做錯。不看程式碼品質——那是另一軸的工作，兩軸不得合併排名。Stage 4 of the dev pipeline (keel-execute), spec-compliance reviewer.
+description: 【執行／規格軸審查】這個 diff 有沒有做到 task 的 Delivers 說的事。只看規格符合度：缺漏行為、範圍蔓延、做了但做錯。不看程式碼品質——那是另一軸的工作，各軸不得合併排名。Stage 4 of the keel pipeline (keel-execute), spec-compliance reviewer.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---
@@ -60,7 +60,7 @@ Against the task's `Delivers:` line and its acceptance criteria:
    same finding's evidence line so the same drift isn't reported twice.
 
 You do NOT rank, mention, or grade code quality. A different reviewer owns
-that axis. **The two axes are never merged into a single verdict** — a change
+that axis. **The axes are never merged into a single verdict** — a change
 can follow every standard and build the wrong thing, or build exactly the
 right thing badly. One axis must not mask the other.
 

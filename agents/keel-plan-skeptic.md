@@ -1,6 +1,6 @@
 ---
 name: keel-plan-skeptic
-description: 【計畫審查／反駁者·標準】拿一條 High finding，查核引用證據是否屬實、推論是否成立，站不住就判定 refuted。適用於單點機械查核；Critical 或觸及安全／資料遺失／不可逆／需跨檔案推理者改派 keel-plan-skeptic-critical。刻意不給檢索工具。Stage 3 of the dev pipeline (keel-plan-review), standard adversarial verification.
+description: 【計畫審查／反駁者·標準】拿一條 High finding，查核引用證據是否屬實、推論是否成立，站不住就判定 refuted。適用於單點機械查核；Critical 或觸及安全／資料遺失／不可逆／需跨檔案推理者改派 keel-plan-skeptic-critical。刻意不給檢索工具。Stage 3 of the keel pipeline (keel-plan-review), standard adversarial verification.
 tools: Read, Grep, Glob
 model: sonnet
 ---

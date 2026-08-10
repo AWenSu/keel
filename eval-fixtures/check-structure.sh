@@ -298,7 +298,10 @@ fi
 # ── bonus: prefix hygiene — no pre-rename names survive ─────────────────────
 head_ "naming  no pre-rename identifiers survive"
 # This script necessarily contains the pattern it searches for, so exclude it.
-STALE='dev-(discover|plan|execute|finish|debug|wayfind|workflow|exec)|unified-dev-skills'
+# `dev pipeline` (unhyphenated) survived the rename in 22 descriptions —
+# the field that decides whether a skill is selected at all — because this
+# pattern only matched the hyphenated form.
+STALE='dev-(discover|plan|execute|finish|debug|wayfind|workflow|exec)|unified-dev-skills|(unified )?dev pipeline'
 if leftover=$( { git ls-files -z; git ls-files -zo --exclude-standard; } | xargs -0 grep -lE "\b($STALE)" 2>/dev/null \
               | grep -v '^eval-fixtures/check-structure.sh$' || true); [ -z "$leftover" ]; then
   ok "no dev-* or unified-dev-skills references in tracked files"

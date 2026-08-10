@@ -174,7 +174,7 @@ G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續
 
 `keel-exec-reviewer-spec` 會依「合約測試證據強度」分級每一條 Interface drift 發現（有既有測試 > 只寫了合約描述 > 未經查證的宣稱），不是照計畫怎麼寫就照單全收。
 
-另外還有兩個現成的通用專家，pipeline 該用的時候會直接用原名派出去：`test-engineer`、`silent-failure-hunter`。`security-auditor` 是另一路的即興專家——只在你手動叫 `/security-review` 或 `/ship` 時才會出場，`keel-plan-review`、`keel-execute` 從來不會自動派它；這兩個階段自己的資安把關現在交給 `keel-plan-lens-security`（第 3 階段）跟 `keel-exec-reviewer-security`（第 4 階段第三軸）。`keel-execute` 收尾時的整分支審查用 `code-reviewer`，而且**故意不去指定它的模型**——讓它自己繼承這次 session 裡最強的那顆模型，因為這是 `keel-finish` 之前的最後一道防線，不能省。
+另外還有六個本 repo 不附、但會依名字派工的 agent（`planner`、`code-reviewer`、`test-engineer`、`silent-failure-hunter`、`build-error-resolver`、`security-auditor`）——它們的模型與工具由你的安裝決定，所以上面那張表釘不住，pipeline 該用的時候會直接用原名派出去：`test-engineer`、`silent-failure-hunter`。`security-auditor` 是另一路的即興專家——只在你手動叫 `/security-review` 或 `/ship` 時才會出場，`keel-plan-review`、`keel-execute` 從來不會自動派它；這兩個階段自己的資安把關現在交給 `keel-plan-lens-security`（第 3 階段）跟 `keel-exec-reviewer-security`（第 4 階段第三軸）。`keel-execute` 收尾時的整分支審查用 `code-reviewer`，而且**故意不去指定它的模型**——讓它自己繼承這次 session 裡最強的那顆模型，因為這是 `keel-finish` 之前的最後一道防線，不能省。
 
 ### 分層靠 agent 名字，不是靠 model 參數
 
@@ -205,7 +205,7 @@ Eng 視角（`keel-plan-lens-eng`）跑另一輪平行檢查，對照現行文�
 
 ## 來源出處與跟上游同步
 
-這是**合成出來的東西，不是 fork**——上游還在持續改。每個 SKILL.md 的 frontmatter 都寫了來源跟版本號。合成時的版本快照（2026-07-14 合成；2026-07-30 加了 subagent 名冊跟先驗掃描）：
+這是**合成出來的東西，不是 fork**——上游還在持續改。每個 SKILL.md 的 frontmatter 都寫了來源跟版本號。合成時的版本快照（2026-07-14 合成；2026-07-30；discover 階段先驗掃描與 design lens 的視覺／路由檢查 2026-08-10 加了 subagent 名冊跟先驗掃描）：
 
 | 上游 | 版本 | Repo |
 |------|------|------|

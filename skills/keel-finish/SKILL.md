@@ -1,6 +1,6 @@
 ---
 name: keel-finish
-description: Use when implementation appears complete, before claiming done, committing final work, or opening a PR — enforces fresh verification evidence for every claim, exercises the change end-to-end, names the signals that would later show it worked or that the requirement was wrong, then integrates the branch. Stage 5 (final) of the unified dev pipeline.
+description: Use when implementation appears complete, before claiming done, committing final work, or opening a PR — enforces fresh verification evidence for every claim, exercises the change end-to-end, names the signals that would later show it worked or that the requirement was wrong, then integrates the branch. Stage 5 (final) of the keel pipeline.
 provenance:
   synthesized: 2026-07-14
   sources:

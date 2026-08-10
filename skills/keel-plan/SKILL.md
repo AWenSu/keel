@@ -1,6 +1,6 @@
 ---
 name: keel-plan
-description: Use when you have an approved spec or clear requirements for a multi-step task, before touching code — produces a plan file precise enough that an engineer with zero codebase context could execute it. Stage 2 of the unified dev pipeline; hands off to keel-plan-review (large tasks) or keel-execute.
+description: Use when you have an approved spec or clear requirements for a multi-step task, before touching code — produces a plan file precise enough that an engineer with zero codebase context could execute it. Stage 2 of the keel pipeline; hands off to keel-plan-review (large tasks) or keel-execute.
 provenance:
   synthesized: 2026-07-14
   sources:

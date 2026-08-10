@@ -1,6 +1,6 @@
 ---
 name: keel-plan-lens-design
-description: 【計畫審查／設計視角】使用者可見的狀態有沒有全部指名（空狀態／錯誤／載入／邊界／a11y／responsive）；計畫有沒有視覺真相來源；UI task 的 Skills: 欄位有沒有路由到合適的 design skill；有沒有重複造既有元件。只看計畫文字判得出來的東西，不從計畫評品味。只在命中 2+ view/rendering/UI/component/screen 詞彙時啟用。Stage 3 of the dev pipeline (keel-plan-review), design lens.
+description: 【計畫審查／設計視角】使用者可見的狀態有沒有全部指名（空狀態／錯誤／載入／邊界／a11y／responsive）；計畫有沒有視覺真相來源；UI task 的 Skills: 欄位有沒有路由到合適的 design skill；有沒有重複造既有元件。只看計畫文字判得出來的東西，不從計畫評品味。只在命中 2+ view/rendering/UI/component/screen 詞彙時啟用。Stage 3 of the keel pipeline (keel-plan-review), design lens.
 tools: Read, Grep, Glob
 model: sonnet
 ---

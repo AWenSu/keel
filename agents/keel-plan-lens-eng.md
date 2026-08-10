@@ -1,6 +1,6 @@
 ---
 name: keel-plan-lens-eng
-description: 【計畫審查／工程視角】這件事能不能照寫的方式做出來。架構、資料流（happy path + nil/empty + 上游錯誤）、邊界案例、測試策略、效能、複雜度異味；並用 context7/Ref 查核計畫點名的框架 API 是否已棄用；另檢查高風險 task 有沒有具名 rollback、風險等級有沒有低報、非 UI task 的 Skills 欄位有沒有路由到對應的平台／協定 skill。Stage 3 of the dev pipeline (keel-plan-review), engineering lens.
+description: 【計畫審查／工程視角】這件事能不能照寫的方式做出來。架構、資料流（happy path + nil/empty + 上游錯誤）、邊界案例、測試策略、效能、複雜度異味；並用 context7/Ref 查核計畫點名的框架 API 是否已棄用；另檢查高風險 task 有沒有具名 rollback、風險等級有沒有低報、非 UI task 的 Skills 欄位有沒有路由到對應的平台／協定 skill。Stage 3 of the keel pipeline (keel-plan-review), engineering lens.
 tools: Read, Grep, Glob, WebFetch, mcp__context7__resolve-library-id, mcp__context7__query-docs, mcp__ref__ref_search_documentation, mcp__ref__ref_read_url
 model: sonnet
 ---

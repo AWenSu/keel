@@ -1,6 +1,6 @@
 ---
 name: keel-execute
-description: Use when a reviewed plan is ready to implement — orchestrates subagent-driven execution with per-task review and a crash-safe progress ledger, or falls back to inline execution when subagents aren't available. Stage 4 of the unified dev pipeline; hands off to keel-finish.
+description: Use when a reviewed plan is ready to implement — orchestrates subagent-driven execution with per-task review and a crash-safe progress ledger, or falls back to inline execution when subagents aren't available. Stage 4 of the keel pipeline; hands off to keel-finish.
 provenance:
   synthesized: 2026-07-14
   sources:

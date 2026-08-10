@@ -1,6 +1,6 @@
 ---
 name: keel-debug
-description: Use when something is broken, throwing, failing, flaky, or slow and the cause is not already known — a disciplined diagnosis loop that forbids guessing before a reproduction exists. Debug lane of the unified dev pipeline; replaces the superpowers:systematic-debugging routing.
+description: Use when something is broken, throwing, failing, flaky, or slow and the cause is not already known — a disciplined diagnosis loop that forbids guessing before a reproduction exists. Debug lane of the keel pipeline; replaces the superpowers:systematic-debugging routing.
 provenance:
   synthesized: 2026-07-22
   sources:
