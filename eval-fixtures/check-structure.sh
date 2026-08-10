@@ -131,14 +131,18 @@ ROSTER=$(grep -oE '^\| `keel-[a-z-]+`' skills/keel-workflow/SKILL.md | tr -d '|`
 # Derived, not listed: a hardcoded six meant any external agent added later
 # (Explore, Plan, claude-code-guide…) was silently exempt from the
 # declared-in-the-roster requirement.
+# Derived, not listed: a hardcoded six meant any external agent added later
+# (Explore, Plan, claude-code-guide…) was silently exempt from the
+# declared-in-the-roster requirement.
+# Written without `case` inside the pipeline — bash 3.2, which is what
+# /bin/bash is on macOS, aborts the whole script there with a syntax error.
 EXTERNAL=$(grep -rhoE '`[A-Za-z][A-Za-z0-9_-]{3,}`' skills/*/*.md | tr -d '`' | sort -u \
+  | grep -vE '^(keel-|model$|general-purpose$|subagent_type$|Delivers$|Files$|Skills$|Interfaces$)' \
+  | grep -vE '\.(md|sh)$' \
   | while read -r n; do
-      [ -f "agents/$n.md" ] && continue
-      case "$n" in
-        keel-*|*.md|*.sh|model|general-purpose|subagent_type|Delivers|Files|Skills|Interfaces) continue;;
-      esac
-      grep -rqE "(dispatch|Dispatch|派工|派出).{0,80}\`$n\`|\`$n\` (agent|subagent)" skills/*/*.md \
-        && echo "$n"
+      [ -f "agents/$n.md" ] || \
+        grep -rqE "(dispatch|Dispatch|派工|派出).{0,80}\`$n\`|\`$n\` (agent|subagent)" skills/*/*.md \
+        && [ ! -f "agents/$n.md" ] && echo "$n"
     done)
 
 missing=""
@@ -347,7 +351,8 @@ for sec in $(echo "$allmd" | xargs grep -hoE '`## [A-Z][A-Za-z0-9 -]{1,30}`' 2>/
              | sed 's/^`## //; s/`$//' | sort -u | tr ' ' '\001'); do
   name=$(echo "$sec" | tr '\001' ' ')
   # `## Task N` is a finding tag, not a section; artifact sections are exempt
-  case "$name" in Task\ *) continue;; esac
+  # bash 3.2 rejects `case` inside these subshell pipelines
+  expr "$name" : 'Task ' >/dev/null && continue
   # sections a stage tells a *plan or spec file* to create live in those
   # artifacts, not here — recognised by the instruction verb near the mention
   echo "$allmd" | xargs grep -hE "(save it under|write it under|goes in|writes|written into|new) \`?## ${name}\`?" \
@@ -373,8 +378,9 @@ badq=$(for fx in eval-fixtures/[0-9]*.md; do
   | while read -r q; do
       frag=$(echo "$q" | sed 's/  */ /g; s/^ *//; s/ *$//')
       # elisions and mid-sentence excerpts are deliberate, not misquotes
-      case "$frag" in *"..."*|*"…"*) continue;; esac
-      case "$flat" in *"$frag"*) ;; *) echo "$fx → ${srcs%% *}: \"$(echo "$frag"|cut -c1-50)\"";; esac
+      echo "$frag" | grep -q '\.\.\.\|…' && continue
+      echo "$flat" | grep -qF "$frag" \
+        || echo "$fx → ${srcs%% *}: \"$(echo "$frag"|cut -c1-50)\""
     done
 done)
 [ -z "$badq" ] && ok "every fixture blockquote is verbatim from its cited source" \
