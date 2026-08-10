@@ -87,3 +87,51 @@ silently breaks first when unrelated wording nearby gets edited. Then add a
 row to `RULE-INVENTORY.md`, which tracks every declared rule (covered or
 not) as the denominator for the `FIXTURE COVERAGE: N/M` line `keel-execute`'s
 Finish step reports whenever a plan edits this repo's own skill files.
+
+## Two harnesses, and where each one stops
+
+```
+check-structure.sh     asserts facts about the repo         (27 checks)
+run-mutations.sh       asserts those checks can fail        (55 mutations)
+NN-*.md                scenario walkthroughs a script can't judge
+```
+
+`run-mutations.sh` exists because five independent audits kept finding the
+same thing: a check that is green and cannot go red. Each audit found it by
+hand and threw the mutation away afterwards, so the next audit re-found the
+class somewhere else, and a check that rotted between audits stayed green
+until someone happened to attack it again. Every mutation those audits ran is
+now a file in `mutations/`, re-run on demand:
+
+```bash
+bash eval-fixtures/run-mutations.sh          # ~4 min, 8 parallel copies
+bash eval-fixtures/run-mutations.sh route    # one area
+JOBS=4 bash eval-fixtures/run-mutations.sh   # fewer copies
+```
+
+The load-bearing assertion is the last one it prints: **every check id must be
+the expected failure of at least one mutation.** A check with no mutation
+fails the run. That is the "declared but not wired" rule — the defect class
+this whole directory exists for — applied to the checking apparatus itself,
+which was the one place it had never been applied.
+
+### What is done, and what would reopen it
+
+Done, and not to be re-litigated by another audit:
+
+- every check can fail, proven, re-runnable
+- every defect class the five audits found is represented by a mutation
+- rule text has a single source and is compared as bytes (`rules/`)
+
+An audit finding **another instance of one of the six classes** in
+`mutations/README.md` is a gap in this suite, not new work: add the mutation,
+fix the check, done. Only a **new class** reopens the design.
+
+Deliberately outside both harnesses, and stated in `rules/README.md` and
+`RULE-INVENTORY.md` rather than implied:
+
+- a contradiction phrased in a way nobody has written before
+- a row rewritten to mean its opposite
+
+Those belong to the scenario fixtures and to periodic adversarial audit. No
+number in this repo counts them as mechanical coverage.

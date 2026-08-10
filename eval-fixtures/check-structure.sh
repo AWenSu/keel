@@ -24,8 +24,11 @@ fi
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 2
 
 PASS=0; FAIL=0
-ok()   { printf '  \033[32mPASS\033[0m  %s\n' "$1"; PASS=$((PASS+1)); }
-bad()  { printf '  \033[31mFAIL\033[0m  %s\n' "$1"; FAIL=$((FAIL+1)); }
+# Every check carries a stable id. The mutation harness names checks by id, so
+# a message that changes wording (or a count inside it) does not silently
+# detach a check from the mutation that proves it can fail.
+ok()   { printf '  \033[32mPASS\033[0m  [%s] %s\n' "$1" "$2"; PASS=$((PASS+1)); }
+bad()  { printf '  \033[31mFAIL\033[0m  [%s] %s\n' "$1" "$2"; FAIL=$((FAIL+1)); }
 head_() { printf '\n\033[1m%s\033[0m\n' "$1"; }
 
 AGENTS=(agents/*.md)
@@ -51,6 +54,11 @@ WRITERS="keel-exec-implementer keel-exec-fixer keel-exec-fixer-critical"
 BASH_OK="$WRITERS keel-exec-reviewer-spec keel-exec-reviewer-quality keel-exec-reviewer-security"
 
 in_list() { case " $2 " in *" $1 "*) return 0;; *) return 1;; esac; }
+
+# eval-fixtures/mutations/ holds deliberately-broken text: every mutation file
+# contains the defect it injects, so a repo-wide sweep reads them as live
+# defects. They are test data, not documents.
+not_test_data() { grep -v '^eval-fixtures/mutations/'; }
 # Frontmatter is lines 2..first `---`, and only when line 1 is `---`. The old
 # sed range re-triggered on any `---`…`---` pair in the body, so an agent could
 # drop `model:`/`tools:` from its real frontmatter, paste a decoy block under an
@@ -82,7 +90,7 @@ printf '\033[1mkeel structural checks\033[0m  (%s agents, %s skills)\n' \
 head_ "F1  every agent pins model:"
 miss=""
 for a in "${AGENTS[@]}"; do fm "$a" | grep -q '^model:' || miss="$miss $(basename "$a")"; done
-[ -z "$miss" ] && ok "all $N_AGENTS agents pin a model" || bad "no model: pin →$miss"
+[ -z "$miss" ] && ok "agent-model-pin" "all $N_AGENTS agents pin a model" || bad "agent-model-pin" "no model: pin →$miss"
 
 # ── F2: every agent pins its own tools ──────────────────────────────────────
 head_ "F2  every agent pins tools:"
@@ -91,8 +99,8 @@ for a in "${AGENTS[@]}"; do
   { fm "$a" | grep -q '^tools:' && [ -n "$(tools_of "$a")" ]; } \
     || miss="$miss $(basename "$a")"
 done
-[ -z "$miss" ] && ok "all $N_AGENTS agents pin a non-empty tool list" \
-  || bad "no tools: pin (inherits the ambient set) →$miss"
+[ -z "$miss" ] && ok "agent-tools-pin" "all $N_AGENTS agents pin a non-empty tool list" \
+  || bad "agent-tools-pin" "no tools: pin (inherits the ambient set) →$miss"
 
 # ── F3: read-only is a grant, not a promise ─────────────────────────────────
 head_ "F3  read-only enforced by tool list"
@@ -106,10 +114,10 @@ for a in "${AGENTS[@]}"; do
     in_list "$n" "$BASH_OK" || badb="$badb $n"
   fi
 done
-[ -z "$badw" ] && ok "write tools confined to the 3 implementer/fixer agents" \
-  || bad "unexpected Edit/Write grant →$badw"
-[ -z "$badb" ] && ok "Bash confined to writers + the 3 diff reviewers" \
-  || bad "unexpected Bash grant →$badb"
+[ -z "$badw" ] && ok "write-grant" "write tools confined to the 3 implementer/fixer agents" \
+  || bad "write-grant" "unexpected Edit/Write grant →$badw"
+[ -z "$badb" ] && ok "bash-grant" "Bash confined to writers + the 3 diff reviewers" \
+  || bad "bash-grant" "unexpected Bash grant →$badb"
 
 # The 3 reviewers keep Bash, so their restriction lives in prose — verify it exists.
 missr=""
@@ -124,8 +132,8 @@ for n in keel-exec-reviewer-spec keel-exec-reviewer-quality keel-exec-reviewer-s
     *) missr="$missr $n(no command restriction)" ;;
   esac
 done
-[ -z "$missr" ] && ok "each Bash-holding reviewer states its read-only shell restriction" \
-  || bad "Bash granted with no stated restriction →$missr"
+[ -z "$missr" ] && ok "reviewer-shell-prose" "each Bash-holding reviewer states its read-only shell restriction" \
+  || bad "reviewer-shell-prose" "Bash granted with no stated restriction →$missr"
 
 # The READMEs are declaration sites for F3 (RULE-INVENTORY says so), and the
 # "reviewer described as plain read-only while holding Bash" defect recurred
@@ -141,8 +149,8 @@ for f in README.md README.zh-TW.md; do
       || missd="$missd $f:$n"
   done
 done
-[ -z "$missd" ] && ok "both READMEs describe the 3 reviewers' shell grant" \
-  || bad "README calls a Bash-holding reviewer plain read-only →$missd"
+[ -z "$missd" ] && ok "readme-shell-grant" "both READMEs describe the 3 reviewers' shell grant" \
+  || bad "readme-shell-grant" "README calls a Bash-holding reviewer plain read-only →$missd"
 
 # ── F4/F5: dispatch names resolve to a roster row ───────────────────────────
 head_ "F4/F5  dispatched subagent_types exist and are rostered"
@@ -182,16 +190,16 @@ for n in $NONAGENT; do
   [ -f "agents/$n.md" ] && badexempt="$badexempt $n(is a shipped agent)"
   grep -qE "^\| \`$n\`" skills/keel-workflow/SKILL.md && badexempt="$badexempt $n(is rostered)"
 done
-[ -z "$badexempt" ] && ok "the non-agent exemption list contains no real agents" \
-  || bad "exemption list hides a real agent →$badexempt"
+[ -z "$badexempt" ] && ok "exemption-guard" "the non-agent exemption list contains no real agents" \
+  || bad "exemption-guard" "exemption list hides a real agent →$badexempt"
 
 missing=""
 for a in "${AGENTS[@]}"; do
   n=$(basename "$a" .md)
   in_list "$n" "$(echo $ROSTER)" || missing="$missing $n"
 done
-[ -z "$missing" ] && ok "all $N_AGENTS shipped agents appear in the keel-workflow roster" \
-  || bad "shipped but not rostered →$missing"
+[ -z "$missing" ] && ok "shipped-rostered" "all $N_AGENTS shipped agents appear in the keel-workflow roster" \
+  || bad "shipped-rostered" "shipped but not rostered →$missing"
 
 # every keel-* name mentioned as a dispatch target must have a file.
 # Skill names share the prefix (keel-plan-review is a skill, not an agent), so
@@ -203,8 +211,8 @@ for n in $(grep -rhoE '`keel-[a-z-]+`' skills/*/*.md \
   in_list "$n" "$(echo $SKILL_NAMES)" && continue
   [ -f "agents/$n.md" ] || ghosts="$ghosts $n"
 done
-[ -z "$ghosts" ] && ok "every agent named in a skill has a definition file" \
-  || bad "named but missing from agents/ →$ghosts"
+[ -z "$ghosts" ] && ok "no-ghost-agent" "every agent named in a skill has a definition file" \
+  || bad "no-ghost-agent" "named but missing from agents/ →$ghosts"
 
 # every agent-shaped name a skill uses must be rostered — shipped ones by
 # having a file (checked above) and a roster row, external ones by the row alone
@@ -215,8 +223,8 @@ for n in $CANDIDATES; do
   echo "$n" | grep -q '^keel-' && continue      # shipped: covered by the two checks above
   grep -qE "^\| \`$n\`" skills/keel-workflow/SKILL.md || undecl="$undecl $n"
 done
-[ -z "$undecl" ] && ok "external agents used are declared in the roster" \
-  || bad "dispatched but absent from roster →$undecl"
+[ -z "$undecl" ] && ok "external-rostered" "external agents used are declared in the roster" \
+  || bad "external-rostered" "dispatched but absent from roster →$undecl"
 
 # ── F4/F6/F16: canonical rule text, compared as bytes ───────────────────────
 # Four audits found the same defect class, and every instance lived in a check
@@ -279,8 +287,8 @@ done
 dupes=$(grep -v '^#' rules/manifest.tsv | grep -v '^[[:space:]]*$' | sort | uniq -d)
 [ -z "$dupes" ] || badrule="$badrule manifest.tsv(duplicate rows)"
 
-[ -z "$badrule" ] && ok "every canonical rule file is one line and is claimed by the manifest" \
-  || { bad "canonical rule file unusable:"; for b in $badrule; do echo "         $b"; done; }
+[ -z "$badrule" ] && ok "rule-file-usable" "every canonical rule file is one line and is claimed by the manifest" \
+  || { bad "rule-file-usable" "canonical rule file unusable:"; for b in $badrule; do echo "         $b"; done; }
 
 missing_rule=""
 while IFS="$(printf '\t')" read -r rule target deriv; do
@@ -300,8 +308,8 @@ while IFS="$(printf '\t')" read -r rule target deriv; do
   [ "${found:-0}" -ge 1 ] \
     || missing_rule="$missing_rule $target(missing $rule, or present only in a comment/code fence)"
 done < rules/manifest.tsv
-[ -z "$missing_rule" ] && ok "every file owing a canonical rule carries it verbatim" \
-  || { bad "canonical rule text missing or paraphrased:"; \
+[ -z "$missing_rule" ] && ok "rule-text-verbatim" "every file owing a canonical rule carries it verbatim" \
+  || { bad "rule-text-verbatim" "canonical rule text missing or paraphrased:"; \
        for m in $missing_rule; do echo "         $m"; done; }
 
 # The manifest is a declaration, so it is cross-checked against a derivation —
@@ -319,14 +327,14 @@ derived_dispatchers=$(grep -rlE '`keel-(exec|plan-lens|plan-skeptic|discover-des
                       | while IFS= read -r d; do echo "skills/$d/SKILL.md"; done | sort -u)
 declared_dispatchers=$(declared_for dispatching-stage)
 if [ "$derived_dispatchers" = "$declared_dispatchers" ]; then
-  ok "the manifest lists every dispatching stage ($(echo "$declared_dispatchers" | wc -l | tr -d ' '))"
+  ok "manifest-dispatchers" "the manifest lists every dispatching stage ($(echo "$declared_dispatchers" | wc -l | tr -d ' '))"
 else
-  bad "dispatching stages differ from the manifest:"
+  bad "manifest-dispatchers" "dispatching stages differ from the manifest:"
   diff <(echo "$declared_dispatchers") <(echo "$derived_dispatchers") | sed 's/^/         /'
 fi
 
 derived_fanout=$( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } \
-  | sort -u | grep -v '^docs/plans/' | grep -v '^eval-fixtures/' | grep -v '^rules/' \
+  | sort -u | not_test_data | grep -v '^docs/plans/' | grep -v '^eval-fixtures/' | grep -v '^rules/' \
   | while IFS= read -r f; do
       # a section that caps or uncaps concurrency is a fan-out section whatever
       # it calls itself: "## Concurrency ceiling" raising the limit to 20 was
@@ -336,9 +344,9 @@ derived_fanout=$( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.m
     done | sort -u )
 declared_fanout=$(declared_for fanout-section)
 if [ "$derived_fanout" = "$declared_fanout" ]; then
-  ok "the manifest lists every fan-out section ($(echo "$declared_fanout" | wc -l | tr -d ' '))"
+  ok "manifest-fanout" "the manifest lists every fan-out section ($(echo "$declared_fanout" | wc -l | tr -d ' '))"
 else
-  bad "fan-out sections differ from the manifest:"
+  bad "manifest-fanout" "fan-out sections differ from the manifest:"
   diff <(echo "$declared_fanout") <(echo "$derived_fanout") | sed 's/^/         /'
 fi
 
@@ -349,13 +357,13 @@ fi
 # stated in rules/README.md and in RULE-INVENTORY rather than papered over.
 head_ "rules  no file contradicts a canonical rule (literal blocklist)"
 hits=$( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } \
-  | sort -u | grep -v '^rules/' | grep -v '^docs/plans/' \
+  | sort -u | not_test_data | grep -v '^rules/' | grep -v '^docs/plans/' \
   | while IFS= read -r f; do
       [ -f "$f" ] && grep -inFf rules/anti-patterns.txt "$f" | sed "s|^|$f:|"
       true
     done )
-[ -z "$hits" ] && ok "no known anti-pattern appears in any tracked file" \
-  || { bad "anti-pattern found:"; echo "$hits" | sed 's/^/         /'; }
+[ -z "$hits" ] && ok "no-anti-pattern" "no known anti-pattern appears in any tracked file" \
+  || { bad "no-anti-pattern" "anti-pattern found:"; echo "$hits" | sed 's/^/         /'; }
 
 # ── F7: fan-out ceiling — one scope, stated the same way everywhere ─────────
 # The previous version of this check asserted that one literal 8-word string was
@@ -370,7 +378,7 @@ head_ "F7  fan-out ceiling consistent repo-wide"
 # backtracked catastrophically: grep hung, returned nothing, and the check
 # passed forever. v5 does the windowing in awk, which cannot blow up.
 noscope=$( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } \
-             | sort -u | grep -v '^docs/plans/' | while IFS= read -r f; do
+             | sort -u | not_test_data | grep -v '^docs/plans/' | while IFS= read -r f; do
   [ -f "$f" ] || continue
   awk -v F="$f" '
     { L[NR] = $0 }
@@ -406,11 +414,11 @@ nb=$(grep -rocE '總量|總計|[0-9]+ +total|in total' --include='*.md' . 2>/dev
 # (the ceiling text itself is now a canonical rule, checked above by bytes;
 #  what remains here is the scope requirement: a total with no stated scope)
 if [ "${nb:-0}" -eq 0 ]; then
-  bad "no fan-out ceiling stated anywhere — the rule has been deleted, not satisfied"
+  bad "total-budget-scoped" "no fan-out ceiling stated anywhere — the rule has been deleted, not satisfied"
 elif [ -z "$noscope" ]; then
-  ok "all $nb stated total-agent budgets are scoped to a task loop or a round"
+  ok "total-budget-scoped" "all $nb stated total-agent budgets are scoped to a task loop or a round"
 else
-  bad "total-agent budget with no task-loop/round scope:"; echo "$noscope" | sed 's/^/         /'
+  bad "total-budget-scoped" "total-agent budget with no task-loop/round scope:"; echo "$noscope" | sed 's/^/         /'
 fi
 
 # ── bonus: prefix hygiene — no pre-rename names survive ─────────────────────
@@ -421,10 +429,10 @@ head_ "naming  no pre-rename identifiers survive"
 # pattern only matched the hyphenated form.
 STALE='dev-(discover|plan|execute|finish|debug|wayfind|workflow|exec)|unified-dev-skills|(unified )?dev pipeline'
 if leftover=$( { git ls-files -z; git ls-files -zo --exclude-standard; } | xargs -0 grep -lE "\b($STALE)" 2>/dev/null \
-              | grep -v '^eval-fixtures/check-structure.sh$' || true); [ -z "$leftover" ]; then
-  ok "no dev-* or unified-dev-skills references in tracked files"
+              | grep -v '^eval-fixtures/check-structure.sh$' | not_test_data || true); [ -z "$leftover" ]; then
+  ok "no-stale-names" "no dev-* or unified-dev-skills references in tracked files"
 else
-  bad "stale identifiers in:"; echo "$leftover" | sed 's/^/         /'
+  bad "no-stale-names" "stale identifiers in:"; echo "$leftover" | sed 's/^/         /'
 fi
 
 # ── fixtures cite stable anchors, not line numbers ──────────────────────────
@@ -435,13 +443,13 @@ fi
 head_ "fixtures  Rule source cites a resolvable anchor"
 nfix=$(ls eval-fixtures/[0-9]*.md 2>/dev/null | wc -l | tr -d ' ')
 if [ "$nfix" -eq 0 ]; then
-  bad "no fixture files found — check ran against nothing"
+  bad "fixture-anchor" "no fixture files found — check ran against nothing"
 else
   # any Rule-source line, bolded or not, citing any .md with a line number
   cites=$(grep -hniE '^\**Rule source' eval-fixtures/[0-9]*.md \
           | grep -E '\.md:[0-9]+' || true)
-  [ -z "$cites" ] && ok "none of the $nfix fixtures pins a rule to a line number" \
-    || { bad "line-number citation will drift:"; echo "$cites" | sed 's/^/         /'; }
+  [ -z "$cites" ] && ok "fixture-anchor" "none of the $nfix fixtures pins a rule to a line number" \
+    || { bad "fixture-anchor" "line-number citation will drift:"; echo "$cites" | sed 's/^/         /'; }
 
   # every file named in a Rule source must exist — a dangling path sends the
   # grader somewhere that is not merely stale but absent
@@ -450,8 +458,8 @@ else
              | tr -d '`' | sort -u); do
     [ -f "$f" ] || missf="$missf $f"
   done
-  [ -z "$missf" ] && ok "every file cited by a fixture exists" \
-    || bad "fixture cites a nonexistent file →$missf"
+  [ -z "$missf" ] && ok "fixture-file-exists" "every file cited by a fixture exists" \
+    || bad "fixture-file-exists" "fixture cites a nonexistent file →$missf"
 fi
 
 # ── every named section that is referenced actually exists ──────────────────
@@ -462,7 +470,7 @@ head_ "sections  every referenced ## section is defined somewhere"
 # A filename containing a space used to word-split into three nonexistent
 # paths, three awk fatals, and every section reported undefined — a check
 # that degrades to all-false-positive is a check nobody will read.
-allmd=$( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } | sort -u )
+allmd=$( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } | sort -u | not_test_data )
 grep_md() { echo "$allmd" | while IFS= read -r m; do [ -f "$m" ] && grep "$@" "$m"; true; done; }
 missing_sec=""
 for sec in $(grep_md -hoE '`## [A-Z][A-Za-z0-9 -]{1,30}`' 2>/dev/null \
@@ -513,8 +521,8 @@ PRODUCER_LIST
       done)
   [ -n "$defined" ] || missing_sec="$missing_sec [$name]"
 done
-[ -z "$missing_sec" ] && ok "every referenced ## section has a definition" \
-  || bad "referenced but never defined →$missing_sec"
+[ -z "$missing_sec" ] && ok "section-defined" "every referenced ## section has a definition" \
+  || bad "section-defined" "referenced but never defined →$missing_sec"
 
 head_ "fixtures  quoted rule text appears in the cited file"
 badq=$(for fx in eval-fixtures/[0-9]*.md; do
@@ -549,8 +557,8 @@ badq=$(for fx in eval-fixtures/[0-9]*.md; do
         || echo "$fx → ${srcs%% *}: \"$(echo "$frag"|cut -c1-50)\""
     done
 done)
-[ -z "$badq" ] && ok "every fixture blockquote is verbatim from its cited source" \
-  || { bad "fixture quotes text absent from its source:"; echo "$badq" | sed 's/^/         /'; }
+[ -z "$badq" ] && ok "fixture-quote-verbatim" "every fixture blockquote is verbatim from its cited source" \
+  || { bad "fixture-quote-verbatim" "fixture quotes text absent from its source:"; echo "$badq" | sed 's/^/         /'; }
 
 # ── F11: the backward-route table is the same length in all three documents ──
 # The A7 route (post-merge Signals → keel-discover) was added to keel-workflow
@@ -585,8 +593,8 @@ wf=$(rows_after skills/keel-workflow/SKILL.md 'Backward routes')
 en=$(rows_after README.md 'Backward routes')
 zh=$(rows_after README.zh-TW.md '回退路由')
 [ "$wf" = "$en" ] && [ "$wf" = "$zh" ] && [ "$wf" -gt 0 ] && [ "$wf" = "$inv_routes" ] \
-  && ok "all three backward-route tables list $wf routes, matching RULE-INVENTORY section A" \
-  || bad "backward-route count differs → keel-workflow=$wf README=$en README.zh-TW=$zh RULE-INVENTORY=$inv_routes"
+  && ok "route-count" "all three backward-route tables list $wf routes, matching RULE-INVENTORY section A" \
+  || bad "route-count" "backward-route count differs → keel-workflow=$wf README=$en README.zh-TW=$zh RULE-INVENTORY=$inv_routes"
 
 # Compared in order, not sorted: swapping two destinations left the sorted
 # multiset identical while both rows pointed at the wrong stage.
@@ -599,12 +607,12 @@ rt_zh=$(routes_of README.zh-TW.md '回退路由')
 # right" in all three tables passed.
 nprose=$(echo "$rt_wf" | grep -c '<prose>')
 [ "${nprose:-0}" -le 1 ] \
-  || bad "more than one backward route has a prose destination ($nprose) — a stage name was laundered into the slot"
+  || bad "route-destinations" "more than one backward route has a prose destination ($nprose) — a stage name was laundered into the slot"
 [ "${nprose:-0}" -le 1 ] && PASS=$((PASS+0))
 if [ "$rt_wf" = "$rt_en" ] && [ "$rt_wf" = "$rt_zh" ] && [ "${nprose:-0}" -le 1 ]; then
-  ok "every route's destination matches across all three tables"
+  ok "route-destinations" "every route's destination matches across all three tables"
 else
-  bad "route destinations differ:"
+  bad "route-destinations" "route destinations differ:"
   diff <(echo "$rt_wf") <(echo "$rt_en") | sed 's/^/         en: /'
   diff <(echo "$rt_wf") <(echo "$rt_zh") | sed 's/^/         zh: /'
 fi
@@ -633,9 +641,9 @@ g_en=$(gates_of README.md)
 g_zh=$(gates_of README.zh-TW.md)
 ngates=$(echo "$g_wf" | grep -c .)
 if [ -n "$g_wf" ] && [ "$g_wf" = "$g_en" ] && [ "$g_wf" = "$g_zh" ] && [ "$ngates" = "$inv_gates" ]; then
-  ok "all three documents list the same $ngates gates, matching RULE-INVENTORY section B"
+  ok "gate-list" "all three documents list the same $ngates gates, matching RULE-INVENTORY section B"
 else
-  bad "gate list differs (documents=$ngates, RULE-INVENTORY section B=$inv_gates):"
+  bad "gate-list" "gate list differs (documents=$ngates, RULE-INVENTORY section B=$inv_gates):"
   diff <(echo "$g_wf") <(echo "$g_en") | sed 's/^/         en: /'
   diff <(echo "$g_wf") <(echo "$g_zh") | sed 's/^/         zh: /'
 fi
@@ -679,12 +687,12 @@ for f in README.md README.zh-TW.md skills/keel-workflow/SKILL.md; do
     done
 done > /tmp/keel-model-drift.$$ 2>/dev/null
 badmodel=$(cat /tmp/keel-model-drift.$$; rm -f /tmp/keel-model-drift.$$)
-[ -z "$badmodel" ] && ok "every documented model pin matches the agent file" \
-  || { bad "documented model differs from the agent's frontmatter:"; echo "$badmodel" | sed 's/^/         /'; }
+[ -z "$badmodel" ] && ok "model-pin-documented" "every documented model pin matches the agent file" \
+  || { bad "model-pin-documented" "documented model differs from the agent's frontmatter:"; echo "$badmodel" | sed 's/^/         /'; }
 if [ -z "$bad_roster" ]; then
-  ok "both READMEs list exactly the $N_AGENTS shipped agents"
+  ok "readme-roster" "both READMEs list exactly the $N_AGENTS shipped agents"
 else
-  bad "README roster does not match agents/ →$bad_roster"
+  bad "readme-roster" "README roster does not match agents/ →$bad_roster"
   for f in $bad_roster; do diff <(echo "$shipped") <(roster_of "$f") | sed "s|^|         $f: |"; done
 fi
 
@@ -706,8 +714,8 @@ if [ -d "$HOME/.claude/skills/keel-workflow" ]; then
     [ -f "$d" ] || { drift="$drift $(basename "$f" .md)(missing)"; continue; }
     cmp -s "$f" "$d" || drift="$drift $(basename "$f" .md)"
   done
-  [ -z "$drift" ] && ok "all skills and agents byte-identical to ~/.claude" \
-    || bad "installed copy has drifted →$drift"
+  [ -z "$drift" ] && ok "install-in-sync" "all skills and agents byte-identical to ~/.claude" \
+    || bad "install-in-sync" "installed copy has drifted →$drift"
 fi
 
 # ── summary ─────────────────────────────────────────────────────────────────

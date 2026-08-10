@@ -72,8 +72,15 @@ tools, every dispatched name resolves to a definition — run it before
 committing any change to this repo:
 
 ```bash
-bash eval-fixtures/check-structure.sh    # exit 0 = all pass
+bash eval-fixtures/check-structure.sh    # 27 checks, exit 0 = all pass
+bash eval-fixtures/run-mutations.sh      # prove each of those checks can fail
 ```
+
+The second one is the one that matters. It injects 55 real defects — every
+mutation five independent audits of this repo ever ran — one at a time in a
+throwaway copy, and asserts the named check goes red. Its final assertion is
+that **every check has at least one mutation**: a check nothing has ever
+tested fails the run.
 
 **Rules that appear in more than one file have a single source.**
 [`rules/`](rules/) holds the canonical text of each one; every file that

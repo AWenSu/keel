@@ -49,8 +49,11 @@ Claude Code 裝備齊全一點，規劃類的 skill 就會越堆越多：superpo
 **回歸測試 pipeline 自己的規則。** [`eval-fixtures/`](eval-fixtures/) 用兩種方式驗證 keel 自己。`check-structure.sh` 是腳本——每隻 agent 都釘死 model 與工具清單、沒有唯讀 agent 拿到寫入權限、每個被派工的名字都找得到定義檔。動本 repo 前先跑：
 
 ```bash
-bash eval-fixtures/check-structure.sh    # exit 0 = 全過
+bash eval-fixtures/check-structure.sh    # 27 條檢查，exit 0 = 全過
+bash eval-fixtures/run-mutations.sh      # 證明上面每條檢查真的會紅
 ```
+
+第二支才是重點。它把 55 個真實缺陷（五輪獨立稽核跑過的每一個突變）逐一注入拋棄式副本，斷言指定的那條檢查變紅。最後一條斷言是**每條檢查都必須至少有一個突變**——沒有人測過的檢查會讓整個 run 失敗。
 
 **出現在一份以上文件裡的規則，只有一份正本。**[`rules/`](rules/) 存每條規則的正本文字，凡是要陳述該規則的檔案都逐字帶那句話，檢查比對的是位元組，不是 pattern。要改規則就三步：改 `rules/<rule>.txt`、跑檢查、把新句子貼進它點名的每個檔案。只改其中一份複本會直接 FAIL——這正是目的，舊的失敗模式就是規則在某份文件改了、另外兩份一個月後才發現。抓不到的部分寫在 `rules/README.md`。
 
