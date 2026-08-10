@@ -135,6 +135,8 @@ context fork.
 | F6 | No `model` override at any dispatch site | `keel-workflow` roster note | every skill's dispatch instruction | `check-structure.sh` |
 | F7 | Fan-out ceiling | `keel-workflow` fan-out note (concurrency), `keel-execute` Fan-out ceiling (per task loop) | each stage | `check-structure.sh` |
 | F8 | Coverage stars are awarded by named-test count, not impression | `keel-execute` Finish coverage table | same — each star cites a test `file:name`; an uncitable star is a GAP | — |
+| F9 | Every `## section` a file references is defined somewhere | — (the requirement is implicit in every cross-reference) | `check-structure.sh` | `check-structure.sh` |
+| F10 | A fixture's blockquote is verbatim from the source it cites | `eval-fixtures/README.md` grading instruction | `check-structure.sh` | `check-structure.sh` |
 
 ## P. Plan-field contracts
 

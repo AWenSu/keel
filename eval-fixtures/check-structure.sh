@@ -316,6 +316,42 @@ else
     || bad "fixture cites a nonexistent file →$missf"
 fi
 
+# ── every named section that is referenced actually exists ──────────────────
+# The `## Signals` defect: six files read a section by that exact name and no
+# file defined it, because what got added was a header *field*. Section-vs-
+# field is invisible to every other check here and cost one whole commit.
+head_ "sections  every referenced ## section is defined somewhere"
+allmd=$( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } | sort -u )
+missing_sec=""
+for sec in $(echo "$allmd" | xargs grep -hoE '`## [A-Za-z][A-Za-z ]{2,30}`' 2>/dev/null \
+             | sed 's/^`## //; s/`$//' | sort -u | tr ' ' '\001'); do
+  name=$(echo "$sec" | tr '\001' ' ')
+  # sections a stage tells a *plan or spec file* to create live in those
+  # artifacts, not here — recognised by the instruction verb near the mention
+  echo "$allmd" | xargs grep -hE "(save it under|write it under|goes in|new) \`## ${name}\`" \
+    >/dev/null 2>&1 && continue
+  echo "$allmd" | xargs grep -lE "^## ${name}" >/dev/null 2>&1 \
+    || missing_sec="$missing_sec [$name]"
+done
+[ -z "$missing_sec" ] && ok "every referenced ## section has a definition" \
+  || bad "referenced but never defined →$missing_sec"
+
+head_ "fixtures  quoted rule text appears in the cited file"
+badq=$(for fx in eval-fixtures/[0-9]*.md; do
+  src=$(grep -m1 '^\*\*Rule source' "$fx" \
+        | grep -oE '`[A-Za-z0-9_./-]+\.md`' | head -1 | tr -d '`')
+  [ -n "$src" ] && [ -f "$src" ] || continue
+  # compare with newlines and markdown flattened on both sides
+  flat=$(tr '\n' ' ' < "$src" | sed 's/[*`]//g; s/  */ /g')
+  awk '/^> /{sub(/^> /,""); gsub(/[*`]/,""); if (length($0)>40) print}' "$fx" \
+  | while read -r q; do
+      frag=$(echo "$q" | sed 's/  */ /g' | cut -c1-46)
+      case "$flat" in *"$frag"*) ;; *) echo "$fx → $src: \"$frag\"";; esac
+    done
+done)
+[ -z "$badq" ] && ok "every fixture blockquote is verbatim from its cited source" \
+  || { bad "fixture quotes text absent from its source:"; echo "$badq" | sed 's/^/         /'; }
+
 # ── maintainer-only: repo vs. installed copy ────────────────────────────────
 # Skips entirely when no keel install is present, so it is a no-op for anyone
 # who just cloned this. For the maintainer, who edits both sides, silent drift
