@@ -115,6 +115,15 @@ fails the run. That is the "declared but not wired" rule — the defect class
 this whole directory exists for — applied to the checking apparatus itself,
 which was the one place it had never been applied.
 
+### Auditing this repo
+
+`AUDIT-BRIEF.md` is the task description for the next adversarial review,
+written to be handed to an independent agent unchanged. It exists because the
+first five audits were briefed to "find defects" and each returned about
+fifteen — which is an agent's hourly output, not a defect count. The brief now
+asks for a **class** nobody has encoded, gives the six that exist, and defines
+what separates a new class from another instance of an old one.
+
 ### What is done, and what would reopen it
 
 Done, and not to be re-litigated by another audit:
