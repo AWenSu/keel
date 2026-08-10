@@ -129,6 +129,10 @@ Each agent file pins its own `tools:` and `model:`. **Do not pass a `model`
 override** — the pin is the decision, and overriding it re-introduces the
 silent-inheritance bug it exists to prevent.
 
+Never dispatch `general-purpose` from this pipeline — name the `subagent_type`.
+
+Do not pass a `model` override at the call site — each agent file pins its own.
+
 **Read-only is enforced by the tool list, not by prose.** Lenses, skeptics,
 the designer, and the researcher hold `Read, Grep, Glob` (plus search tools
 where their job needs them) — no shell, so "read-only" is a property of the
@@ -144,6 +148,8 @@ each stage, not to this table — keel-execute's is ≤16 per *task loop*
 (`keel-plan-review` Step 4). Over a ceiling, sort by severity, take the top N,
 and emit `SKIPPED: <n> — <id + reason>`. Silent truncation reads as full
 coverage when it isn't.
+
+Fan-out ceiling: ≤8 concurrent everywhere; total-agent budgets belong to the stages that own the loop.
 
 **Pre-dispatch self-check (mandatory, every dispatch).** Naming the rule above
 is not enough on its own — a `general-purpose` dispatch can still slip through

@@ -75,6 +75,15 @@ committing any change to this repo:
 bash eval-fixtures/check-structure.sh    # exit 0 = all pass
 ```
 
+**Rules that appear in more than one file have a single source.**
+[`rules/`](rules/) holds the canonical text of each one; every file that
+states the rule carries that sentence verbatim, and the checker compares
+bytes rather than patterns. To change a rule: edit `rules/<rule>.txt`, run the
+checker, and paste the new sentence into each file it names. Paraphrasing one
+copy is a build failure, which is the point — the old failure mode was
+changing a rule in one document and finding the other two a month later.
+`rules/README.md` states what this does *not* catch.
+
 The `NN-*.md` files are scenario fixtures for rules a script can't judge
 (does a spec marked `draft` block `keel-plan`? does a plan-vs-code
 contradiction route back?), graded by walkthrough. `RULE-INVENTORY.md` lists
@@ -332,6 +341,8 @@ by severity, covers the top N, and **must** emit a `SKIPPED: <n> — <reason>`
 line. Silent truncation is treated as a bug — a stage that quietly covers 60%
 of the findings and reports as if it covered 100% is worse than one that never
 ran.
+
+Fan-out ceiling: ≤8 concurrent, ≤16 total per task loop.
 
 ## Provenance & upstream sync
 

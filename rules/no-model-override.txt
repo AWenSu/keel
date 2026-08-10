@@ -1,0 +1,1 @@
+Do not pass a `model` override at the call site — each agent file pins its own.

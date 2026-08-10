@@ -276,6 +276,8 @@ missing `security:` field. Confirming, not re-running; two whole-branch reviews 
 inherit-strongest is the most expensive way to duplicate work in this
 pipeline.
 
+Do not pass a `model` override at the call site — each agent file pins its own.
+
 All boxes checked, evidence fresh — present the user exactly these options:
 
 1. **Merge** back to the base branch locally

@@ -45,6 +45,8 @@ override**) for a one-shot plan you review in-conversation, skip the
 artifact. This skill's full artifact is for work that will be executed over
 multiple sessions or by subagents.
 
+Do not pass a `model` override at the call site — each agent file pins its own.
+
 **The lightweight path still owes the four fields.** `keel-execute` consumes
 `Delivers:` (spec-axis review + staleness relocation), `Files:` (brief
 extraction + staleness check), `Interfaces:` (downstream task briefs), and

@@ -1,0 +1,1 @@
+唯讀 + shell 僅限 `git diff`/`log`/`show`、`which`、既有測試指令

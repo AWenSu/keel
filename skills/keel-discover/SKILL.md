@@ -187,6 +187,8 @@ locality, and seam placement (design.md terms), then present a strong
 recommendation, not a menu. Approaches from one context correlate — they
 share your blind spots; constraint-differentiated ones don't.
 
+Do not pass a `model` override at the call site — each agent file pins its own.
+
 ### 5. Lock scope
 
 State explicitly, and get agreement on:

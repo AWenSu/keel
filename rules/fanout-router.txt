@@ -1,0 +1,1 @@
+Fan-out ceiling: ≤8 concurrent everywhere; total-agent budgets belong to the stages that own the loop.

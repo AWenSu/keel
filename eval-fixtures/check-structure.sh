@@ -208,99 +208,71 @@ done
 [ -z "$undecl" ] && ok "external agents used are declared in the roster" \
   || bad "dispatched but absent from roster →$undecl"
 
-# F4 proper: the rule is "no general-purpose dispatch inside the pipeline".
-#
-# Judged one sentence at a time, because a character window cannot tell a
-# prohibition from an endorsement. Allowing commas made "When no keel agent
-# fits, just dispatch a general-purpose agent" read as a prohibition;
-# forbidding them made "Do not dispatch, under any circumstances, a
-# general-purpose agent" read as an endorsement. Both were live. The negation
-# now has to govern either the term itself or the verb that takes it, or the
-# sentence has to state the consequence — which is what the rule actually is.
-# The judgement itself lives in eval-fixtures/lib/general-purpose-judge.awk
-# (a heredoc inside $( ) is a bash 3.2 parse hazard, and this repo runs on it).
-GP_JUDGE=eval-fixtures/lib/general-purpose-judge.awk
-[ -f "$GP_JUDGE" ] || { printf '\033[31mFATAL\033[0m  missing %s\n' "$GP_JUDGE"; exit 2; }
+# ── F4/F6/F16: canonical rule text, compared as bytes ───────────────────────
+# Four audits found the same defect class, and every instance lived in a check
+# that read prose with a regex. There is no correct regex for "is this
+# sentence forbidding or recommending?" — allow a comma in the window and an
+# endorsement reads as a prohibition; forbid it and a prohibition reads as an
+# endorsement. So the rule text is a constant now, not a pattern: rules/*.txt
+# holds it once, the files that owe it carry it verbatim, and this compares
+# bytes. See rules/README.md for what that does and does not buy.
+head_ "rules  canonical rule text present verbatim where it is owed"
+missing_rule=""
+while IFS="$(printf '\t')" read -r rule target deriv; do
+  echo "$rule" | grep -q '^#' && continue
+  [ -n "${rule:-}" ] || continue
+  [ -f "rules/$rule" ] || { missing_rule="$missing_rule rules/$rule(no such rule file)"; continue; }
+  [ -f "$target" ] || { missing_rule="$missing_rule $target(no such file)"; continue; }
+  grep -qF "$(cat "rules/$rule")" "$target" \
+    || missing_rule="$missing_rule $target(missing $rule)"
+done < rules/manifest.tsv
+[ -z "$missing_rule" ] && ok "every file owing a canonical rule carries it verbatim" \
+  || { bad "canonical rule text missing or paraphrased:"; \
+       for m in $missing_rule; do echo "         $m"; done; }
 
-GP_FILES=$( { git ls-files 'skills/**/*.md' 'agents/*.md' 'README.md' 'README.zh-TW.md' 'PROJECT-TYPE-GUIDE.md' 'eval-fixtures/*.md'; git ls-files -o --exclude-standard 'skills/**/*.md' 'agents/*.md'; } | sort -u )
-gp=$(echo "$GP_FILES" | while IFS= read -r f; do
-  [ -f "$f" ] || continue
-  awk -v F="$f" -f "$GP_JUDGE" "$f"
-done)
-[ -z "$gp" ] && ok "no file endorses a general-purpose dispatch" \
-  || { bad "general-purpose named without a prohibition:"; echo "$gp" | sed 's/^/         /'; }
+# The manifest is a declaration, so it is cross-checked against a derivation —
+# otherwise a new dispatching stage is exempt by omission, which is exactly
+# how the hardcoded-six external agent list stayed wrong for a month.
+declared_for() { awk -F"$(printf '\t')" -v d="$1" '$3==d && $0 !~ /^#/ {print $2}' rules/manifest.tsv | sort -u; }
 
-# F4's other half. The counter used to be a grep whose negation list included
-# a bare `no`, so one decoy sentence containing the word "notes" kept it above
-# zero with every real prohibition deleted. It now counts sentences that pass
-# the judgement above, and requires more than one: the rule is stated at the
-# roster, at the pre-dispatch self-check, and in the fallback warning, and
-# losing any two of those is the defect.
-gpstated=$(awk -v F=keel-workflow -v COUNT=1 -f "$GP_JUDGE" skills/keel-workflow/SKILL.md \
-           | sed -n 's/^PROHIBITIONS=//p')
-[ "${gpstated:-0}" -ge 2 ] \
-  && ok "keel-workflow states the general-purpose prohibition ($gpstated sentences)" \
-  || bad "the general-purpose prohibition has been gutted in keel-workflow (found ${gpstated:-0}, need 2)"
-
-# ── F6: no model override at any dispatch site ──────────────────────────────
-# The previous version grepped a pattern with zero pre-filter matches, so its
-# whole exclusion list was dead code guarding nothing — and, worse, deleting
-# the no-override rule outright would not have failed it. Two checks now: the
-# rule must still be stated, and no override syntax may appear at a call site.
-head_ "F6  no model override at dispatch sites"
-norule=""
-# every stage that dispatches, not the three that happened to be listed
-# Derived from dispatch verbs, not from the string `general-purpose` — two
-# stages dispatch without ever using that word and were invisible.
-# A stage dispatches if it says so anywhere — a narrower predicate silently
-# excluded three stages, and a green line naming a count is what makes that
-# dangerous.
-# Any stage that names a shipped agent is dispatching, whatever verb it uses —
-# keel-wayfind says "Fire ... subagents" and was invisible to a keyword list.
-DISPATCHERS=$(grep -rlE '`keel-(exec|plan-lens|plan-skeptic|discover-designer|wayfind-researcher)[a-z-]*`|\b(dispatch|Dispatch|dispatches|dispatching)\b' \
-              skills/*/SKILL.md | xargs -n1 dirname | xargs -n1 basename)
-for f in $DISPATCHERS; do
-  # tolerate emphasis markup and wording variants; require a real prohibition
-  # `|\b` used to make any sentence containing "never ... model" satisfy this,
-  # including "Never re-dispatch the same prompt to the same model" — retry
-  # discipline, not override policy. The prohibition must name the override.
-  tr '\n' ' ' < "skills/$f/SKILL.md" \
-    | grep -qiE '(do \*{0,2}not\*{0,2}|never|\bno\b)[^.]{0,40}(`?model`? +(override|parameter)|pass[^.]{0,20}`?model`?)' \
-    || norule="$norule $f"
-done
-ndisp=$(echo "$DISPATCHERS" | grep -c . || true)
-if [ "${ndisp:-0}" -eq 0 ]; then
-  bad "no dispatching stage found — the rule check would pass over an empty set"
-elif [ -z "$norule" ]; then
-  ok "the no-override rule is still stated in all $ndisp dispatching stages"
+derived_dispatchers=$(grep -rlE '`keel-(exec|plan-lens|plan-skeptic|discover-designer|wayfind-researcher)[a-z-]*`|\b(dispatch|Dispatch|dispatches|dispatching)\b' \
+                      skills/*/SKILL.md | sort -u)
+declared_dispatchers=$(declared_for dispatching-stage)
+if [ "$derived_dispatchers" = "$declared_dispatchers" ]; then
+  ok "the manifest lists every dispatching stage ($(echo "$declared_dispatchers" | wc -l | tr -d ' '))"
 else
-  bad "no-override rule weakened or deleted in →$norule"
+  bad "dispatching stages differ from the manifest:"
+  diff <(echo "$declared_dispatchers") <(echo "$derived_dispatchers") | sed 's/^/         /'
 fi
 
-# Override *syntax* at a call site. Roster/matrix table cells legitimately name
-# models, so exclude table rows; frontmatter legitimately pins one, so exclude
-# lines starting `model:`.
-# Any model name, not an enumerated three; `"model":` JSON form included; the
-# frontmatter exemption is resolved per file by line number rather than by the
-# substring `:model:`, which a body line beginning `model:` also satisfies.
-override_hits() {
-  # READMEs included for the same reason F4 now includes them: "dispatch the
-  # reviewer with model: haiku to save cost" could be added to either README
-  # with the board green.
-  for f in $( { git ls-files 'skills/**/*.md' 'agents/*.md' 'README.md' 'README.zh-TW.md'; git ls-files -o --exclude-standard 'skills/**/*.md' 'agents/*.md'; } | sort -u); do
-    fmend=$(awk 'NR>1 && /^---$/{print NR; exit}' "$f"); : "${fmend:=0}"
-    grep -nE '["`]?model["`]? *[:=] *["`]?[a-z][a-z0-9.-]+' "$f" \
-      | awk -F: -v e="$fmend" '$1 > e' \
-      | grep -vE '^[0-9]+:\|' \
-      | grep -viE 'do not|never|instead of|rather than|not by passing|pins its own|model matrix' \
-      | sed "s|^|$f:|"
-  done
-}
-if hits=$(override_hits || true); [ -z "$hits" ]; then
-  ok "no dispatch site carries model-override syntax"
+derived_fanout=$( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } \
+  | sort -u | grep -v '^docs/plans/' | grep -v '^eval-fixtures/' | grep -v '^rules/' \
+  | while IFS= read -r f; do
+      [ -f "$f" ] && grep -qiE '^#+ .*([Ff]an-out|扇出)|\*\*[Ff]an-out' "$f" && echo "$f"
+      true
+    done | sort -u )
+declared_fanout=$(declared_for fanout-section)
+if [ "$derived_fanout" = "$declared_fanout" ]; then
+  ok "the manifest lists every fan-out section ($(echo "$declared_fanout" | wc -l | tr -d ' '))"
 else
-  bad "model-override syntax at a call site:"; echo "$hits" | sed 's/^/         /'
+  bad "fan-out sections differ from the manifest:"
+  diff <(echo "$declared_fanout") <(echo "$derived_fanout") | sed 's/^/         /'
 fi
+
+# Known contradictions, matched literally and case-insensitively — the first
+# version was case-sensitive and "You may pass..." walked past a blocklist
+# entry that began with a lowercase y. This is a blocklist: it catches
+# what has been written before, not what could be written next — a limit
+# stated in rules/README.md and in RULE-INVENTORY rather than papered over.
+head_ "rules  no file contradicts a canonical rule (literal blocklist)"
+hits=$( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } \
+  | sort -u | grep -v '^rules/' | grep -v '^docs/plans/' \
+  | while IFS= read -r f; do
+      [ -f "$f" ] && grep -inFf rules/anti-patterns.txt "$f" | sed "s|^|$f:|"
+      true
+    done )
+[ -z "$hits" ] && ok "no known anti-pattern appears in any tracked file" \
+  || { bad "anti-pattern found:"; echo "$hits" | sed 's/^/         /'; }
 
 # ── F7: fan-out ceiling — one scope, stated the same way everywhere ─────────
 # The previous version of this check asserted that one literal 8-word string was
@@ -348,33 +320,8 @@ nb=$(grep -rocE '總量|總計|[0-9]+ +total|in total' --include='*.md' . 2>/dev
 # The delegation exemption is keel-workflow's alone. As a general escape
 # hatch it was a per-file kill switch: prepending "Total-agent budgets belong
 # to the stages." to any file let its total half be deleted.
-REQUIRE_CEILING=$( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } \
-  | sort -u | grep -v '^docs/plans/' | grep -v '^eval-fixtures/' \
-  | while IFS= read -r f; do
-      [ -f "$f" ] && grep -qiE '^#+ .*([Ff]an-out|扇出)|\*\*[Ff]an-out' "$f" && echo "$f"
-      true
-    done )
-pairing=""
-[ -z "$REQUIRE_CEILING" ] && pairing=" no file states a fan-out ceiling at all"
-for f in $REQUIRE_CEILING; do
-  # a fan-out section has to carry a NUMBER. Which halves it states varies by
-  # stage — keel-plan-review caps skeptics per verification round and has no
-  # total, keel-workflow states concurrency and delegates the total — so the
-  # bar is a stated numeric cap, plus the pairing rule for whoever claims both.
-  n=$(grep -cE '(≤|<=|最多|至多)? ?[0-9]+ +(concurrent|skeptics|agents|total)|同時[^。]{0,8}[0-9]+|每輪[^。]{0,8}[0-9]+' "$f")
-  [ "$n" -ge 1 ] || { pairing="$pairing $f(no numeric cap)"; continue; }
-  c=$(grep -cE '[0-9]+ +concurrent|同時[^。]{0,8}[0-9]+' "$f")
-  t=$(grep -cE '總量|總計|[0-9]+ +total|in total' "$f")
-  # a file that states the concurrency half owes the total half, unless it is
-  # keel-workflow, which delegates it in writing
-  [ "$c" -ge 1 ] || continue
-  [ "$f" = "skills/keel-workflow/SKILL.md" ] \
-    && grep -qE 'Total-agent budgets belong to' "$f" && continue
-  [ "$t" -ge 1 ] || pairing="$pairing $f(concurrent=$c,total=$t)"
-done
-[ -z "$pairing" ] && ok "every fan-out section states both ceilings ($(echo "$REQUIRE_CEILING" | wc -l | tr -d ' ') sections)" \
-  || bad "fan-out ceiling missing →$pairing"
-
+# (the ceiling text itself is now a canonical rule, checked above by bytes;
+#  what remains here is the scope requirement: a total with no stated scope)
 if [ "${nb:-0}" -eq 0 ]; then
   bad "no fan-out ceiling stated anywhere — the rule has been deleted, not satisfied"
 elif [ -z "$noscope" ]; then

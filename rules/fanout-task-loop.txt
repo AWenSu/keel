@@ -1,0 +1,1 @@
+Fan-out ceiling: ≤8 concurrent, ≤16 total per task loop.

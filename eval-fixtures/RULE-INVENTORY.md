@@ -130,9 +130,9 @@ context fork.
 | F1 | Every agent pins its own `model:` | `keel-workflow` roster note | all 15 `agents/*.md` frontmatter | `check-structure.sh` |
 | F2 | Every agent pins its own `tools:` | `keel-workflow` roster note | all 15 `agents/*.md` frontmatter | `check-structure.sh` |
 | F3 | Reviewers / lenses / skeptics / researchers are read-only | `keel-workflow` roster note, `README` | each agent's `tools:` list — lenses/skeptics/designer/researcher hold no shell at all; the 3 diff reviewers hold Bash restricted in their own text to `git diff`/`log`/`show`, `which`, and the project's existing test command (which does execute, so this tier is a weaker guarantee than the no-shell one) | `check-structure.sh` |
-| F4 | No `general-purpose` dispatch inside the pipeline | `keel-workflow` roster heading | `keel-workflow` pre-dispatch self-check | `check-structure.sh` (added 2026-08-10 — the section header claimed F4 for months while only F5 had code) |
+| F4 | No `general-purpose` dispatch inside the pipeline | `rules/no-general-purpose.txt` (canonical) | `keel-workflow`, verbatim | `check-structure.sh` (byte comparison + literal anti-pattern blocklist) |
 | F5 | Every dispatched `subagent_type` is a roster row | `keel-workflow` pre-dispatch self-check | same | `check-structure.sh` |
-| F6 | No `model` override at any dispatch site | `keel-workflow` roster note | every skill's dispatch instruction | `check-structure.sh` |
+| F6 | No `model` override at any dispatch site | `rules/no-model-override.txt` (canonical) | all 8 dispatching stages, verbatim | `check-structure.sh` (byte comparison; the stage list is cross-checked against a derivation) |
 | F7 | Fan-out ceiling | `keel-workflow` fan-out note (concurrency), `keel-execute` Fan-out ceiling (per task loop) | each stage | `check-structure.sh` |
 | F8 | Coverage stars are awarded by named-test count, not impression | `keel-execute` Finish coverage table | same — each star cites a test `file:name`; an uncitable star is a GAP | — |
 | F9 | Every `## section` a file references is defined somewhere | — (the requirement is implicit in every cross-reference) | `check-structure.sh` | `check-structure.sh` |
@@ -142,7 +142,8 @@ context fork.
 | F13 | Both READMEs' agent rosters list exactly the shipped agents | READMEs' Subagent roster | `agents/` | `check-structure.sh` |
 | F14 | Every model pin documented in a roster matches the agent's frontmatter | READMEs + `keel-workflow` roster model column | `agents/*.md` frontmatter | `check-structure.sh` |
 | F15 | The checker's own non-agent exemption list hides no real agent | `check-structure.sh` NONAGENT | same | `check-structure.sh` |
-| F16 | Every fan-out section states a numeric cap, and whoever states the concurrency half states the total half | `keel-execute`, `keel-plan-review`, `keel-workflow`, both READMEs | same | `check-structure.sh` |
+| F16 | Every fan-out section states its ceiling | `rules/fanout-*.txt` (canonical) | `keel-execute`, `keel-plan-review`, `keel-workflow`, both READMEs, verbatim | `check-structure.sh` (byte comparison; the section list is cross-checked against a derivation) |
+| F17 | The manifest of who owes which rule cannot go stale | `rules/manifest.tsv` | derived set of dispatching stages / fan-out sections | `check-structure.sh` |
 
 ## P. Plan-field contracts
 
@@ -218,9 +219,28 @@ covered.
 When editing a skill file, run the fixtures for every rule whose `Declared at`
 or `Enforced at` points into that file.
 
+## What a script cannot check here, stated rather than implied
+
+Rule text is compared as bytes against `rules/*.txt`, so deletion and
+paraphrase both fail. Two things remain out of reach, and neither is counted
+as mechanical coverage anywhere in this file:
+
+1. **A contradiction phrased in a way nobody has written before.**
+   `rules/anti-patterns.txt` is a literal blocklist. It catches what has been
+   written, not what could be written next. Four audits' worth of real
+   endorsement phrasings are in it.
+2. **A row rewritten to mean its opposite** — a gate table row saying the
+   fixer may auto-resolve a plan conflict, for instance. F12 compares gate IDs
+   and the stage column; meaning is not a lexical property.
+
+Both are covered, to the extent they are covered at all, by the scenario
+fixtures graded by walkthrough and by periodic adversarial audit. The earlier
+attempt to reach them with regexes produced the opposite of coverage: checks
+that passed on live defects and failed on correctly stated rules.
+
 ## Current coverage
 
-**93 rules. 63 verified (68%)** — 47 by scenario fixture, 16 by
+**94 rules. 64 verified (68%)** — 47 by scenario fixture, 17 by
 `check-structure.sh`. Every number on this line is produced by the commands
 below — including the split, which used to be the one figure no command
 emitted and was wrong by one in each direction for a week. Recount with:

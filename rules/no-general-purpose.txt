@@ -1,0 +1,1 @@
+Never dispatch `general-purpose` from this pipeline — name the `subagent_type`.

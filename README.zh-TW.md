@@ -52,6 +52,8 @@ Claude Code 裝備齊全一點，規劃類的 skill 就會越堆越多：superpo
 bash eval-fixtures/check-structure.sh    # exit 0 = 全過
 ```
 
+**出現在一份以上文件裡的規則，只有一份正本。**[`rules/`](rules/) 存每條規則的正本文字，凡是要陳述該規則的檔案都逐字帶那句話，檢查比對的是位元組，不是 pattern。要改規則就三步：改 `rules/<rule>.txt`、跑檢查、把新句子貼進它點名的每個檔案。只改其中一份複本會直接 FAIL——這正是目的，舊的失敗模式就是規則在某份文件改了、另外兩份一個月後才發現。抓不到的部分寫在 `rules/README.md`。
+
 `NN-*.md` 則是腳本判斷不了的情境測試（spec 標 `draft` 會不會擋下 `keel-plan`？計畫與現況牴觸會不會退回？），靠走查。`RULE-INVENTORY.md` 列出每一條已宣告規則、各自的執行點與驗證方式——沒有驗證方式的那列表示它可能無聲壞掉，`執行於` 空著的那列表示它現在就是壞的。
 
 ## 安裝
@@ -203,6 +205,8 @@ Eng 視角（`keel-plan-lens-eng`）跑另一輪平行檢查，對照現行文�
 ### 扇出上限
 
 沒有哪個階段可以無限開 agent。上限是**同時最多 8 個，總量每個 task loop 最多 16 個**（keel-plan-review 是每輪最多 8 隻 skeptic）；真的超過的話，pipeline 會按嚴重度排序，先蓋前面幾條，剩下的**一定要**印出 `SKIPPED: <幾條> — <原因>`。悄悄少做卻不講，這條 pipeline 當成 bug 處理——一個階段偷偷只查了六成卻回報得像查了十成，比一開始就沒跑還糟糕。
+
+Fan-out ceiling: ≤8 concurrent, ≤16 total per task loop.
 
 ## 來源出處與跟上游同步
 

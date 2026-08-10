@@ -29,6 +29,8 @@ already done — the build command *is* the loop. Dispatch
 override) and skip to Phase 6's checklist. The phases below are
 for behavior you have to hunt.
 
+Do not pass a `model` override at the call site — each agent file pins its own.
+
 Skip phases only when explicitly justified. Read `CONTEXT.md` (if it exists)
 before exploring, so you name modules the way the project does, and
 `docs/adr/` for the affected area — what looks like a bug is sometimes a

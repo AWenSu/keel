@@ -1,0 +1,1 @@
+read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests

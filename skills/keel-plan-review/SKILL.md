@@ -61,6 +61,8 @@ will agree with your mistakes.
 Dispatch by name — never `general-purpose`, never a `model` override (each
 agent file pins its own model and read-only tool set):
 
+Do not pass a `model` override at the call site — each agent file pins its own.
+
 | Lens | subagent_type | Condition |
 |------|---------------|-----------|
 | CEO | `keel-plan-lens-ceo` | always |
@@ -210,6 +212,8 @@ give it those and it becomes a second lens instead of a refuter.
 **Fan-out cap:** ≤8 skeptics per verification round (Step 4; distinct from Step 5's frontier batches and from a full review pass). Over the cap, sort by severity, take
 the top 8, and emit `SKIPPED: <n> findings not verified — <id + reason>`.
 An unverified finding must never be presented as though it survived refutation.
+
+Fan-out ceiling: ≤8 concurrent per verification round.
 
 Broadcast each verdict as it lands — the agent name (so the tier is visible),
 `UPHELD`/`WEAKENED`/`REFUTED`, and the one-line reason. A refutation you never

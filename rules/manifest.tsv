@@ -1,0 +1,17 @@
+# rule-file	must appear verbatim in	derivation (how the target set is cross-checked)
+no-model-override.txt	skills/keel-discover/SKILL.md	dispatching-stage
+no-model-override.txt	skills/keel-plan/SKILL.md	dispatching-stage
+no-model-override.txt	skills/keel-plan-review/SKILL.md	dispatching-stage
+no-model-override.txt	skills/keel-execute/SKILL.md	dispatching-stage
+no-model-override.txt	skills/keel-finish/SKILL.md	dispatching-stage
+no-model-override.txt	skills/keel-debug/SKILL.md	dispatching-stage
+no-model-override.txt	skills/keel-wayfind/SKILL.md	dispatching-stage
+no-model-override.txt	skills/keel-workflow/SKILL.md	dispatching-stage
+no-general-purpose.txt	skills/keel-workflow/SKILL.md	-
+fanout-task-loop.txt	skills/keel-execute/SKILL.md	fanout-section
+fanout-task-loop.txt	README.md	fanout-section
+fanout-task-loop.txt	README.zh-TW.md	fanout-section
+fanout-per-round.txt	skills/keel-plan-review/SKILL.md	fanout-section
+fanout-router.txt	skills/keel-workflow/SKILL.md	fanout-section
+reviewer-shell-en.txt	README.md	-
+reviewer-shell-zh.txt	README.zh-TW.md	-

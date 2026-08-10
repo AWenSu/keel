@@ -287,6 +287,8 @@ fix loop can carry, sort by severity, handle the top N, and emit
 `SKIPPED: <n> — <id + reason>`. Silent truncation reads as full coverage when
 it isn't.
 
+Fan-out ceiling: ≤8 concurrent, ≤16 total per task loop.
+
 ### Dispatch discipline
 
 Name the `subagent_type` on every dispatch — a `general-purpose` agent inside
@@ -294,6 +296,8 @@ this stage is a bug, and the type name is what tells the user which stage and
 which role is currently running. Do **not** pass a `model` override: each agent
 file pins its own model and tool set, and overriding re-introduces the silent
 model-inheritance problem those pins exist to prevent.
+
+Do not pass a `model` override at the call site — each agent file pins its own.
 
 ### Implementer status protocol
 
