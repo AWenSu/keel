@@ -185,6 +185,7 @@ G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續
 | `keel-exec-fixer` | 4 執行 | 只修拿到手的那幾條發現，不順手改別的 | sonnet | 完整權限 |
 | `keel-exec-fixer-critical` | 4 執行 | 只在修復迴圈第 4-5 輪出手——標準層卡了兩次才輪到它 | **opus** | 完整權限 |
 | `keel-wayfind-researcher` | 前置階段 | 解一張能靠外部資料查出答案的研究票 | sonnet | 唯讀 + 完整檢索工具 |
+| `keel-auditor` | 後設 | 用突變攻擊這個 repo 自己的檢查機制，找沒人編碼過的缺陷類別 | **opus** | 唯讀 + shell 僅限 `git diff`/`log`/`show`、`which`、既有測試指令 |
 <!-- /generated:roster -->
 
 `keel-exec-reviewer-spec` 會依「合約測試證據強度」分級每一條 Interface drift 發現（有既有測試 > 只寫了合約描述 > 未經查證的宣稱），不是照計畫怎麼寫就照單全收。

@@ -14,3 +14,4 @@ keel-exec-reviewer-security	4 execute	4 執行	Security review axis (R4 conditio
 keel-exec-fixer	4 execute	4 執行	Apply review findings	Apply only the findings it was given	只修拿到手的那幾條發現，不順手改別的	full	完整權限
 keel-exec-fixer-critical	4 execute	4 執行	Fix-loop round 4-5 — standard tier stalled	Fix-loop rounds 4-5 only, after the standard tier stalls twice	只在修復迴圈第 4-5 輪出手——標準層卡了兩次才輪到它	full	完整權限
 keel-wayfind-researcher	pre-stage	前置階段	Resolve one research ticket	Resolve one externally-answerable research ticket	解一張能靠外部資料查出答案的研究票	read-only + full search	唯讀 + 完整檢索工具
+keel-auditor	meta	後設	Adversarial audit of this repo's own checks	Attacks this repo's own checks by mutation — looks for a defect class nobody has encoded	用突變攻擊這個 repo 自己的檢查機制，找沒人編碼過的缺陷類別	read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests	唯讀 + shell 僅限 `git diff`/`log`/`show`、`which`、既有測試指令

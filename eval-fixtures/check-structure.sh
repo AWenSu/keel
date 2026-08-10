@@ -51,7 +51,9 @@ git rev-parse --git-dir >/dev/null 2>&1 \
 WRITERS="keel-exec-implementer keel-exec-fixer keel-exec-fixer-critical"
 # Agents allowed to hold Bash: the writers, plus the three diff reviewers that
 # cannot review a diff without `git diff`.
-BASH_OK="$WRITERS keel-exec-reviewer-spec keel-exec-reviewer-quality keel-exec-reviewer-security"
+# keel-auditor holds Bash for the same reason the reviewers do — it cannot run
+# the checkers without it — and carries the same prose restriction.
+BASH_OK="$WRITERS keel-exec-reviewer-spec keel-exec-reviewer-quality keel-exec-reviewer-security keel-auditor"
 
 in_list() { case " $2 " in *" $1 "*) return 0;; *) return 1;; esac; }
 
@@ -121,7 +123,7 @@ done
 
 # The 3 reviewers keep Bash, so their restriction lives in prose — verify it exists.
 missr=""
-for n in keel-exec-reviewer-spec keel-exec-reviewer-quality keel-exec-reviewer-security; do
+for n in keel-exec-reviewer-spec keel-exec-reviewer-quality keel-exec-reviewer-security keel-auditor; do
   body=$(tr '\n' ' ' < "agents/$n.md")
   case "$body" in
     *"read-only inspection only"*) : ;;

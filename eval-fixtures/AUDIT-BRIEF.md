@@ -1,6 +1,15 @@
 # Audit brief — for the next adversarial review of this repo
 
-Paste this to an independent agent. It is written to be handed over unchanged.
+Dispatch `keel-auditor` and give it this file. It is written to be handed over
+unchanged.
+
+The first six audits of this repo were dispatched as `general-purpose`, in a
+repo whose F4 rule forbids exactly that. An audit is not a pipeline stage so
+the rule did not literally bind it, and it was still the failure mode the rule
+describes: the roster had no auditor, so the generic agent got the work — no
+pinned model, no restricted tools, no name in the display saying which role was
+running, and full write access in a repo it was told not to modify. The only
+thing enforcing that instruction was the prompt.
 
 ## Why this brief exists
 

@@ -113,6 +113,7 @@ is working. A `general-purpose` dispatch inside this pipeline is a bug.
 | `keel-exec-fixer` | 4 execute | Apply review findings | sonnet |
 | `keel-exec-fixer-critical` | 4 execute | Fix-loop round 4-5 — standard tier stalled | opus |
 | `keel-wayfind-researcher` | pre-stage | Resolve one research ticket | sonnet |
+| `keel-auditor` | meta | Adversarial audit of this repo's own checks | opus |
 <!-- /generated:roster -->
 
 **External agents — shipped elsewhere, not in this repo's `agents/`.** Still
