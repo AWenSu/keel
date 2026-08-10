@@ -129,12 +129,16 @@ for a in "${AGENTS[@]}"; do
 done
 [ -z "$badw" ] && ok "write-grant" "write tools confined to the 3 implementer/fixer agents" \
   || bad "write-grant" "unexpected Edit/Write grant →$badw"
-[ -z "$badb" ] && ok "bash-grant" "Bash confined to writers + the 3 diff reviewers" \
+[ -z "$badb" ] && ok "bash-grant" "Bash confined to the $(echo $WRITERS | wc -w | tr -d ' ') writers + $(echo $BASH_ONLY | wc -w | tr -d ' ') read-only agents" \
   || bad "bash-grant" "unexpected Bash grant →$badb"
 
 # The 3 reviewers keep Bash, so their restriction lives in prose — verify it exists.
 missr=""
-for n in keel-exec-reviewer-spec keel-exec-reviewer-quality keel-exec-reviewer-security keel-auditor; do
+# derived from BASH_OK: the fix was applied to readme-shell-grant three lines
+# below and not to this one, so a new Bash-holding read-only agent could ship
+# with no restriction at all and this would not ask
+BASH_ONLY=$(for b in $BASH_OK; do in_list "$b" "$WRITERS" || echo "$b"; done)
+for n in $BASH_ONLY; do
   # live text only: wrapping the whole restriction in an HTML comment and
   # writing the opposite underneath used to satisfy this
   body=$(live_text "agents/$n.md" | tr '\n' ' ')
@@ -156,7 +160,6 @@ done
 missd=""
 # derived from BASH_OK, not a hardcoded three: the list has seven members and
 # this checked the same three it was written with
-BASH_ONLY=$(for b in $BASH_OK; do in_list "$b" "$WRITERS" || echo "$b"; done)
 for f in README.md README.zh-TW.md; do
   for n in $BASH_ONLY; do
     row=$(grep -E "\`$n\`" "$f" | head -1)

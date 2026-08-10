@@ -41,21 +41,30 @@ Two things here are deliberately out of reach:
    says the fixer may auto-resolve a plan conflict). Structural checks compare
    identifiers and stages, not meaning.
 
-3. **Any restriction on an agent that holds Bash.** Four agents hold it — the
-   three diff reviewers and `keel-auditor` — because none of them can do their
-   job without running something. Bash writes files. So "read-only inspection
-   only, never write, delete, move, install, push" is prose, and
-   `reviewer-shell-prose` verifies **that the sentence is present**, never that
-   it was obeyed. The seventh audit put this plainly about itself: removing
-   `Edit`/`Write` from its own grant changed which tool name appeared in its
-   transcript and nothing else, and it wrote files all session with `perl -i`
-   and heredocs. The one structural gain is real but narrow — `write-grant`
-   catches a *declared* `Write` in frontmatter, which is a guard against a
-   careless edit, not against an agent that decides otherwise.
-
-Both are covered — where they are covered at all — by the scenario fixtures
+3. **Any restriction on an agent that holds Bash.** Seven agents declare it in
+   frontmatter: the three implementer/fixer agents, which are meant to write,
+   and four read-only ones — the three diff reviewers and `keel-auditor` —
+   which are not, and which hold it because none of them can do their job
+   without running something. Bash writes files. So the restriction is prose,
+   and what `reviewer-shell-prose` actually asserts is narrower and wider than
+   "the sentence is present": it requires **two independent case-sensitive
+   substrings** — `read-only inspection only` and
+   `Never write, delete, move, install, push` — anywhere in the file's *live*
+   text, with no requirement that they be adjacent or in the same section, and
+   with HTML comments and fenced blocks stripped first. Lowercasing one letter
+   fails it; a copy inside a comment does not satisfy it; and a paragraph
+   underneath announcing that the policy is withdrawn satisfies it completely.
+   The seventh audit put the underlying point plainly about itself: removing
+   `Edit`/`Write` from a grant that keeps Bash changed which tool name appeared
+   in its transcript and nothing else. The one structural gain is real but
+   narrow — `write-grant` catches a *declared* `Write` in frontmatter, which is
+   a guard against a careless edit, not against an agent that decides
+   otherwise.
+The first two are covered — where they are covered at all — by the scenario fixtures
 in `eval-fixtures/`, graded by walkthrough, and by periodic adversarial audit.
-Neither is claimed as mechanical coverage in `RULE-INVENTORY.md`.
+The third is covered by nothing mechanical at all: it is a property of whoever
+dispatches the agent. None of the three is claimed as mechanical coverage in
+`RULE-INVENTORY.md`.
 
 ## Files
 

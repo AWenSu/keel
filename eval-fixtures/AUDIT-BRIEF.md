@@ -18,9 +18,10 @@ like a defect count and is not: it is roughly what one agent produces in an
 hour of mutation testing. Reading a work rate as a defect rate kept the work
 open indefinitely.
 
-The number that does converge is **defect classes**. Seven audits have produced ten. The fifth produced none; the sixth and seventh produced two each, all four in
-machinery built between audits — which is where new classes come from. So the brief changed: your job is to find a
-class nobody has encoded, not to re-find instances of the ten below. Instances
+The number that does converge is **defect classes**. Eight audits have produced eleven. The fifth produced none; the sixth and seventh produced two each and the
+eighth one — every one of them in machinery built between audits, which is
+where new classes come from. So the brief changed: your job is to find a
+class nobody has encoded, not to re-find instances of the eleven below. Instances
 are cheap now — they are a missing file in `mutations/`, not a work stream.
 
 ## Before you start: get the current state yourself
@@ -65,11 +66,12 @@ which. Read three or four of them before you begin.
 | `round-trip-laundering` | a provenance stamp wider than what the generator derives | the table generator read prose back out of the document and joined it to the source by position |
 | `co-deletion-blind` | every consistency check is an equality, and an equality survives deleting the same member from both sides | a backward route removed from its source and from its independent record together, with every board green |
 | `lane-dependent-verdict` | the verdict depends on the execution model, not on the artifact | contamination visible only inside one worker lane: `JOBS=1` said DIRTY, `JOBS=8` said clean |
+| `unreconciled-floor` | an inequality against a hand-written reference nobody reconciles with reality | the ratchet's own floor was born one below the real check count, and a whole check could leave the repo with it green |
 
 ## What counts as a new class
 
 A finding is a **new class** only if fixing it requires a different *kind* of
-countermeasure than the ten above — not a wider regex, not another derivation
+countermeasure than the eleven above — not a wider regex, not another derivation
 input, not one more validated file. If your fix is "add this string to the
 blocklist" or "scan this directory too", it is an instance of an existing
 class. Say which one.
@@ -103,18 +105,25 @@ coverage nowhere:
    may auto-resolve a plan conflict, for instance. Structural checks compare
    identifiers and stages; meaning is not a lexical property.
 
-3. **Any restriction on an agent that holds Bash.** Four agents hold it — the
-   three diff reviewers and `keel-auditor` — because none of them can do their
-   job without running something. Bash writes files. So "read-only inspection
-   only, never write, delete, move, install, push" is prose, and
-   `reviewer-shell-prose` verifies **that the sentence is present**, never that
-   it was obeyed. The seventh audit put this plainly about itself: removing
-   `Edit`/`Write` from its own grant changed which tool name appeared in its
-   transcript and nothing else, and it wrote files all session with `perl -i`
-   and heredocs. The one structural gain is real but narrow — `write-grant`
-   catches a *declared* `Write` in frontmatter, which is a guard against a
-   careless edit, not against an agent that decides otherwise.
-
+3. **Any restriction on an agent that holds Bash.** Seven agents declare it in
+   frontmatter: the three implementer/fixer agents, which are meant to write,
+   and four read-only ones — the three diff reviewers and `keel-auditor` —
+   which are not, and which hold it because none of them can do their job
+   without running something. Bash writes files. So the restriction is prose,
+   and what `reviewer-shell-prose` actually asserts is narrower and wider than
+   "the sentence is present": it requires **two independent case-sensitive
+   substrings** — `read-only inspection only` and
+   `Never write, delete, move, install, push` — anywhere in the file's *live*
+   text, with no requirement that they be adjacent or in the same section, and
+   with HTML comments and fenced blocks stripped first. Lowercasing one letter
+   fails it; a copy inside a comment does not satisfy it; and a paragraph
+   underneath announcing that the policy is withdrawn satisfies it completely.
+   The seventh audit put the underlying point plainly about itself: removing
+   `Edit`/`Write` from a grant that keeps Bash changed which tool name appeared
+   in its transcript and nothing else. The one structural gain is real but
+   narrow — `write-grant` catches a *declared* `Write` in frontmatter, which is
+   a guard against a careless edit, not against an agent that decides
+   otherwise.
 The first two belong to the scenario fixtures (`NN-*.md`, graded by walkthrough)
 and to audits like yours. The third belongs to whoever dispatches you. Reporting that they are uncovered is not a finding. Reporting
 that a document *claims* they are covered is.

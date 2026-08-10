@@ -68,6 +68,15 @@ inv_b=$(grep -cE '^\| B[0-9]+ \|' eval-fixtures/RULE-INVENTORY.md)
 n_routes=$(grep -cv '^#' tables/routes.tsv)
 n_gates=$(grep -cv '^#' tables/gates.tsv)
 [ "$n_routes" = "$inv_a" ] || fatal="$fatal routes.tsv=$n_routes-vs-RULE-INVENTORY-A=$inv_a"
+# cardinality was the whole comparison, so changing a route's destination at
+# the source propagated into all three documents unopposed while the A-row and
+# its fixture still named the old one
+# only the keel-* destinations are comparable: the INPUT-contract route ends
+# at "the owing stage" in the inventory and at a per-language phrase in the tsv
+dst_tsv=$(grep -v '^#' tables/routes.tsv | cut -f10 | tr -d '`' | grep -oE 'keel-[a-z-]+' | sort)
+dst_inv=$(grep -E '^\| A[0-9]+ \|' eval-fixtures/RULE-INVENTORY.md \
+  | awk -F'|' '{print $3}' | sed 's/.*→ *//' | tr -d '`' | grep -oE 'keel-[a-z-]+' | sort)
+[ "$dst_tsv" = "$dst_inv" ] || fatal="$fatal route-destinations-vs-RULE-INVENTORY-A($(diff <(echo "$dst_inv") <(echo "$dst_tsv") | tr -d '\n' | cut -c1-60))"
 [ "$n_gates" = "$inv_b" ] || fatal="$fatal gates.tsv=$n_gates-vs-RULE-INVENTORY-B=$inv_b"
 if [ -n "$fatal" ]; then
   echo "FATAL: table source is out of step with the repo →$fatal"

@@ -62,6 +62,39 @@ export HOME="$BASE_HOME"
 
 run_checks() { /bin/bash eval-fixtures/check-structure.sh 2>&1 | sed 's/\x1b\[[0-9;]*m//g'; }
 
+# A fingerprint of the whole sandbox, not a question put to git. The previous
+# version asked `git status` and `git log`, and a mutation can reconfigure git:
+# `update-index --skip-worktree`, `.git/info/exclude`, a `core.excludesFile` in
+# $HOME, and a `.git/hooks/post-checkout` all survived it, and two of them also
+# blanked the self-edit detector. The observation surface was the suspect's own
+# reporting. This is the surface itself.
+# path first, so the stream is sorted by path and `comm` can diff two of them
+# one xargs, not one process per file: the per-file loop made a full suite run
+# exceed ten minutes
+file_hashes() {
+  find . -type f -not -path './.git/*' 2>/dev/null | sort \
+    | xargs shasum 2>/dev/null | awk '{print $2, $1}'
+}
+# A fingerprint of the sandbox rather than a question put to git. The previous
+# version asked `git status` and `git log`; a mutation can reconfigure git, and
+# `update-index --skip-worktree`, `.git/info/exclude`, a `core.excludesFile` in
+# $HOME and a `.git/hooks/post-checkout` all survived that, two of them also
+# blanking the self-edit detector. The observation surface was the suspect's
+# own reporting.
+#
+# Inside .git only the state a mutation can weaponise is fingerprinted: config,
+# hooks, exclude, and the index FLAGS (via ls-files -v, not the index file,
+# whose stat cache changes on every checkout).
+sandbox_state() {
+  { file_hashes
+    ls .git/config .git/info/exclude .git/hooks/* 2>/dev/null | sort \
+      | xargs shasum 2>/dev/null | awk '{print $2, $1}'
+    git ls-files -v 2>/dev/null | grep -v '^H ' || true
+    find "$MYHOME" -type f 2>/dev/null | sort | xargs shasum 2>/dev/null \
+      | awk -v h="$MYHOME" '{ p = $2; sub(h, "", p); print p, $1 }'
+  } | shasum | awk '{print $1}'
+}
+
 verdict_of() {   # verdict_of <id> <output>  ->  PASS | FAIL | ABSENT
   printf '%s\n' "$2" | awk -v id="[$1]" '
     index($0, id) { if ($1 == "PASS" || $1 == "FAIL") { print $1; found = 1; exit } }
@@ -100,7 +133,7 @@ for m in "$MUT_DIR"/*.sh; do
   expect=$(sed -n 's/^# expect: *//p' "$m" | head -1)
   class=$(sed -n 's/^# class: *//p' "$m" | head -1)
   [ -n "$expect" ] || { echo "FATAL: $name has no \`# expect:\` header"; exit 2; }
-  case "$expect" in none|refused) : ;; *) COVERED="$COVERED $expect" ;; esac
+  case "$expect" in none|refused|residue) : ;; *) COVERED="$COVERED $expect" ;; esac
   if [ -n "$FILTER" ]; then
     case "$name$expect$class" in *"$FILTER"*) : ;; *) continue ;; esac
   fi
@@ -133,12 +166,22 @@ worker() {   # worker <slot>: its own copy, its own slice, its own result file
   MYHOME="$WORK/h$slot"; cp -R "$BASE_HOME" "$MYHOME" || return 2
   export HOME="$MYHOME"
   cd "$dir" || return 2
+  # settle the sandbox before the first fingerprint: the copy carries the live
+  # repo's ignored files (progress.md, findings.md, .keel/), and the first
+  # `git clean -fdx` would otherwise read as residue from mutation one
+  git clean -fdxq >/dev/null 2>&1
   BASE_COMMIT=$(git rev-parse HEAD)
+  # a pristine copy of the git state a mutation can weaponise, kept outside the
+  # sandbox so the revert does not have to trust anything inside it
+  GITSAFE="$WORK/gitsafe$slot"; mkdir -p "$GITSAFE"
+  cp -R .git/config .git/info "$GITSAFE/" 2>/dev/null
+  [ -d .git/hooks ] && cp -R .git/hooks "$GITSAFE/hooks" 2>/dev/null
   n=0
   for name in $MUTS; do
     n=$((n + 1))
     [ $(( (n - 1) % JOBS )) -eq "$slot" ] || continue
     exp0=$(sed -n 's/^# expect: *//p' "$MUT_DIR/$name.sh" | head -1)
+    PRE_STATE=$(sandbox_state); PRE_FILES=$(file_hashes)
     ( /bin/bash "$MUT_DIR/$name.sh" ) >/dev/null 2>&1
     # A mutation that edits the checker proves nothing: "I broke the check" is
     # not "the check enforces the rule". Opt in per file when the apparatus
@@ -146,22 +189,36 @@ worker() {   # worker <slot>: its own copy, its own slice, its own result file
     # `git status` alone is an observation surface the mutation can rewrite:
     # one `git commit` moved the edit out of the porcelain output and the
     # checker edit was graded as proof. Compare against the baseline commit.
+    # touched set from the fingerprint, not from git: `update-index
+    # --assume-unchanged` used to blank both `git status` and `git diff`, and
+    # the checker edit under it was graded as proof
     touched=$( { git status --porcelain | awk '{print $NF}'
-                 git diff --name-only "$BASE_COMMIT" 2>/dev/null; } | sort -u )
+                 git diff --name-only "$BASE_COMMIT" 2>/dev/null
+                 comm -3 <(printf '%s\n' "$PRE_FILES") <(file_hashes) | awk '{print $1}'; } \
+               | sed 's|^\./||' | sort -u )
     selfedit=""
     # first token only: the header carries a justification after the id
     optin=$(sed -n 's/^# touches-checker: *//p' "$MUT_DIR/$name.sh" | head -1 | awk '{print $1}')
     # the opt-in must name the check it is the subject of, and that must be the
     # check it expects: `# touches-checker: yes` let any mutation launder any
     # red — 23 of them could have "covered" all 23 ids without touching the repo
-    if [ -n "$optin" ] && [ "$optin" != "$exp0" ]; then
+    # `none` and `refused` are control verdicts, not check ids: an opt-in
+    # naming one exempted a mutation from the whole self-edit scan while its
+    # job was to certify the board is clean
+    if [ -n "$optin" ] && ! grep -qx "$optin" "$REPO/eval-fixtures/CHECK-IDS.txt"; then
+      selfedit="opt-in '$optin' is not a check id"
+    elif [ -n "$optin" ] && [ "$optin" != "$exp0" ]; then
       selfedit="opt-in names '$optin' but expects '$exp0'"
     elif [ -z "$optin" ]; then
       selfedit=$(printf '%s\n' "$touched" | grep -E '^(eval-fixtures/(check-structure|run-mutations)\.sh|eval-fixtures/CHECK-IDS\.txt|eval-fixtures/mutations/|tables/render\.)' || true)
     fi
     out=$(run_checks)
     exp="$exp0"
-    if [ "$exp" = "refused" ]; then
+    if [ "$exp" = "residue" ]; then
+      # a probe whose point is that state escaped the revert: passing means the
+      # fingerprint noticed
+      v="PENDING_RESIDUE"
+    elif [ "$exp" = "refused" ]; then
       # a negative control: the harness itself is on trial, and passing means
       # this mutation was rejected rather than graded
       v=$([ -n "$selfedit" ] && echo REFUSED_OK || echo REFUSED_MISS)
@@ -181,7 +238,17 @@ worker() {   # worker <slot>: its own copy, its own slice, its own result file
     # 55 appends to it, the append survived every later mutation in the run,
     # and a no-op mutation then inherited the red it caused
     git reset -q --hard "$BASE_COMMIT" >/dev/null 2>&1
-    rm -rf "$MYHOME/.claude"
+    # index flags (skip-worktree / assume-unchanged) live in the index file, so
+    # rebuilding it is what clears them; config, hooks and info/exclude come
+    # back from the copy taken before any mutation ran
+    rm -f .git/index; git reset -q --hard "$BASE_COMMIT" >/dev/null 2>&1
+    rm -rf .git/hooks .git/info; cp -R "$GITSAFE/hooks" .git/hooks 2>/dev/null
+    cp -R "$GITSAFE/info" .git/info 2>/dev/null
+    cp "$GITSAFE/config" .git/config 2>/dev/null
+    git clean -fdxq >/dev/null 2>&1
+    # the whole HOME, not just .claude: a mutation wrote core.excludesFile into
+    # $HOME/.gitconfig and it outlived a .claude-only rebuild
+    rm -rf "$MYHOME"
     mkdir -p "$MYHOME/.claude/skills" "$MYHOME/.claude/agents"
     cp -R skills/. "$MYHOME/.claude/skills/"
     cp -R agents/. "$MYHOME/.claude/agents/"
@@ -189,8 +256,11 @@ worker() {   # worker <slot>: its own copy, its own slice, its own result file
     # committed survived checkout+clean and every later mutation in the same
     # worker lane inherited its red, while a different JOBS value put the
     # control in another lane and reported the board clean
-    resid=$( { git status --porcelain; git log -1 --format=%H | grep -v "^$BASE_COMMIT$"; } | head -3 )
-    [ -z "$resid" ] || v="RESIDUE"
+    if [ "$(sandbox_state)" = "$PRE_STATE" ]; then
+      [ "$v" = "PENDING_RESIDUE" ] && v="RESIDUE_MISSED"
+    else
+      v=$([ "$v" = "PENDING_RESIDUE" ] && echo RESIDUE_OK || echo RESIDUE)
+    fi
     printf '%s\t%s\t%s\n' "$n" "$v" "$name" >> "$WORK/res"
   done
 }
@@ -214,6 +284,8 @@ while IFS="$(printf '\t')" read -r idx v name; do
     CONTROL_DIRTY) printf '  \033[31mDIRTY BOARD\033[0m  %-34s → a previous mutation was not fully reverted\n' "$name"; RED=$((RED+1)) ;;
     FAIL)   printf '  \033[32m red \033[0m  %-42s → [%s]\n' "$name" "$exp"; GREEN=$((GREEN+1)) ;;
     PASS)   printf '  \033[31mSTILL GREEN\033[0m  %-34s → [%s] did not fire\n' "$name" "$exp"; RED=$((RED+1)) ;;
+    RESIDUE_OK)     printf '  \033[32mresidue\033[0m  %-42s → escape noticed and reverted\n' "$name"; GREEN=$((GREEN+1)) ;;
+    RESIDUE_MISSED) printf '  \033[31mUNNOTICED  \033[0m  %-34s → state escaped the revert and the fingerprint did not see it\n' "$name"; RED=$((RED+1)) ;;
     RESIDUE)  printf '  \033[31mRESIDUE    \033[0m  %-34s → state survived the revert; every later mutation in this lane is tainted\n' "$name"; RED=$((RED+1)) ;;
     SELFEDIT) printf '  \033[31mSELF-EDIT  \033[0m  %-34s → edits the checker; add `# touches-checker: yes` if that is the point\n' "$name"; RED=$((RED+1)) ;;
     *)      printf '  \033[31mNO SUCH ID \033[0m  %-34s → [%s] never printed\n' "$name" "$exp"; RED=$((RED+1)) ;;

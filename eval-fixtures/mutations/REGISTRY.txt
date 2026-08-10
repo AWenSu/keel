@@ -72,3 +72,11 @@
 70-readme-documents-an-unrestricted-shell.sh
 71-rule-and-its-record-deleted-together.sh
 72-check-and-all-its-evidence-deleted-together.sh
+73-residue-skip-worktree.sh
+74-residue-assume-unchanged.sh
+75-residue-git-info-exclude.sh
+76-residue-home-gitconfig.sh
+77-residue-git-hook.sh
+78-optin-names-a-control-verdict.sh
+79-new-bash-agent-without-a-restriction.sh
+80-route-destination-changed-at-the-source.sh
