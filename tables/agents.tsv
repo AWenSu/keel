@@ -1,0 +1,16 @@
+# name	stage_en	stage_zh   — model comes from agents/<name>.md frontmatter
+keel-discover-designer	1 discover	1 探索
+keel-plan-lens-ceo	3 review	3 審查
+keel-plan-lens-design	3 review	3 審查
+keel-plan-lens-eng	3 review	3 審查
+keel-plan-lens-security	3 review	3 審查
+keel-plan-lens-dx	3 review	3 審查
+keel-plan-skeptic	3 review	3 審查
+keel-plan-skeptic-critical	3 review	3 審查
+keel-exec-implementer	4 execute	4 執行
+keel-exec-reviewer-spec	4 execute	4 執行
+keel-exec-reviewer-quality	4 execute	4 執行
+keel-exec-reviewer-security	4 execute	4 執行
+keel-exec-fixer	4 execute	4 執行
+keel-exec-fixer-critical	4 execute	4 執行
+keel-wayfind-researcher	pre-stage	前置階段

@@ -1,4 +1,4 @@
-# expect: route-destinations
+# expect: tables-generated
 # class:  check-cannot-fail
 # origin: gate-4 (the multiset was sorted)
 python3 - <<'PY'

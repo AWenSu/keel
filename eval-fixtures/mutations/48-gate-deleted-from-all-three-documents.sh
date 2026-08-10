@@ -1,4 +1,4 @@
-# expect: gate-list
+# expect: tables-generated
 # class:  check-cannot-fail
 # origin: gate-5
 python3 - <<'PY'

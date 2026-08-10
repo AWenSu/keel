@@ -49,13 +49,16 @@ Claude Code 裝備齊全一點，規劃類的 skill 就會越堆越多：superpo
 **回歸測試 pipeline 自己的規則。** [`eval-fixtures/`](eval-fixtures/) 用兩種方式驗證 keel 自己。`check-structure.sh` 是腳本——每隻 agent 都釘死 model 與工具清單、沒有唯讀 agent 拿到寫入權限、每個被派工的名字都找得到定義檔。動本 repo 前先跑：
 
 ```bash
-bash eval-fixtures/check-structure.sh    # 27 條檢查，exit 0 = 全過
+bash eval-fixtures/check-structure.sh    # 22 條檢查，exit 0 = 全過
 bash eval-fixtures/run-mutations.sh      # 證明上面每條檢查真的會紅
+bash tables/render.sh                    # 重新生成三張重複的表
 ```
 
 第二支才是重點。它把 55 個真實缺陷（五輪獨立稽核跑過的每一個突變）逐一注入拋棄式副本，斷言指定的那條檢查變紅。最後一條斷言是**每條檢查都必須至少有一個突變**——沒有人測過的檢查會讓整個 run 失敗。
 
 **出現在一份以上文件裡的規則，只有一份正本。**[`rules/`](rules/) 存每條規則的正本文字，凡是要陳述該規則的檔案都逐字帶那句話，檢查比對的是位元組，不是 pattern。要改規則就三步：改 `rules/<rule>.txt`、跑檢查、把新句子貼進它點名的每個檔案。只改其中一份複本會直接 FAIL——這正是目的，舊的失敗模式就是規則在某份文件改了、另外兩份一個月後才發現。抓不到的部分寫在 `rules/README.md`。
+
+**有三張表各自出現在三份文件裡**——agent 名冊、關卡表、回退路由。原本有六條檢查在盯這九份副本，而五輪稽核在那六條檢查裡找到六個缺陷。現在改成生成：來源是 [`tables/`](tables/) 加上每隻 agent 自己的 frontmatter，`bash tables/render.sh` 重寫結構欄位，只留一條檢查確認沒人手改生成結果。表格裡的敘述文字不生成——三份文件的敘述本來就沒有一句相同，那是刻意的。
 
 `NN-*.md` 則是腳本判斷不了的情境測試（spec 標 `draft` 會不會擋下 `keel-plan`？計畫與現況牴觸會不會退回？），靠走查。`RULE-INVENTORY.md` 列出每一條已宣告規則、各自的執行點與驗證方式——沒有驗證方式的那列表示它可能無聲壞掉，`執行於` 空著的那列表示它現在就是壞的。
 
@@ -105,6 +108,7 @@ cp -R agents/* ~/.claude/agents/
 
 除了這些，pipeline 其他地方都不會停下來問你要不要繼續：
 
+<!-- generated:gates — structure from tables/gates.tsv; run tables/render.sh after editing -->
 | 關卡 | 在哪個階段 | 問什麼 |
 |------|-----------|--------|
 | **G1** | `keel-discover` | spec 核准。你沒點頭就不准寫程式碼，「這案子很簡單」也不例外。 |
@@ -116,6 +120,7 @@ cp -R agents/* ~/.claude/agents/
 | **G7** | `keel-finish` Part 2 | 每一條 Success Criteria 請你當場核對。agent 自己的判斷永遠不算數。 |
 | **G8** | `keel-finish` Part 3 | 選哪種整合方式——選 discard 的話還要逐字打出那個字。 |
 | **G9** | 任何階段 | repo 之外的不可逆操作：部署、對非暫時性資料庫做 migration、刪資料、對外發布、憑證輪替、push/merge 到受保護分支。指名目標與確切指令，在動手當下問，**就算計畫裡已經寫了也要問**。 |
+<!-- /generated:gates -->
 
 G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續，會跳過硬性關卡或做出無法復原的事」的位置——所以這張表反過來也是封閉的：不在表上的「要繼續嗎？」一律禁止。
 
@@ -124,6 +129,7 @@ G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續
 
 ### 回退路由——後面發現前面錯了怎麼辦
 
+<!-- generated:routes — structure from tables/routes.tsv; run tables/render.sh after editing -->
 | 發生什麼 | 從哪個階段 | 退回哪個階段 |
 |---------|-----------|-------------|
 | 執行時發現計畫跟現況不合，而且不是改一個 task 就能收尾的 | `keel-execute` | `keel-plan` |
@@ -133,6 +139,7 @@ G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續
 | debug 到最後發現，根本是需求本身就錯了 | `keel-debug` | `keel-discover` |
 | 已上線的東西，`## Signals` 顯示沒效——是需求錯了，不是程式錯 | 上線後的真實回饋 | `keel-discover` |
 | 某階段的 INPUT 契約無法滿足 | 任何階段 | 欠交那份產物的階段 |
+<!-- /generated:routes -->
 
 ### 建議路由（`keel-workflow` 怎麼判斷）
 
@@ -160,14 +167,15 @@ G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續
 
 **唯讀是靠工具權限卡死的，不是靠散文交代。** 視角、懷疑者、designer、researcher 只拿到 `Read, Grep, Glob`（加上各自需要的檢索工具）——**完全沒有 shell**，所以唯讀是「它手上就沒有那個能力」而不是「它答應不做」。三隻 `keel-exec-reviewer-*` 額外拿到 `Bash`，因為審 diff 非得跑 `git diff` 不可；各自在定義檔裡把 shell 限制成唯讀指令，那是比較弱的保證，也正是權限只放到這裡為止的原因。只有 implementer 跟 fixer 有 `Edit`/`Write`。這樣「審查的人不准動自己在審的程式碼」就是規則卡死的，不是提示詞寫寫就算了。
 
+<!-- generated:roster — structure from tables/agents.tsv; run tables/render.sh after editing -->
 | subagent_type | 階段 | 幹嘛的 | model | 工具權限 |
 |---|---|---|---|---|
 | `keel-discover-designer` | 1 探索 | 三個平行方案之一，各自守著不同限制想 | sonnet | 唯讀 |
 | `keel-plan-lens-ceo` | 3 審查 | 這件事到底該不該做，還要上網先查有沒有人做過、有沒有人撞過牆 | **opus** | 唯讀 + tavily、exa、context7 |
 | `keel-plan-lens-design` | 3 審查 | 使用者看得到的每個狀態都想到了沒（只在 UI 相關計畫才會開） | sonnet | 唯讀 |
 | `keel-plan-lens-eng` | 3 審查 | 照這樣寫真的做得出來嗎，還要查一下用到的 API 是不是早就被棄用了 | sonnet | 唯讀 + context7、Ref |
-| `keel-plan-lens-dx` | 3 審查 | 開發者要花多少力氣才能上手（只在面向 API/CLI/SDK 的計畫才會開） | sonnet | 唯讀 + context7 |
 | `keel-plan-lens-security` | 3 審查 | 設計期做 STRIDE 威脅建模（只在命中 2+ 資安詞彙、有高風險標記、或新增對外端點時才會開） | **opus** | 唯讀 |
+| `keel-plan-lens-dx` | 3 審查 | 開發者要花多少力氣才能上手（只在面向 API/CLI/SDK 的計畫才會開） | sonnet | 唯讀 + context7 |
 | `keel-plan-skeptic` | 3 審查 | 挑一條 High 等級的發現來反駁——單點查證就搞得定的那種 | sonnet | 唯讀，**不給它上網查** |
 | `keel-plan-skeptic-critical` | 3 審查 | 反駁 Critical 等級、碰到安全/資料遺失/不可逆操作、或要跨檔案推理才能判斷的發現 | **opus** | 唯讀，**不給它上網查** |
 | `keel-exec-implementer` | 4 執行 | 把一個 task 做出來，強制測試先行 | sonnet | 完整權限 |
@@ -177,6 +185,7 @@ G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續
 | `keel-exec-fixer` | 4 執行 | 只修拿到手的那幾條發現，不順手改別的 | sonnet | 完整權限 |
 | `keel-exec-fixer-critical` | 4 執行 | 只在修復迴圈第 4-5 輪出手——標準層卡了兩次才輪到它 | **opus** | 完整權限 |
 | `keel-wayfind-researcher` | 前置階段 | 解一張能靠外部資料查出答案的研究票 | sonnet | 唯讀 + 完整檢索工具 |
+<!-- /generated:roster -->
 
 `keel-exec-reviewer-spec` 會依「合約測試證據強度」分級每一條 Interface drift 發現（有既有測試 > 只寫了合約描述 > 未經查證的宣稱），不是照計畫怎麼寫就照單全收。
 

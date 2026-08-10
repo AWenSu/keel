@@ -193,13 +193,9 @@ done
 [ -z "$badexempt" ] && ok "exemption-guard" "the non-agent exemption list contains no real agents" \
   || bad "exemption-guard" "exemption list hides a real agent →$badexempt"
 
-missing=""
-for a in "${AGENTS[@]}"; do
-  n=$(basename "$a" .md)
-  in_list "$n" "$(echo $ROSTER)" || missing="$missing $n"
-done
-[ -z "$missing" ] && ok "shipped-rostered" "all $N_AGENTS shipped agents appear in the keel-workflow roster" \
-  || bad "shipped-rostered" "shipped but not rostered →$missing"
+# shipped-vs-rostered is now structural: tables/agents.tsv is the roster's
+# source and render.sh rewrites every copy from it, so an agent missing from a
+# roster is a stale generated block, caught above.
 
 # every keel-* name mentioned as a dispatch target must have a file.
 # Skill names share the prefix (keel-plan-review is a skill, not an agent), so
@@ -560,140 +556,30 @@ done)
 [ -z "$badq" ] && ok "fixture-quote-verbatim" "every fixture blockquote is verbatim from its cited source" \
   || { bad "fixture-quote-verbatim" "fixture quotes text absent from its source:"; echo "$badq" | sed 's/^/         /'; }
 
-# ── F11: the backward-route table is the same length in all three documents ──
-# The A7 route (post-merge Signals → keel-discover) was added to keel-workflow
-# and to neither README for a week: the source of truth grew a route and the
-# two documents users actually read did not. Counting rows catches that without
-# needing to match wording across two languages.
-head_ "F11  backward routes documented everywhere"
-# The three tables were cross-checked against each other and against nothing
-# else, so deleting a route from all three passed while RULE-INVENTORY's A
-# section still claimed it and a fixture still graded it.
-inv_routes=$(grep -cE '^\| A[0-9]+ \|' eval-fixtures/RULE-INVENTORY.md)
-inv_gates=$(grep -cE '^\| B[0-9]+ \|' eval-fixtures/RULE-INVENTORY.md)
-
-
-rows_after() {   # rows of the first table following the given heading match
-  awk -v pat="$2" '$0 ~ pat {f=1; next} f && /^\|/ {if ($0 !~ /^\|[- :|]+\|$/ && $0 !~ /Trigger|發生什麼/) n++; next} f && n {exit} END {print n+0}' "$1"
-}
-# Row counts are the weak form; the destinations are the content. A route
-# whose text was replaced wholesale kept the count intact, so the `back to`
-# column is compared as a multiset too.
-routes_of() {
-  awk -v pat="$2" '$0 ~ pat {f=1; next}
-       f && /^\|/ {if ($0 !~ /^\|[- :|]+\|$/ && $0 !~ /Trigger|發生什麼/) {print; n++} next}
-       f && n {exit}' "$1" \
-    | awk -F'|' '{ d=$(NF-1); gsub(/[` ]/,"",d)
-                   # one destination is prose in both languages ("the stage
-                   # that owes the missing artifact"); compare it as a slot,
-                   # not as text, or the zh table can never match
-                   print (d ~ /keel-/ ? d : "<prose>") }'
-}
-wf=$(rows_after skills/keel-workflow/SKILL.md 'Backward routes')
-en=$(rows_after README.md 'Backward routes')
-zh=$(rows_after README.zh-TW.md '回退路由')
-[ "$wf" = "$en" ] && [ "$wf" = "$zh" ] && [ "$wf" -gt 0 ] && [ "$wf" = "$inv_routes" ] \
-  && ok "route-count" "all three backward-route tables list $wf routes, matching RULE-INVENTORY section A" \
-  || bad "route-count" "backward-route count differs → keel-workflow=$wf README=$en README.zh-TW=$zh RULE-INVENTORY=$inv_routes"
-
-# Compared in order, not sorted: swapping two destinations left the sorted
-# multiset identical while both rows pointed at the wrong stage.
-rt_wf=$(routes_of skills/keel-workflow/SKILL.md 'Backward routes')
-rt_en=$(routes_of README.md 'Backward routes')
-rt_zh=$(routes_of README.zh-TW.md '回退路由')
-# `<prose>` is a slot for the one route whose destination is a role rather
-# than a stage ("the stage that owes the missing artifact") — as a wildcard it
-# absorbed any number of rows, so replacing `keel-debug` with "wherever feels
-# right" in all three tables passed.
-nprose=$(echo "$rt_wf" | grep -c '<prose>')
-[ "${nprose:-0}" -le 1 ] \
-  || bad "route-destinations" "more than one backward route has a prose destination ($nprose) — a stage name was laundered into the slot"
-[ "${nprose:-0}" -le 1 ] && PASS=$((PASS+0))
-if [ "$rt_wf" = "$rt_en" ] && [ "$rt_wf" = "$rt_zh" ] && [ "${nprose:-0}" -le 1 ]; then
-  ok "route-destinations" "every route's destination matches across all three tables"
+# ── generated tables: the structure is rendered, not duplicated ─────────────
+# Six checks used to live here: route count, route destinations, gate list,
+# README roster, documented model pin, and shipped-vs-rostered. Every one of
+# them existed to keep three copies of the same table honest, and five audits
+# produced six separate defects in them — a sorted multiset that missed a swap,
+# a `<prose>` slot that absorbed any number of rows, a gate deleted from all
+# three at once, a model column read from the wrong cell. Verification kept
+# losing to duplication, so the duplication is what changed: the key and
+# structural columns are generated from tables/*.tsv and the agents' own
+# frontmatter. What is left to check is that nobody hand-edited the output.
+#
+# The prose in those tables is NOT generated and never was checked: no
+# description is shared between the three documents, by design.
+head_ "tables  generated blocks match their source"
+if [ -x tables/render.sh ] || [ -f tables/render.sh ]; then
+  render_out=$(/bin/bash tables/render.sh --check 2>&1)
+  if [ $? -eq 0 ]; then
+    ok "tables-generated" "all 9 generated table blocks match tables/*.tsv"
+  else
+    bad "tables-generated" "a generated table block was hand-edited or its source changed:"
+    printf '%s\n' "$render_out" | sed 's/^/         /'
+  fi
 else
-  bad "route-destinations" "route destinations differ:"
-  diff <(echo "$rt_wf") <(echo "$rt_en") | sed 's/^/         en: /'
-  diff <(echo "$rt_wf") <(echo "$rt_zh") | sed 's/^/         zh: /'
-fi
-
-# ── F12: the gate table is enumerated in three documents ────────────────────
-# keel-workflow calls it "a closed list" that forbids everything not on it, so
-# a gate present in one document and absent from two is actively countermanded
-# by the other two — a worse shape than the A7 route drift F11 was written for.
-head_ "F12  gate list identical in all three documents"
-# ID plus the stage each gate belongs to. Semantics stay out of reach of a
-# grep — a gate row can be rewritten to say the opposite and this will not
-# see it; RULE-INVENTORY states that boundary rather than implying coverage
-# this does not have.
-gates_of() {
-  awk -F'|' '/^\| *\*{0,2}G[0-9]+\*{0,2} *\|/ {
-    id = $2; stage = $3
-    gsub(/[ *`]/, "", id); gsub(/[ *`]/, "", stage)
-    # G9 belongs to "any stage", which is prose and differs by language;
-    # every other gate names a keel-* stage
-    sub(/[,，].*|Step.*|pre-flight.*|Part.*|per-task.*|每個.*/, "", stage)
-    print id "/" (stage ~ /^keel-/ ? stage : "<any>")
-  }' "$1" | sort -u
-}
-g_wf=$(gates_of skills/keel-workflow/SKILL.md)
-g_en=$(gates_of README.md)
-g_zh=$(gates_of README.zh-TW.md)
-ngates=$(echo "$g_wf" | grep -c .)
-if [ -n "$g_wf" ] && [ "$g_wf" = "$g_en" ] && [ "$g_wf" = "$g_zh" ] && [ "$ngates" = "$inv_gates" ]; then
-  ok "gate-list" "all three documents list the same $ngates gates, matching RULE-INVENTORY section B"
-else
-  bad "gate-list" "gate list differs (documents=$ngates, RULE-INVENTORY section B=$inv_gates):"
-  diff <(echo "$g_wf") <(echo "$g_en") | sed 's/^/         en: /'
-  diff <(echo "$g_wf") <(echo "$g_zh") | sed 's/^/         zh: /'
-fi
-
-# ── F13: the READMEs' agent rosters match agents/ ───────────────────────────
-# F5 compares agents/ to keel-workflow only, and the ghost check reads
-# skills/ only, so both READMEs could lose a shipped agent or advertise one
-# that does not exist.
-head_ "F13  README rosters match the shipped agents"
-shipped=$(for a in "${AGENTS[@]}"; do basename "$a" .md; done | sort)
-roster_of() {   # agent rows in the roster section only
-  awk '/^## Subagent (roster|名冊)/ {f=1; next} f && /^## / {exit} f' "$1" \
-    | grep -oE '^\| `keel-[a-z-]+`' | tr -d '|` ' | sort -u
-}
-bad_roster=""
-for f in README.md README.zh-TW.md; do
-  [ "$(roster_of "$f")" = "$shipped" ] || bad_roster="$bad_roster $f"
-done
-
-# The name column matching is the weak form: a roster row could advertise
-# `opus` for an agent whose frontmatter pins `haiku`, in either direction,
-# and the model is the whole reason the roster exists. F1 only asserts that a
-# pin exists, never that the documented pin is the real one.
-badmodel=""
-for f in README.md README.zh-TW.md skills/keel-workflow/SKILL.md; do
-  awk '/^## Subagent (roster|名冊)|^## .*[Rr]oster/ {f=1} f && /^## / && seen {exit}
-       f && /^\| `keel-[a-z-]+`/ {print; seen=1}' "$f" \
-  | while IFS= read -r row; do
-      n=$(echo "$row" | grep -oE '^\| `keel-[a-z-]+`' | tr -d '|` ')
-      [ -f "agents/$n.md" ] || continue
-      real=$(sed -n '/^---$/,/^---$/p' "agents/$n.md" | sed -n 's/^model: *//p' | head -1)
-      # from the model COLUMN, not the first match in the row: putting the
-      # word "haiku" in the description column laundered a real haiku pin past
-      # a roster that still displayed opus
-      shown=$(echo "$row" | awk -F'|' '{ for (i = NF; i > 0; i--) {
-                 c = $i; gsub(/[ *`]/, "", c)
-                 if (c ~ /^(opus|sonnet|haiku|inherit)$/) { print tolower(c); exit }
-               } }')
-      [ -n "$shown" ] || continue
-      [ "$shown" = "$real" ] || echo "$f:$n(doc=$shown,file=$real)"
-    done
-done > /tmp/keel-model-drift.$$ 2>/dev/null
-badmodel=$(cat /tmp/keel-model-drift.$$; rm -f /tmp/keel-model-drift.$$)
-[ -z "$badmodel" ] && ok "model-pin-documented" "every documented model pin matches the agent file" \
-  || { bad "model-pin-documented" "documented model differs from the agent's frontmatter:"; echo "$badmodel" | sed 's/^/         /'; }
-if [ -z "$bad_roster" ]; then
-  ok "readme-roster" "both READMEs list exactly the $N_AGENTS shipped agents"
-else
-  bad "readme-roster" "README roster does not match agents/ →$bad_roster"
-  for f in $bad_roster; do diff <(echo "$shipped") <(roster_of "$f") | sed "s|^|         $f: |"; done
+  bad "tables-generated" "tables/render.sh is missing — the three duplicated tables have no source"
 fi
 
 # ── maintainer-only: repo vs. installed copy ────────────────────────────────

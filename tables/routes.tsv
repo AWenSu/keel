@@ -1,0 +1,8 @@
+# key	from_workflow	from_readme_en	from_readme_zh	to_workflow	to_readme_en	to_readme_zh
+R1	keel-execute	`keel-execute`	`keel-execute`	`keel-plan`	`keel-plan`	`keel-plan`
+R2	keel-execute	`keel-execute`	`keel-execute`	`keel-plan`	`keel-plan`	`keel-plan`
+R3	keel-plan-review	`keel-plan-review`	`keel-plan-review`	`keel-discover`	`keel-discover`	`keel-discover`
+R4	keel-finish	`keel-finish`	`keel-finish`	`keel-debug`	`keel-debug`	`keel-debug`
+R5	keel-debug	`keel-debug`	`keel-debug`	`keel-discover`	`keel-discover`	`keel-discover`
+R6	post-merge reality	post-merge reality	上線後的真實回饋	`keel-discover`	`keel-discover`	`keel-discover`
+R7	any	any stage	任何階段	the stage that owes the missing artifact	the stage that owes the missing artifact	欠交那份產物的階段

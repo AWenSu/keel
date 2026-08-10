@@ -1,4 +1,4 @@
-# expect: route-count
+# expect: tables-generated
 # class:  check-cannot-fail
 # origin: gate-5 (cross-checked against each other and nothing else)
 python3 - <<'PY'

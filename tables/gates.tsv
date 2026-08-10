@@ -1,0 +1,10 @@
+# id	where_workflow	where_readme_en	where_readme_zh
+G1	keel-discover	`keel-discover`	`keel-discover`
+G2	keel-plan Step 6	`keel-plan`, Step 6	`keel-plan` Step 6
+G3	keel-plan-review Step 0	`keel-plan-review`, Step 0	`keel-plan-review` Step 0
+G4	keel-plan-review Step 5	`keel-plan-review`, Step 5	`keel-plan-review` Step 5
+G5	keel-execute pre-flight	`keel-execute`, pre-flight	`keel-execute` pre-flight
+G6	keel-execute per-task review	`keel-execute`, per-task review	`keel-execute` 每個 task 審查
+G7	keel-finish Part 2	`keel-finish`, Part 2	`keel-finish` Part 2
+G8	keel-finish Part 3	`keel-finish`, Part 3	`keel-finish` Part 3
+G9	any stage	any stage	任何階段

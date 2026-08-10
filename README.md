@@ -72,8 +72,9 @@ tools, every dispatched name resolves to a definition — run it before
 committing any change to this repo:
 
 ```bash
-bash eval-fixtures/check-structure.sh    # 27 checks, exit 0 = all pass
+bash eval-fixtures/check-structure.sh    # 22 checks, exit 0 = all pass
 bash eval-fixtures/run-mutations.sh      # prove each of those checks can fail
+bash tables/render.sh                    # regenerate the three duplicated tables
 ```
 
 The second one is the one that matters. It injects 55 real defects — every
@@ -90,6 +91,14 @@ checker, and paste the new sentence into each file it names. Paraphrasing one
 copy is a build failure, which is the point — the old failure mode was
 changing a rule in one document and finding the other two a month later.
 `rules/README.md` states what this does *not* catch.
+
+**Three tables appear in three documents each** — the agent roster, the gate
+list, the backward routes. Six checks used to keep those nine copies honest,
+and five audits found six defects in those six checks. They are generated now,
+from [`tables/`](tables/) plus each agent's own frontmatter: `bash
+tables/render.sh` rewrites the structural columns, and one check confirms
+nobody hand-edited the output. The prose in them is not generated — no
+description is shared across the three documents, by design.
 
 The `NN-*.md` files are scenario fixtures for rules a script can't judge
 (does a spec marked `draft` block `keel-plan`? does a plan-vs-code
@@ -154,6 +163,7 @@ are never staring at a silent pipeline wondering what four agents are doing.
 Everything else in the pipeline proceeds without asking permission. These
 never do:
 
+<!-- generated:gates — structure from tables/gates.tsv; run tables/render.sh after editing -->
 | Gate | Stage | What it asks |
 |------|-------|--------------|
 | **G1** | `keel-discover` | Spec approval. No code before you approve it; no exception for "simple" projects. |
@@ -165,6 +175,7 @@ never do:
 | **G7** | `keel-finish`, Part 2 | Each Success Criterion, confirmed by you on the spot. The agent's own assessment never closes a box. |
 | **G8** | `keel-finish`, Part 3 | Which integration option — and the literal typed `discard` if that's the one. |
 | **G9** | any stage | An irreversible operation outside the repo: deploy, migration against a non-ephemeral database, data deletion, external publication, credential rotation, push/merge to a protected branch. Named target, exact command, asked at the point of action — **even when the plan already says to do it.** |
+<!-- /generated:gates -->
 
 G1–G9 are not checkpoints. Each is a point where continuing without your
 answer would skip a hard gate or do something that can't be undone — which is
@@ -186,6 +197,7 @@ frontier is empty.
 
 ### Backward routes — when a later stage finds an earlier mistake
 
+<!-- generated:routes — structure from tables/routes.tsv; run tables/render.sh after editing -->
 | Trigger | From | Back to |
 |---------|------|---------|
 | Execution finds the plan contradicts the code as it now stands (beyond one task's fix) | `keel-execute` | `keel-plan` |
@@ -195,6 +207,7 @@ frontier is empty.
 | Debugging concludes the requirement itself is wrong | `keel-debug` | `keel-discover` |
 | Shipped work's `## Signals` say it did not work — the requirement was wrong, not the code | post-merge reality | `keel-discover` |
 | A stage's INPUT contract cannot be satisfied | any stage | the stage that owes the missing artifact |
+<!-- /generated:routes -->
 
 ### Suggested routing (what `keel-workflow` detects)
 
@@ -242,14 +255,15 @@ reason the grant goes no further. Only implementers and fixers get
 `Edit`/`Write`. This is what makes "the reviewer must not edit the code it's
 reviewing" structural instead of a prompt that can be ignored.
 
+<!-- generated:roster — structure from tables/agents.tsv; run tables/render.sh after editing -->
 | subagent_type | Stage | Role | model | Tools |
 |---|---|---|---|---|
 | `keel-discover-designer` | 1 discover | One of 3 parallel approach proposals, each under a different constraint | sonnet | read-only |
 | `keel-plan-lens-ceo` | 3 review | Should this exist at all — plus a mandatory prior-art web scan | **opus** | read-only + tavily, exa, context7 |
 | `keel-plan-lens-design` | 3 review | Every user-visible state named (conditional: UI-heavy plans) | sonnet | read-only |
 | `keel-plan-lens-eng` | 3 review | Buildable as written — plus an API-currency check against live docs | sonnet | read-only + context7, Ref |
-| `keel-plan-lens-dx` | 3 review | Developer onboarding cost (conditional: API/CLI/SDK-facing plans) | sonnet | read-only + context7 |
 | `keel-plan-lens-security` | 3 review | Design-time STRIDE threat modeling (conditional: 2+ security keywords, high-risk marker, or new external endpoint) | **opus** | read-only |
+| `keel-plan-lens-dx` | 3 review | Developer onboarding cost (conditional: API/CLI/SDK-facing plans) | sonnet | read-only + context7 |
 | `keel-plan-skeptic` | 3 review | Refute one High finding — single-point evidence check | sonnet | read-only, **no search** |
 | `keel-plan-skeptic-critical` | 3 review | Refute one Critical / security / cross-file-reasoning finding | **opus** | read-only, **no search** |
 | `keel-exec-implementer` | 4 execute | Build one task, test-first enforced | sonnet | full |
@@ -257,8 +271,9 @@ reviewing" structural instead of a prompt that can be ignored.
 | `keel-exec-reviewer-quality` | 4 execute | Code-quality axis only | sonnet | read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests |
 | `keel-exec-reviewer-security` | 4 execute | Security axis only, dispatched conditionally when an R4 trigger is hit | **opus** | read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests |
 | `keel-exec-fixer` | 4 execute | Apply only the findings it was given | sonnet | full |
-| `keel-exec-fixer-critical` | 4 execute | Fix-loop rounds 4-5 only, after the standard tier stalls twice | opus | full |
+| `keel-exec-fixer-critical` | 4 execute | Fix-loop rounds 4-5 only, after the standard tier stalls twice | **opus** | full |
 | `keel-wayfind-researcher` | pre-stage | Resolve one externally-answerable research ticket | sonnet | read-only + full search |
+<!-- /generated:roster -->
 
 `keel-exec-reviewer-spec` grades every Interface-drift finding by contract-test
 evidence strength (existing test > described contract > unverified claim)

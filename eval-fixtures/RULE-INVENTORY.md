@@ -131,16 +131,16 @@ context fork.
 | F2 | Every agent pins its own `tools:` | `keel-workflow` roster note | all 15 `agents/*.md` frontmatter | `check-structure.sh` |
 | F3 | Reviewers / lenses / skeptics / researchers are read-only | `keel-workflow` roster note, `README` | each agent's `tools:` list — lenses/skeptics/designer/researcher hold no shell at all; the 3 diff reviewers hold Bash restricted in their own text to `git diff`/`log`/`show`, `which`, and the project's existing test command (which does execute, so this tier is a weaker guarantee than the no-shell one) | `check-structure.sh` |
 | F4 | No `general-purpose` dispatch inside the pipeline | `rules/no-general-purpose.txt` (canonical) | `keel-workflow`, verbatim | `check-structure.sh` (byte comparison + literal anti-pattern blocklist) |
-| F5 | Every dispatched `subagent_type` is a roster row | `keel-workflow` pre-dispatch self-check | same | `check-structure.sh` |
+| F5 | Every shipped agent appears in the roster | `agents/` | `tables/agents.tsv` → generated rosters | `check-structure.sh` (generated-block check) |
 | F6 | No `model` override at any dispatch site | `rules/no-model-override.txt` (canonical) | all 8 dispatching stages, verbatim | `check-structure.sh` (byte comparison; the stage list is cross-checked against a derivation) |
 | F7 | Fan-out ceiling | `keel-workflow` fan-out note (concurrency), `keel-execute` Fan-out ceiling (per task loop) | each stage | `check-structure.sh` |
 | F8 | Coverage stars are awarded by named-test count, not impression | `keel-execute` Finish coverage table | same — each star cites a test `file:name`; an uncitable star is a GAP | — |
 | F9 | Every `## section` a file references is defined somewhere | — (the requirement is implicit in every cross-reference) | `check-structure.sh` | `check-structure.sh` |
 | F10 | A fixture's blockquote is verbatim from the source it cites | `eval-fixtures/README.md` grading instruction | `check-structure.sh` | `check-structure.sh` |
-| F11 | Every backward route in `keel-workflow` is documented in both READMEs | `keel-workflow` Backward routes | both READMEs' backward-route tables | `check-structure.sh` |
-| F12 | The gate list is identical in `keel-workflow` and both READMEs | `keel-workflow` gate table ("a closed list") | both READMEs' gate tables | `check-structure.sh` (IDs and stage column only — a row rewritten to say the opposite is out of a grep's reach) |
-| F13 | Both READMEs' agent rosters list exactly the shipped agents | READMEs' Subagent roster | `agents/` | `check-structure.sh` |
-| F14 | Every model pin documented in a roster matches the agent's frontmatter | READMEs + `keel-workflow` roster model column | `agents/*.md` frontmatter | `check-structure.sh` |
+| F11 | Every backward route appears in all three documents with the same from/to | `tables/routes.tsv` | generated into `keel-workflow` + both READMEs | `check-structure.sh` (generated-block check) |
+| F12 | The gate list is identical in `keel-workflow` and both READMEs | `tables/gates.tsv` | generated into all three | `check-structure.sh` (generated-block check) |
+| F13 | Both READMEs' agent rosters list exactly the shipped agents | `tables/agents.tsv`, cross-checked against `agents/` | generated into all three | `check-structure.sh` (generated-block check) |
+| F14 | Every documented model pin matches the agent's frontmatter | `agents/*.md` frontmatter | rendered into every roster; never typed | `check-structure.sh` (generated-block check) |
 | F15 | The checker's own non-agent exemption list hides no real agent | `check-structure.sh` NONAGENT | same | `check-structure.sh` |
 | F16 | Every fan-out section states its ceiling | `rules/fanout-*.txt` (canonical) | `keel-execute`, `keel-plan-review`, `keel-workflow`, both READMEs, verbatim | `check-structure.sh` (byte comparison; the section list is cross-checked against a derivation) |
 | F17 | The manifest of who owes which rule cannot go stale | `rules/manifest.tsv` | derived set of dispatching stages / fan-out sections | `check-structure.sh` |
@@ -219,6 +219,23 @@ covered.
 
 When editing a skill file, run the fixtures for every rule whose `Declared at`
 or `Enforced at` points into that file.
+
+## Generated, not verified
+
+The agent roster, the gate list and the backward routes each appear in three
+documents. Six checks used to keep those copies honest and five audits
+produced six separate defects **in those six checks** — a sorted multiset that
+missed a swap, a `<prose>` slot that absorbed any number of rows, a gate
+deleted from all three at once, a model column read from the wrong cell.
+Verification kept losing to duplication, so as of 2026-08-11 the duplication
+is gone: `tables/*.tsv` plus each agent's own frontmatter are the source, and
+`tables/render.sh` writes the key and structural columns into all nine blocks.
+One check remains — that nobody hand-edited the output.
+
+The prose in those tables is deliberately not generated. No description is
+shared between the three documents: `keel-workflow`'s roster is terse because
+a router reads it, the READMEs' is written for a person, and the Chinese one
+is not a translation. Nothing ever checked those and nothing should.
 
 ## What a script cannot check here, stated rather than implied
 

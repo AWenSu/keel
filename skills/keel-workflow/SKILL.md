@@ -30,6 +30,7 @@ truth, no inlined copies to go stale).
 
 ### Backward routes (a stage may send work back)
 
+<!-- generated:routes — structure from tables/routes.tsv; run tables/render.sh after editing -->
 | Trigger | From | Back to |
 |---------|------|---------|
 | Execution finds the plan contradicts the code as it now is (beyond one task's fix) | keel-execute | `keel-plan` |
@@ -39,6 +40,7 @@ truth, no inlined copies to go stale).
 | Debugging concludes the requirement itself is wrong | keel-debug | `keel-discover` |
 | Shipped work's `## Signals` say it did not work — the requirement was wrong, not the code | post-merge reality | `keel-discover` |
 | A stage's INPUT contract is unsatisfiable (see below) | any | the stage that owes the missing artifact |
+<!-- /generated:routes -->
 
 ## Stage contracts
 
@@ -93,6 +95,7 @@ Every pipeline dispatch names a purpose-built `subagent_type`. The type name
 IS the progress display: reading it tells you which stage is running and who
 is working. A `general-purpose` dispatch inside this pipeline is a bug.
 
+<!-- generated:roster — structure from tables/agents.tsv; run tables/render.sh after editing -->
 | subagent_type | Stage | Role | model |
 |---------------|-------|------|-------|
 | `keel-discover-designer` | 1 discover | Parallel approach proposals | sonnet |
@@ -109,7 +112,8 @@ is working. A `general-purpose` dispatch inside this pipeline is a bug.
 | `keel-exec-reviewer-security` | 4 execute | Security review axis (R4 conditional trigger) | opus |
 | `keel-exec-fixer` | 4 execute | Apply review findings | sonnet |
 | `keel-exec-fixer-critical` | 4 execute | Fix-loop round 4-5 — standard tier stalled | opus |
-| `keel-wayfind-researcher` | pre | Resolve one research ticket | sonnet |
+| `keel-wayfind-researcher` | pre-stage | Resolve one research ticket | sonnet |
+<!-- /generated:roster -->
 
 **External agents — shipped elsewhere, not in this repo's `agents/`.** Still
 valid `subagent_type` values for the pre-dispatch check below, but their
@@ -221,6 +225,7 @@ Add `.keel/` to the repo's `.gitignore` on first creation.
 
 **The gates that may stop the pipeline for a user answer:**
 
+<!-- generated:gates — structure from tables/gates.tsv; run tables/render.sh after editing -->
 | Gate | Where | What |
 |------|-------|------|
 | G1 | keel-discover | Spec approval — no code before the user approves; no exceptions for "simple" projects |
@@ -232,6 +237,7 @@ Add `.keel/` to the repo's `.gitignore` on first creation.
 | G7 | keel-finish Part 2 | Each Success Criterion, confirmed on the spot by the user — the agent's own assessment never closes a box |
 | G8 | keel-finish Part 3 | Branch-integration choice, and the typed `discard` confirmation if that option is taken |
 | G9 | any stage | An irreversible operation outside the repo — deploy, migration against a non-ephemeral database, data deletion, external publication, credential rotation, push/merge to a protected branch. Named target + exact command, asked at the point of action, **even when the plan already specifies it** |
+<!-- /generated:gates -->
 
 A "should I continue?" that is **not one of the rows above** is forbidden —
 generic checkpoint questions burn the user's time and are not a safety

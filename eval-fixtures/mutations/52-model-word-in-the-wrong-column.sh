@@ -1,4 +1,4 @@
-# expect: model-pin-documented
+# expect: tables-generated
 # class:  check-cannot-fail
 # origin: gate-5 (first match anywhere in the row)
 perl -i -pe 's/^model: opus/model: haiku/' agents/keel-exec-reviewer-security.md
