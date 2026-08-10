@@ -1,6 +1,6 @@
 ---
 name: keel-discover
-description: Use when starting any feature, change, or project whose requirements are not yet nailed down — turns a vague idea into a user-approved, evidence-grounded spec before any code is written. Stage 1 of the unified dev pipeline; hands off to keel-plan.
+description: Use when starting any feature, change, or project whose requirements are not yet nailed down — turns a vague idea into a user-approved, evidence-grounded spec before any code is written, including a prior-art scan of what already exists outside the repo. Also the re-entry point when shipped work's Signals came back negative — the requirement was wrong, not the code. Stage 1 of the unified dev pipeline; hands off to keel-plan.
 provenance:
   synthesized: 2026-07-14
   sources:
