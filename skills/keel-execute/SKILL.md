@@ -111,7 +111,8 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
 0. **Read the dependency graph before dispatching anything.** Every task
    carries a `Depends on:` line — that is the plan's statement of what must
    finish first — confirmed by the user at G2, or re-examined by
-   `keel-plan-review`'s breakdown pass when G2 was skipped. It governs three
+   `keel-plan-lens-eng` when G2 was skipped because the plan routed through
+   `keel-plan-review`. It governs three
    decisions here, and nothing else in this stage can substitute for it:
    - **Order.** Never dispatch a task whose `Depends on:` names a task the
      ledger does not yet record as DONE. Task number is not dependency order.

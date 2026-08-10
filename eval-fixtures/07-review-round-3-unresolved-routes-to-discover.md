@@ -5,7 +5,8 @@
 > Max 3 **full review passes** — one pass being Steps 1→5 run end to end. If
 > a third pass still has unresolved items, the plan is fighting the spec; go
 > back to keel-discover. Step 5's internal frontier batches are not passes
-> and are not counted.
+> and are not counted: a dependency chain four batches deep is a normal plan
+> being questioned in the right order, not a plan in trouble.
 
 plus `skills/keel-workflow/SKILL.md` Backward routes.
 

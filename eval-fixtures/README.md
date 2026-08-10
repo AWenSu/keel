@@ -22,6 +22,12 @@ The last check compares this repo against a `~/.claude` install and is
 skipped when there isn't one — so a fresh clone reports one check fewer
 than a maintainer's run. That is not a regression.
 
+**A fixture quotes its rule source verbatim.** A blockquote under
+`**Rule source:**` must be the cited file's actual words — fixture 07 once
+quoted "Max 3 review rounds" where the rule says "Max 3 full review passes",
+and then tested behaviour the real rule calls normal, so a grader following
+it would have failed correct behaviour. `check-structure.sh` enforces this.
+
 **`NN-*.md` — walk them.** Scenario fixtures pin trigger/no-trigger boundaries
 that no script can judge ("does a spec marked draft block `keel-plan`?"). These
 need a human or an agent reading the rule text against the scenario.

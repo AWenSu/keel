@@ -40,7 +40,8 @@ file to check.
 
 Single-file reversible changes don't need a plan file. Medium tasks
 (multi-file, under half a day) may use the lightweight path: dispatch the
-`planner` agent for a one-shot plan you review in-conversation, skip the
+`planner` agent (by name, never `general-purpose`; **do not pass a `model`
+override**) for a one-shot plan you review in-conversation, skip the
 artifact. This skill's full artifact is for work that will be executed over
 multiple sessions or by subagents.
 
@@ -267,7 +268,8 @@ plan) and ask two questions before exit:
 This is the only human checkpoint most plans get on their task breakdown —
 **keel-plan-review is optional and skipped by most plans** (only large/risky
 ones route through it). Skip this quiz only when the plan is heading into
-keel-plan-review anyway; that stage re-examines the breakdown in more depth
+keel-plan-review anyway; `keel-plan-lens-eng` re-examines the breakdown and
+the `Depends on:` edges in more depth
 and asking twice wastes a round-trip.
 
 ## Exit

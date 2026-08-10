@@ -204,7 +204,13 @@ done)
 head_ "F6  no model override at dispatch sites"
 norule=""
 # every stage that dispatches, not the three that happened to be listed
-DISPATCHERS=$(grep -rl 'general-purpose' skills/*/SKILL.md | xargs -n1 dirname | xargs -n1 basename)
+# Derived from dispatch verbs, not from the string `general-purpose` — two
+# stages dispatch without ever using that word and were invisible.
+# A stage dispatches if it says so anywhere — a narrower predicate silently
+# excluded three stages, and a green line naming a count is what makes that
+# dangerous.
+DISPATCHERS=$(grep -rlE '\b(dispatch|Dispatch|dispatches|dispatching)\b' skills/*/SKILL.md \
+              | xargs -n1 dirname | xargs -n1 basename)
 for f in $DISPATCHERS; do
   # tolerate emphasis markup and wording variants; require a real prohibition
   tr '\n' ' ' < "skills/$f/SKILL.md" \
@@ -249,31 +255,42 @@ fi
 # was live in both READMEs. A green light certifying a live defect is worse than
 # no check, so this now sweeps every file that states a total.
 head_ "F7  fan-out ceiling consistent repo-wide"
-# Rewritten twice. v1 asserted one literal string was ABSENT from one file and
-# passed while the defect was live elsewhere. v2 hardcoded the number 16 in
-# three patterns (renumbering the ceiling silently disarmed it), missed
-# README.zh-TW entirely because its Chinese pattern assumed <5 chars between
-# 總量 and the digits, and treated four literal phrases as a scope whitelist.
-# v3 finds any total-agent budget by shape, then requires a scope word near it.
-# Only counts that are explicitly about agents — `confidence ≤5` and
-# `≤15 lines` are not fan-out budgets.
-# Judged per *clause*, not per line: a line can legitimately state a
-# concurrency cap and a total in the same sentence, and matching scope words
-# anywhere on the line let the concurrency word rescue a mis-scoped total.
-# Window ends at the budget's own quantifier — a 40-char window swallowed the
-# NEXT clause, and its scope word ("每輪") then rescued the mis-scoped total.
-noscope=$(grep -rnoE '(總量|[0-9]+ +total)[^.。，,；;（(]{0,28}' --include='*.md' . 2>/dev/null \
-          | grep -v '^\./docs/plans/' \
-          | grep -iE 'agent|隻|個' \
-          | grep -viE 'task loop|每個 ?task|per round|每輪|skeptics per' || true)
-if [ -z "$noscope" ]; then
-  n=$(grep -rocE '總量|[0-9]+ +total agents' --include='*.md' . 2>/dev/null \
-      | grep -v '^\./docs/plans/' | awk -F: '{t+=$2} END{print t+0}')
-  if [ "${n:-0}" -eq 0 ]; then
-    bad "no fan-out ceiling stated anywhere — the rule has been deleted, not satisfied"
-  else
-    ok "all $n stated total-agent budgets are scoped to a task loop or a round"
-  fi
+# Rewritten five times. v3 scanned only forward from the number and so
+# discarded "…number of agents. The cap is ≤8 concurrent, ≤16 total per
+# stage" — the noun precedes the digits. v4 added a `.{0,60}` prefix and
+# backtracked catastrophically: grep hung, returned nothing, and the check
+# passed forever. v5 does the windowing in awk, which cannot blow up.
+noscope=$(for f in $( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } \
+                      | sort -u | grep -v '^docs/plans/' ); do
+  awk -v F="$f" '
+    /總量|[0-9]+ +total/ {
+      line = $0
+      ctx = prev " " line " " ((getline nxt) > 0 ? nxt : "")
+      # scope must attach to the TOTAL clause itself: a concurrency cap or a
+      # per-round skeptic cap elsewhere on the same line rescued a mis-scoped
+      # total twice, in two different rewrites.
+      # Cut at the clause boundary, not at a byte count: substr(…,40) spans
+      # only ~13 CJK characters yet still reached the next clause, whose
+      # "每輪" then rescued a mis-scoped total. Third time this line was wrong.
+      clause = line
+      if (match(clause, /總量|[0-9]+ +total/))
+        clause = substr(clause, RSTART)
+      if (match(clause, /[。.，,；;（(]/))
+        clause = substr(clause, 1, RSTART - 1)
+      if (ctx ~ /agent|隻|個|skeptic/ &&
+          clause !~ /task loop|每個 ?task|per round|每輪|skeptics per/)
+        printf "%s:%d: %s\n", F, NR, substr(line,1,90)
+      prev = nxt; next
+    }
+    { prev = $0 }
+  ' "$f"
+done)
+nb=$(grep -rocE '總量|[0-9]+ +total' --include='*.md' . 2>/dev/null \
+     | grep -v '^\./docs/plans/' | awk -F: '{t+=$2} END{print t+0}')
+if [ "${nb:-0}" -eq 0 ]; then
+  bad "no fan-out ceiling stated anywhere — the rule has been deleted, not satisfied"
+elif [ -z "$noscope" ]; then
+  ok "all $nb stated total-agent budgets are scoped to a task loop or a round"
 else
   bad "total-agent budget with no task-loop/round scope:"; echo "$noscope" | sed 's/^/         /'
 fi
@@ -323,14 +340,17 @@ fi
 head_ "sections  every referenced ## section is defined somewhere"
 allmd=$( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } | sort -u )
 missing_sec=""
-for sec in $(echo "$allmd" | xargs grep -hoE '`## [A-Z][A-Za-z ]{2,30}`' 2>/dev/null \
+for sec in $(echo "$allmd" | xargs grep -hoE '`## [A-Z][A-Za-z0-9 -]{1,30}`' 2>/dev/null \
              | sed 's/^`## //; s/`$//' | sort -u | tr ' ' '\001'); do
   name=$(echo "$sec" | tr '\001' ' ')
+  # `## Task N` is a finding tag, not a section; artifact sections are exempt
+  case "$name" in Task\ *) continue;; esac
   # sections a stage tells a *plan or spec file* to create live in those
   # artifacts, not here — recognised by the instruction verb near the mention
-  echo "$allmd" | xargs grep -hE "(save it under|write it under|goes in|new) \`## ${name}\`" \
+  echo "$allmd" | xargs grep -hE "(save it under|write it under|goes in|writes|written into|new) \`?## ${name}\`?" \
     >/dev/null 2>&1 && continue
-  echo "$allmd" | xargs grep -lE "^## ${name}" >/dev/null 2>&1 \
+  echo "$allmd" | grep -v '^docs/plans/' | grep -v '^eval-fixtures/[0-9]' \
+    | xargs grep -lE "^## ${name}([[:space:]]|\\(|$)" >/dev/null 2>&1 \
     || missing_sec="$missing_sec [$name]"
 done
 [ -z "$missing_sec" ] && ok "every referenced ## section has a definition" \
@@ -338,15 +358,20 @@ done
 
 head_ "fixtures  quoted rule text appears in the cited file"
 badq=$(for fx in eval-fixtures/[0-9]*.md; do
-  src=$(grep -m1 '^\*\*Rule source' "$fx" \
-        | grep -oE '`[A-Za-z0-9_./-]+\.md`' | head -1 | tr -d '`')
-  [ -n "$src" ] && [ -f "$src" ] || continue
-  # compare with newlines and markdown flattened on both sides
-  flat=$(tr '\n' ' ' < "$src" | sed 's/[*`]//g; s/  */ /g')
-  awk '/^> /{sub(/^> /,""); gsub(/[*`]/,""); if (length($0)>40) print}' "$fx" \
+  srcs=$(grep -iE '^\**Rule source' "$fx" \
+         | grep -oE '`?[A-Za-z0-9_./-]+\.md`?' | tr -d '`' | sort -u)
+  [ -n "$srcs" ] || continue
+  flat=""
+  for sf in $srcs; do
+    [ -f "$sf" ] && flat="$flat $(tr '\n' ' ' < "$sf" | sed 's/[*`]//g; s/  */ /g')"
+  done
+  [ -n "$flat" ] || continue
+  awk '/^>/{sub(/^> ?/,""); gsub(/[*`]/,""); if (length($0)>12) print}' "$fx" \
   | while read -r q; do
-      frag=$(echo "$q" | sed 's/  */ /g' | cut -c1-46)
-      case "$flat" in *"$frag"*) ;; *) echo "$fx → $src: \"$frag\"";; esac
+      frag=$(echo "$q" | sed 's/  */ /g; s/^ *//; s/ *$//')
+      # elisions and mid-sentence excerpts are deliberate, not misquotes
+      case "$frag" in *"..."*|*"…"*) continue;; esac
+      case "$flat" in *"$frag"*) ;; *) echo "$fx → ${srcs%% *}: \"$(echo "$frag"|cut -c1-50)\"";; esac
     done
 done)
 [ -z "$badq" ] && ok "every fixture blockquote is verbatim from its cited source" \

@@ -196,7 +196,7 @@ or `Enforced at` points into that file.
 
 ## Current coverage
 
-**78 rules. 53 verified (67%)** — 46 by scenario fixture, 7 by
+**80 rules. 55 verified (68%)** — 46 by scenario fixture, 9 by
 `check-structure.sh`. Recount with:
 
 ```
@@ -215,7 +215,7 @@ plausible number in a table reads as verified.
 
 ## This is the ceiling, and it is deliberate
 
-67% is not a milestone on the way to 100% — it is the intended end state. The
+68% is not a milestone on the way to 100% — it is the intended end state. The
 remaining 25 rows should stay uncovered:
 
 **V1–V5** (Iron Law, red-green regression, the evidence gate, "an agent's
