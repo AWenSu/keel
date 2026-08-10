@@ -138,6 +138,11 @@ context fork.
 | F9 | Every `## section` a file references is defined somewhere | — (the requirement is implicit in every cross-reference) | `check-structure.sh` | `check-structure.sh` |
 | F10 | A fixture's blockquote is verbatim from the source it cites | `eval-fixtures/README.md` grading instruction | `check-structure.sh` | `check-structure.sh` |
 | F11 | Every backward route in `keel-workflow` is documented in both READMEs | `keel-workflow` Backward routes | both READMEs' backward-route tables | `check-structure.sh` |
+| F12 | The gate list is identical in `keel-workflow` and both READMEs | `keel-workflow` gate table ("a closed list") | both READMEs' gate tables | `check-structure.sh` (IDs and stage column only — a row rewritten to say the opposite is out of a grep's reach) |
+| F13 | Both READMEs' agent rosters list exactly the shipped agents | READMEs' Subagent roster | `agents/` | `check-structure.sh` |
+| F14 | Every model pin documented in a roster matches the agent's frontmatter | READMEs + `keel-workflow` roster model column | `agents/*.md` frontmatter | `check-structure.sh` |
+| F15 | The checker's own non-agent exemption list hides no real agent | `check-structure.sh` NONAGENT | same | `check-structure.sh` |
+| F16 | Every fan-out section states a numeric cap, and whoever states the concurrency half states the total half | `keel-execute`, `keel-plan-review`, `keel-workflow`, both READMEs | same | `check-structure.sh` |
 
 ## P. Plan-field contracts
 
@@ -215,7 +220,7 @@ or `Enforced at` points into that file.
 
 ## Current coverage
 
-**88 rules. 58 verified (66%)** — 47 by scenario fixture, 11 by
+**93 rules. 63 verified (68%)** — 47 by scenario fixture, 16 by
 `check-structure.sh`. Every number on this line is produced by the commands
 below — including the split, which used to be the one figure no command
 emitted and was wrong by one in each direction for a week. Recount with:
@@ -236,8 +241,10 @@ plausible number in a table reads as verified.
 
 ## This is the ceiling, and it is deliberate
 
-66% is not a milestone on the way to 100% — it is the intended end state. The
-remaining 25 rows:
+68% is not a milestone on the way to 100% — it is the intended end state. The
+remaining 30 rows — the list below is produced by the command in
+Current coverage, not maintained by hand; it was 25 for a week after section S
+added five more:
 
 **V1–V5** (Iron Law, red-green regression, the evidence gate, "an agent's
 success report is not evidence", untrusted search results) and **H1–H5**
@@ -248,11 +255,16 @@ expected result — tautological, zero information. And they fail loudly in
 normal use: a run that skips the ledger is visibly broken by the next
 compaction, which is a faster and harsher test than any document.
 
-**A6, B2–B5, D5–D6, E7–E9, P3, P9, F8, H6–H7** are in the same family — gates and dispatch
-triggers that fire on ordinary runs, or persistence rules whose absence is
-immediately apparent.
+**A6, B2–B5, D5–D6, E7–E9, P3, P9, F8, H6–H7** are in the same family — gates
+and dispatch triggers that fire on ordinary runs, or persistence rules whose
+absence is immediately apparent.
 
-Chasing the last 25 would be the anti-pattern this repo already names:
+**S2–S6** (seam discipline in plan and debug, the `CONTEXT.md` glossary chain)
+are read-and-obey rules with no trigger boundary: every task that places a
+test touches S2, every brief touches S5. Their producer sections (S1) are
+checked mechanically; the obedience is what a reviewer sees in the diff.
+
+Chasing the last 30 would be the anti-pattern this repo already names:
 optimizing for the check rather than the behavior. Adding a rule that
 genuinely has a trigger/no-trigger boundary and a high cost of being wrong?
 That earns a fixture. Adding one to move a percentage does not.

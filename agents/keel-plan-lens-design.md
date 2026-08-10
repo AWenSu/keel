@@ -35,6 +35,19 @@ For every screen, view, or component the plan introduces or touches:
 - **Responsive behavior** — which breakpoints exist and what reflows. "It'll
   be responsive" is not a named state.
 
+### A2. The feature matrix, read as coverage
+
+`keel-plan` Step 2b produces a `## Feature Matrix` section under this lens's
+own trigger. Read it by that exact heading — a matrix saved under any other
+name, or a plan that states one was produced without carrying the section, is
+a finding in itself.
+
+Then use it as the checklist for §A: every cell of feature × state × role ×
+platform either has a named behavior or an explicit "not applicable, because".
+A matrix with empty cells is worse than no matrix, because it looks like
+coverage. If the plan has no `## Feature Matrix` and hits the trigger above,
+say so as the first finding — the rest of this review is guesswork without it.
+
 ### B. Visual source of truth
 
 A plan can name every state and still leave every visual decision to whoever

@@ -221,7 +221,9 @@ Rules that make plans executable:
   wide-refactor exception in 3b is deliberate — that's the one case a
   horizontal cut is correct.
 - **Tests only at confirmed seams.** Every "write failing test" step names
-  the seam from the spec's **Test seams** section it exercises, and the test
+  the seam from the spec's `## Test seams` section it exercises — read that
+  section by its exact heading; a seam list under any other name is a spec
+  with no seams, and every task then invents its own, and the test
   observes behavior through that interface only — no internals, no private
   methods, no side channels. A task that needs an unconfirmed seam is a
   design change: stop and take it back to the spec. If the spec predates
