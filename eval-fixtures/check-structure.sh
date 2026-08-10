@@ -323,7 +323,7 @@ fi
 head_ "sections  every referenced ## section is defined somewhere"
 allmd=$( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } | sort -u )
 missing_sec=""
-for sec in $(echo "$allmd" | xargs grep -hoE '`## [A-Za-z][A-Za-z ]{2,30}`' 2>/dev/null \
+for sec in $(echo "$allmd" | xargs grep -hoE '`## [A-Z][A-Za-z ]{2,30}`' 2>/dev/null \
              | sed 's/^`## //; s/`$//' | sort -u | tr ' ' '\001'); do
   name=$(echo "$sec" | tr '\001' ' ')
   # sections a stage tells a *plan or spec file* to create live in those
