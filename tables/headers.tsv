@@ -1,0 +1,10 @@
+# table	dockey	header	separator
+roster	workflow	| subagent_type | Stage | Role | model |	|---------------|-------|------|-------|
+roster	readme_en	| subagent_type | Stage | Role | model | Tools |	|---|---|---|---|---|
+roster	readme_zh	| subagent_type | 階段 | 幹嘛的 | model | 工具權限 |	|---|---|---|---|---|
+gates	workflow	| Gate | Where | What |	|------|-------|------|
+gates	readme_en	| Gate | Stage | What it asks |	|------|-------|--------------|
+gates	readme_zh	| 關卡 | 在哪個階段 | 問什麼 |	|------|-----------|--------|
+routes	workflow	| Trigger | From | Back to |	|---------|------|---------|
+routes	readme_en	| Trigger | From | Back to |	|---------|------|---------|
+routes	readme_zh	| 發生什麼 | 從哪個階段 | 退回哪個階段 |	|---------|-----------|-------------|

@@ -2,7 +2,7 @@
 #
 # stdin: <agent-name>\t<model>   (pins read from agents/*.md frontmatter)
 # -v TABLE=roster|gates|routes  DOCKEY=workflow|readme_en|readme_zh
-# -v TSV=tables/<file>.tsv
+# -v TSV=tables/<file>.tsv  HDRTSV=tables/headers.tsv
 #
 # Every cell inside the markers comes from the tsv or from an agent's
 # frontmatter. The first version read the prose cells back out of the document
@@ -38,6 +38,17 @@ BEGIN {
   }
   if (!hdr || NROW == 0) { print "FATAL: could not read " TSV > "/dev/stderr"; exit 2 }
 
+  # the header row used to be reprinted from the document, which made it a
+  # fixed point of the generator: swapping two column names survived
+  # `--check`, and the header's cell count decided whether a whole source
+  # column (Tools) was emitted at all — a laundered cell steering the render
+  while ((getline line < HDRTSV) > 0) {
+    if (line ~ /^#/ || line == "") continue
+    split(line, HH, "\t")
+    if (HH[1] == TABLE && HH[2] == DOCKEY) { HEADER = HH[3]; SEP = HH[4] }
+  }
+  if (HEADER == "") { print "FATAL: no header for " TABLE "/" DOCKEY " in " HDRTSV > "/dev/stderr"; exit 2 }
+
   OPEN  = "<!-- generated:" TABLE " "
   CLOSE = "<!-- /generated:" TABLE " -->"
 }
@@ -49,16 +60,18 @@ BEGIN {
 }
 
 inblock && index($0, CLOSE) != 1 {
-  if ($0 ~ /^\|/) { nold++; OLD[nold] = $0 }
-  else EXTRA[++nextra] = $0
-  next
+  # Anything that is not a table row has no business inside a block stamped
+  # "generated": a blockquote contradicting the table survived here, under a
+  # provenance mark it did not earn.
+  if ($0 ~ /^\|/) { nold++; next }
+  if ($0 ~ /^[[:space:]]*$/) next
+  printf "FATAL: non-table line inside <!-- generated:%s -->: %s\n", TABLE, substr($0,1,60) > "/dev/stderr"
+  exit 4
 }
 
 inblock && index($0, CLOSE) == 1 {
-  # header and separator stay with the document: the READMEs carry a Tools
-  # column the router's table does not, and the Chinese headings are Chinese
-  print OLD[1]; print OLD[2]
-  ncell = split(OLD[1], HC, "|") - 2
+  print HEADER; print SEP
+  ncell = split(HEADER, HC, "|") - 2
 
   for (i = 1; i <= NROW; i++) {
     if (TABLE == "roster") {
@@ -77,7 +90,6 @@ inblock && index($0, CLOSE) == 1 {
       print "| " C[i, "trigger_" DOCKEY] " | " C[i, "from_" DOCKEY] " | " C[i, "to_" DOCKEY] " |"
     }
   }
-  for (i = 1; i <= nextra; i++) print EXTRA[i]
   print
   inblock = 0
   next

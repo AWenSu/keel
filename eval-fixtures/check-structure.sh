@@ -57,6 +57,17 @@ BASH_OK="$WRITERS keel-exec-reviewer-spec keel-exec-reviewer-quality keel-exec-r
 
 in_list() { case " $2 " in *" $1 "*) return 0;; *) return 1;; esac; }
 
+uncommented() {
+  awk '/<!--/ { c = 1 } c { if (/-->/) c = 0; next } { print }' "$1"
+}
+live_text() {
+  awk '/^[[:space:]]*```/ { fence = !fence; next }
+       fence { next }
+       /<!--/ { c = 1 }
+       c { if (/-->/) c = 0; next }
+       { print }' "$1"
+}
+
 # eval-fixtures/mutations/ holds deliberately-broken text: every mutation file
 # contains the defect it injects, so a repo-wide sweep reads them as live
 # defects. They are test data, not documents.
@@ -124,7 +135,9 @@ done
 # The 3 reviewers keep Bash, so their restriction lives in prose — verify it exists.
 missr=""
 for n in keel-exec-reviewer-spec keel-exec-reviewer-quality keel-exec-reviewer-security keel-auditor; do
-  body=$(tr '\n' ' ' < "agents/$n.md")
+  # live text only: wrapping the whole restriction in an HTML comment and
+  # writing the opposite underneath used to satisfy this
+  body=$(live_text "agents/$n.md" | tr '\n' ' ')
   case "$body" in
     *"read-only inspection only"*) : ;;
     *) missr="$missr $n"; continue ;;
@@ -141,9 +154,12 @@ done
 # "reviewer described as plain read-only while holding Bash" defect recurred
 # in the untranslated half because this check only ever read agents/*.md.
 missd=""
+# derived from BASH_OK, not a hardcoded three: the list has seven members and
+# this checked the same three it was written with
+BASH_ONLY=$(for b in $BASH_OK; do in_list "$b" "$WRITERS" || echo "$b"; done)
 for f in README.md README.zh-TW.md; do
-  for n in spec quality security; do
-    row=$(grep -E "keel-exec-reviewer-$n\`" "$f" | head -1)
+  for n in $BASH_ONLY; do
+    row=$(grep -E "\`$n\`" "$f" | head -1)
     # must positively describe a restricted shell, and must not deny holding one
     echo "$row" | grep -qiE 'restricted|僅限|受限' &&
       echo "$row" | grep -qiE 'shell|bash' &&
@@ -151,7 +167,7 @@ for f in README.md README.zh-TW.md; do
       || missd="$missd $f:$n"
   done
 done
-[ -z "$missd" ] && ok "readme-shell-grant" "both READMEs describe the 3 reviewers' shell grant" \
+[ -z "$missd" ] && ok "readme-shell-grant" "both READMEs describe the shell grant of all $(echo $BASH_ONLY | wc -w | tr -d ' ') Bash-holding read-only agents" \
   || bad "readme-shell-grant" "README calls a Bash-holding reviewer plain read-only →$missd"
 
 # ── F4/F5: dispatch names resolve to a roster row ───────────────────────────
@@ -234,16 +250,6 @@ done
 # bytes. See rules/README.md for what that does and does not buy.
 # A copy inside an HTML comment or a fenced block is present and inert: three
 # lines later the file can say the opposite. Live text only.
-uncommented() {
-  awk '/<!--/ { c = 1 } c { if (/-->/) c = 0; next } { print }' "$1"
-}
-live_text() {
-  awk '/^[[:space:]]*```/ { fence = !fence; next }
-       fence { next }
-       /<!--/ { c = 1 }
-       c { if (/-->/) c = 0; next }
-       { print }' "$1"
-}
 head_ "rules  canonical rule text present verbatim where it is owed"
 # The rule files themselves are checked first. An empty one makes `grep -F ""`
 # match everything, and a two-line one makes `grep -F` an OR of the lines —

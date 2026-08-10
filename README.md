@@ -273,7 +273,7 @@ reviewing" structural instead of a prompt that can be ignored.
 | `keel-exec-fixer` | 4 execute | Apply only the findings it was given | sonnet | full |
 | `keel-exec-fixer-critical` | 4 execute | Fix-loop rounds 4-5 only, after the standard tier stalls twice | **opus** | full |
 | `keel-wayfind-researcher` | pre-stage | Resolve one externally-answerable research ticket | sonnet | read-only + full search |
-| `keel-auditor` | meta | Attacks this repo's own checks by mutation — looks for a defect class nobody has encoded | **opus** | read-only + shell restricted to `git diff`/`log`/`show`, `which`, tests |
+| `keel-auditor` | meta | Attacks this repo's own checks by mutation — looks for a defect class nobody has encoded | **opus** | read-only + a shell restricted to running the checkers; mutations only in a throwaway copy, never commits |
 <!-- /generated:roster -->
 
 `keel-exec-reviewer-spec` grades every Interface-drift finding by contract-test

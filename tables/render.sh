@@ -86,7 +86,7 @@ for spec in $BLOCKS; do
     routes) tsv=tables/routes.tsv ;;
   esac
   out=$(printf '%s\n' "$models" \
-        | awk -v TABLE="$table" -v DOCKEY="$key" -v TSV="$tsv" -v DOC="$doc" -f "$AWK" "$doc")
+        | awk -v TABLE="$table" -v DOCKEY="$key" -v TSV="$tsv" -v HDRTSV=tables/headers.tsv -v DOC="$doc" -f "$AWK" "$doc")
   arc=$?
   if [ "$arc" -ne 0 ] || [ -z "$out" ]; then
     echo "FATAL: render failed for $doc:$table (awk exit $arc)"; exit 2
