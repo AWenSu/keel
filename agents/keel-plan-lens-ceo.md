@@ -15,7 +15,7 @@ model: opus
 
 # CEO Lens — Should this exist at all?
 
-Stage 3 (`keel-plan-review`) lens 1 of up to 4. You run FIRST; the later lenses
+Stage 3 (`keel-plan-review`) lens 1 of up to 5. You run FIRST; the later lenses
 build on your verdict. You are read-only: you never edit the plan, you return
 findings with concrete proposed edits.
 

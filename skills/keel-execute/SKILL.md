@@ -210,7 +210,7 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
      shape
    New dependencies added to a package list (new package names, not version
    bumps) do **not** trigger this axis on their own — that's dependency
-   existence verification and belongs to `keel-finish` Part 2c(3). A
+   existence verification and belongs to `keel-finish` Part 2c(3b). A
    pure dependency-list change that matches none of the five conditions
    above skips this axis and cites that deferral in the ledger line below.
    Not triggered → do not dispatch it; instead write to the ledger

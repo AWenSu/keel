@@ -53,7 +53,7 @@ tools_of() {
     /^tools:/ { inline=$0; sub(/^tools: */,"",inline); if (inline!="") {print inline; next} blk=1; next }
     blk && /^[[:space:]]*-[[:space:]]*/ { sub(/^[[:space:]]*-[[:space:]]*/,""); print; next }
     blk && /^[^[:space:]]/ { blk=0 }
-  ' | tr ',' '\n' | sed 's/^ *//; s/ *$//' | grep -v '^$'
+  ' | tr ',' '\n' | tr -d '[]' | sed 's/^ *//; s/ *$//' | grep -v '^$'
 }
 
 printf '\033[1mkeel structural checks\033[0m  (%s agents, %s skills)\n' \
@@ -177,7 +177,7 @@ done
 # had code behind it, and RULE-INVENTORY credited this script for the coverage.
 # Judged over a 2-line window: the prohibition often wraps onto the next line
 # ("a `general-purpose` agent inside\n this pipeline is a bug").
-gp=$(for f in $(git ls-files 'skills/**/*.md' 'agents/*.md'); do
+gp=$(for f in $( { git ls-files 'skills/**/*.md' 'agents/*.md'; git ls-files -o --exclude-standard 'skills/**/*.md' 'agents/*.md'; } | sort -u); do
   awk -v F="$f" '
     { win = prev "\n" $0 "\n" nextline }
     /general-purpose/ {
@@ -204,14 +204,21 @@ done)
 head_ "F6  no model override at dispatch sites"
 norule=""
 # every stage that dispatches, not the three that happened to be listed
-for f in $(grep -rl 'general-purpose' skills/*/SKILL.md | xargs -n1 dirname | xargs -n1 basename); do
+DISPATCHERS=$(grep -rl 'general-purpose' skills/*/SKILL.md | xargs -n1 dirname | xargs -n1 basename)
+for f in $DISPATCHERS; do
   # tolerate emphasis markup and wording variants; require a real prohibition
   tr '\n' ' ' < "skills/$f/SKILL.md" \
     | grep -qiE '(do \*{0,2}not\*{0,2}|never|no) [^.]{0,40}`?model`?( +override| +parameter|\b)' \
     || norule="$norule $f"
 done
-[ -z "$norule" ] && ok "the no-override rule is still stated in all 3 dispatching stages" \
-  || bad "no-override rule weakened or deleted in →$norule"
+ndisp=$(echo "$DISPATCHERS" | grep -c . || true)
+if [ "${ndisp:-0}" -eq 0 ]; then
+  bad "no dispatching stage found — the rule check would pass over an empty set"
+elif [ -z "$norule" ]; then
+  ok "the no-override rule is still stated in all $ndisp dispatching stages"
+else
+  bad "no-override rule weakened or deleted in →$norule"
+fi
 
 # Override *syntax* at a call site. Roster/matrix table cells legitimately name
 # models, so exclude table rows; frontmatter legitimately pins one, so exclude
@@ -220,7 +227,7 @@ done
 # frontmatter exemption is resolved per file by line number rather than by the
 # substring `:model:`, which a body line beginning `model:` also satisfies.
 override_hits() {
-  for f in $(git ls-files 'skills/**/*.md' 'agents/*.md'); do
+  for f in $( { git ls-files 'skills/**/*.md' 'agents/*.md'; git ls-files -o --exclude-standard 'skills/**/*.md' 'agents/*.md'; } | sort -u); do
     fmend=$(awk 'NR>1 && /^---$/{print NR; exit}' "$f"); : "${fmend:=0}"
     grep -nE '["`]?model["`]? *[:=] *["`]?[a-z][a-z0-9.-]+' "$f" \
       | awk -F: -v e="$fmend" '$1 > e' \
@@ -262,7 +269,11 @@ noscope=$(grep -rnoE '(總量|[0-9]+ +total)[^.。，,；;（(]{0,28}' --include
 if [ -z "$noscope" ]; then
   n=$(grep -rocE '總量|[0-9]+ +total agents' --include='*.md' . 2>/dev/null \
       | grep -v '^\./docs/plans/' | awk -F: '{t+=$2} END{print t+0}')
-  ok "all $n stated total-agent budgets are scoped to a task loop or a round"
+  if [ "${n:-0}" -eq 0 ]; then
+    bad "no fan-out ceiling stated anywhere — the rule has been deleted, not satisfied"
+  else
+    ok "all $n stated total-agent budgets are scoped to a task loop or a round"
+  fi
 else
   bad "total-agent budget with no task-loop/round scope:"; echo "$noscope" | sed 's/^/         /'
 fi
@@ -297,7 +308,7 @@ else
   # every file named in a Rule source must exist — a dangling path sends the
   # grader somewhere that is not merely stale but absent
   missf=""
-  for f in $(grep -hoE '`(skills|agents)/[A-Za-z0-9_./-]+\.md`' eval-fixtures/[0-9]*.md \
+  for f in $(grep -hoE '`?(skills|agents)/[A-Za-z0-9_./-]+\.md`?' eval-fixtures/[0-9]*.md \
              | tr -d '`' | sort -u); do
     [ -f "$f" ] || missf="$missf $f"
   done

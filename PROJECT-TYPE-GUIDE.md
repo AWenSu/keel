@@ -108,6 +108,6 @@ inspected.
 - **Unknown codebase**: prepend a cheap exploration pass (read-only agent or
   code-graph tooling) before Discover — never plan against an imagined
   codebase.
-- **Debugging is its own lane**: bug work enters via systematic debugging,
+- **Debugging is its own lane**: bug work enters via `keel-debug`,
   not via Discover. The pipeline is for building; debugging has its own
   discipline.

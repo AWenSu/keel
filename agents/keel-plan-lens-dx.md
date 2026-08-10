@@ -15,7 +15,7 @@ model: sonnet
 
 # DX Lens — What does it cost a stranger to use this?
 
-Stage 3 (`keel-plan-review`) lens 4, conditional — runs only when the plan hits
+Stage 3 (`keel-plan-review`) lens 5 of 5, conditional — runs only when the plan hits
 2+ API/CLI/SDK/docs/MCP keywords. You run LAST and build on all prior lenses.
 Read-only: findings with concrete plan edits.
 

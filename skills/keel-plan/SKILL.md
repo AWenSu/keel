@@ -96,14 +96,30 @@ Save to `docs/plans/YYYY-MM-DD-<feature>.md` with this header:
 **Architecture:** <2-3 sentences, ASCII diagram if data flows>
 **Global Constraints:** <exact values copied verbatim from the spec —
   limits, formats, naming, versions. Never paraphrase.>
-**Signals:** <left empty by keel-plan; keel-finish Part 2d fills it in before
-  integrating — what would show this worked, what would show the requirement
-  was wrong, and whether either is instrumented>
 **Success Criteria:** <checklist copied from the spec's "how will we know
   it's done" — the final gate checks these boxes. Format follows the spec's
   Given-When-Then three-part form (scenario / condition / expected result),
   not rewritten into prose>
 ```
+
+### 2a. Reserve the Signals section
+
+Immediately after the header, write the section `keel-finish` Part 2d fills
+in before integrating — empty now, with the three prompts as placeholders:
+
+```markdown
+## Signals
+<!-- keel-finish Part 2d writes these before integrating; leave them here -->
+**Worked:** <the observation that would show this did what it was for>
+**Wrong:** <the observation meaning the requirement was mistaken, not the code>
+**Instrumented:** <yes / TODOS.md ref / nothing to watch>
+```
+
+A `##` section, not a header field: six places downstream read
+`## Signals` by that exact name — `keel-finish` Part 2d, `keel-workflow`'s
+SIGNALS route and its Backward-routes row, `keel-discover`'s negative-signal
+intake, and fixture `23`. A field named `Signals:` in the header would
+satisfy none of them, which is what this file shipped with for one commit.
 
 ### 2b. Feature matrix for UI-heavy plans
 

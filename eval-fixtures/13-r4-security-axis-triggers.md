@@ -56,7 +56,7 @@ exists specifically to catch that false-positive failure mode.
 **Scenario:** a task only bumps a dependency's version number in a package
 list. **Expected:** security axis skipped; ledger line cites which
 condition was checked and why none matched (per dependency-only diffs,
-cites deferral to `keel-finish` Part 2c(3) explicitly, not a bare "skip").
+cites deferral to `keel-finish` Part 2c(3b) explicitly, not a bare "skip").
 
 ## Not expected (would be a regression)
 

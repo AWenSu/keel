@@ -65,6 +65,17 @@ verdict, even when clean.
   from. Name the *capability* in your proposed edit, not a hardcoded skill
   name — the installed set differs per environment, and a stale list is
   worse than none.
+- **Task breakdown and `Depends on:` edges.** `keel-plan` Step 6 quizzes the
+  user on these (G2) — **except** when the plan is coming here, on the stated
+  grounds that this stage re-examines them in more depth. Until now no lens
+  did, so the plans that skip G2 are exactly the large, risky ones whose
+  dependency graph nobody checked, and `keel-execute` step 0 treats that graph
+  as a hard scheduling bar. Check three things: every `Depends on:` names a
+  task that exists; no cycle; and each edge is real — a task that merely runs
+  *after* another is not dependent on it, and a spurious edge serialises work
+  that could have run in parallel just as surely as a missing one corrupts it.
+  Also flag any task with no `Depends on:` line at all, which is different
+  from `none`.
 - **Risk grade sanity.** A task that migrates data, touches an
   authentication/authorization path, or performs an irreversible operation and
   is graded `Low` or `Med` is a finding in its own right — the grade drives
@@ -86,6 +97,7 @@ Missing → confidence ≤5, appendix only.
 ```
 SCORE: <0-10>
 API 時效查核: <library → 版本 → 計畫假設是否成立 → URL>
+Task breakdown: <Depends on 邊是否都指向存在的 task／有無環／有無多餘或缺漏的邊>
 High-risk rollback: <每個 [Risk: High] task → 具名 rollback 步驟，或「缺」>
 風險等級合理性: <有無低報；低報會靜默關掉 R4 條件 3 與上面的 error registry>
 Skills 路由（非 UI）: <每個平台／協定 task → 已命名的 skill，或「未命名」>

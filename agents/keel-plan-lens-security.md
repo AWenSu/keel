@@ -15,7 +15,7 @@ model: opus
 
 # Security Lens — What can go wrong with trust, data, and failure?
 
-Stage 3 (`keel-plan-review`) lens 4, conditional — runs when the plan hits 2+
+Stage 3 (`keel-plan-review`) lens 4 of 5, conditional — runs when the plan hits 2+
 security keywords, carries a high-risk marker, or adds an externally
 reachable endpoint. You run AFTER the CEO, Design, and Eng lenses and build
 on their verdicts. Read-only: findings with concrete plan edits, never edit

@@ -207,7 +207,7 @@ wrong. Re-dispatch that finding to `keel-plan-skeptic-critical`; never accept
 reasoning over the evidence already presented, not gathering new arguments —
 give it those and it becomes a second lens instead of a refuter.
 
-**Fan-out cap:** ≤8 skeptics per round. Over the cap, sort by severity, take
+**Fan-out cap:** ≤8 skeptics per verification round (Step 4; distinct from Step 5's frontier batches and from a full review pass). Over the cap, sort by severity, take
 the top 8, and emit `SKIPPED: <n> findings not verified — <id + reason>`.
 An unverified finding must never be presented as though it survived refutation.
 
@@ -238,7 +238,7 @@ chain here is normal and must not be mistaken for that.)
 - Ask the whole frontier in **one AskUserQuestion call** (up to its 4-question
   cap; a frontier over 4 splits across the fewest calls needed — never forced
   down to one question per call just to be safe). A question whose answer
-  depends on another still open this round belongs to a **later** round, not
+  depends on another still open this batch belongs to a **later** batch, not
   this one — batching is bounded by dependency, not by convenience.
 - Never proceed on an unanswered question. Each question still carries full
   detail:
@@ -251,7 +251,7 @@ chain here is normal and must not be mistaken for that.)
 - User Challenges additionally use the 5-field format above, with the
   user's stated direction as the default option
 
-Apply every answer from a round to the plan file before computing the next
+Apply every answer from a batch to the plan file before computing the next
 round's frontier — an answer often resolves or reshapes what's still open;
 drop questions an earlier answer already settled. The session's Step 5 is
 done when the frontier is empty.
@@ -261,7 +261,7 @@ decision — Mechanical, Taste, or User Challenge — is applied to the plan
 file, check it against the existing ADR criterion (verbatim from
 `keel-finish` Part 2): a decision this work locked that is hard to reverse +
 surprising without context + a real trade-off. Miss any condition → no ADR,
-move on to the next decision in the round. This is the same criterion
+move on to the next decision in the batch. This is the same criterion
 keel-finish already applies at integration time, just checked at the moment
 the decision is made instead of later — it is not a new mandatory gate, and
 a decision that fails the check is not blocked or flagged, it simply

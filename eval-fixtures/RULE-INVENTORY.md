@@ -153,7 +153,7 @@ Add a row here whenever a field is added to the plan template.
 | P2 | `Files:` | `keel-plan` Step 3 | implementer staleness check | `keel-execute` drift threshold (accumulates relocations) | `06` |
 | P3 | `Interfaces:` | `keel-plan` Step 3 | `keel-execute` brief extraction | `keel-exec-reviewer-spec` interface-drift check | — |
 | P4 | `Skills:` | `keel-plan` Step 3 | implementer invokes them | `keel-plan-lens-design` §C for user-visible surfaces; `keel-plan-lens-eng` for platform / protocol / tooling work *(only when keel-plan-review runs — most plans skip it)* | `21` |
-| P5 | `Depends on:` | `keel-plan` Step 3 | `keel-execute` step 0 — order, parallelism, which Interfaces to include | user at G2 (edge correctness); `BLOCKED` on an edge naming a nonexistent task | `22` |
+| P5 | `Depends on:` | `keel-plan` Step 3 | `keel-execute` step 0 — order, parallelism, which Interfaces to include | user at G2 (edge correctness); `keel-plan-lens-eng` when G2 was skipped for review; `BLOCKED` on a missing field or an edge naming a nonexistent task | `22` |
 | P6 | `[Risk: …]` | `keel-plan` Step 3 | `keel-execute` R4 condition 3; `keel-plan-lens-eng` error registry | `keel-plan-lens-eng` — rollback present on every High, and grade-sanity against what the task actually does *(only when keel-plan-review runs — most plans skip it)* | `22` |
 | P7 | `Spec Version:` | `keel-plan` Step 2 header | `keel-execute` pre-flight drift check | same check (mismatch routes back) | `03` |
 | P8 | `Success Criteria:` | `keel-plan` Step 2 header | `keel-finish` Part 2; final `code-reviewer` spec axis | user at G7, one criterion at a time | `19` |
@@ -239,6 +239,6 @@ That earns a fixture. Adding one to move a percentage does not.
 `Enforced at` is a different claim from `Fixture`, and is **not** summarised
 as a percentage on purpose. Every row names a location, and every location was
 confirmed to contain the rule when written — but "the text is there" is weaker
-than "the rule operates," and collapsing 59 individually-checkable claims into
+than "the rule operates," and collapsing every individually-checkable claim into
 one number is how the weaker reading gets laundered into the stronger one.
 Check the rows you care about.

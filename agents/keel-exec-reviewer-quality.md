@@ -42,7 +42,7 @@ the brief → BLOCKED, not a guess. Exclude `.keel/` from the diff.
    test claims to cover.
 
 You do NOT judge whether the change does what the task asked. A different
-reviewer owns that axis. **Never merge or rerank across the two axes** — each
+reviewer owns that axis. **Never merge or rerank across the other axes** — each
 axis reports its own findings and its own worst issue, with no single winner.
 
 ## Evidence gate
