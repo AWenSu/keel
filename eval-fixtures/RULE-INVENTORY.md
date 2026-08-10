@@ -144,6 +144,7 @@ context fork.
 | F15 | The checker's own non-agent exemption list hides no real agent | `check-structure.sh` NONAGENT | same | `check-structure.sh` |
 | F16 | Every fan-out section states its ceiling | `rules/fanout-*.txt` (canonical) | `keel-execute`, `keel-plan-review`, `keel-workflow`, both READMEs, verbatim | `check-structure.sh` (byte comparison; the section list is cross-checked against a derivation) |
 | F17 | The manifest of who owes which rule cannot go stale | `rules/manifest.tsv` | derived set of dispatching stages / fan-out sections | `check-structure.sh` |
+| F18 | Every canonical rule file is exactly one non-empty line and is claimed by the manifest | `rules/README.md` | `rules/*.txt` | `check-structure.sh` (an empty file makes `grep -F` match everything; a two-line file makes it an OR) |
 
 ## P. Plan-field contracts
 
@@ -240,7 +241,7 @@ that passed on live defects and failed on correctly stated rules.
 
 ## Current coverage
 
-**94 rules. 64 verified (68%)** — 47 by scenario fixture, 17 by
+**95 rules. 65 verified (68%)** — 47 by scenario fixture, 18 by
 `check-structure.sh`. Every number on this line is produced by the commands
 below — including the split, which used to be the one figure no command
 emitted and was wrong by one in each direction for a week. Recount with:

@@ -217,13 +217,36 @@ done
 # holds it once, the files that owe it carry it verbatim, and this compares
 # bytes. See rules/README.md for what that does and does not buy.
 head_ "rules  canonical rule text present verbatim where it is owed"
+# The rule files themselves are checked first. An empty one makes `grep -F ""`
+# match everything, and a two-line one makes `grep -F` an OR of the lines —
+# both turn every copy of that rule green while it is absent. A rule nobody
+# lists in the manifest is enforced nowhere and would sit here looking
+# authoritative.
+badrule=""
+for rf in rules/*.txt; do
+  base=$(basename "$rf")
+  [ "$base" = "anti-patterns.txt" ] && continue
+  n=$(grep -c . "$rf")
+  [ "$n" -eq 1 ] || badrule="$badrule $base(must be exactly one non-empty line, has $n)"
+  grep -qF "$base" rules/manifest.tsv \
+    || badrule="$badrule $base(orphan — no manifest entry, enforced nowhere)"
+done
+[ -z "$badrule" ] && ok "every canonical rule file is one line and is claimed by the manifest" \
+  || { bad "canonical rule file unusable:"; for b in $badrule; do echo "         $b"; done; }
+
 missing_rule=""
 while IFS="$(printf '\t')" read -r rule target deriv; do
   echo "$rule" | grep -q '^#' && continue
   [ -n "${rule:-}" ] || continue
+  case "$rule" in
+    *" "*) missing_rule="$missing_rule manifest-row(columns must be tab-separated, found spaces: $rule)"; continue ;;
+  esac
   [ -f "rules/$rule" ] || { missing_rule="$missing_rule rules/$rule(no such rule file)"; continue; }
+  [ -n "$target" ] || { missing_rule="$missing_rule $rule(manifest row has no target — tab-separated, not spaces)"; continue; }
   [ -f "$target" ] || { missing_rule="$missing_rule $target(no such file)"; continue; }
-  grep -qF "$(cat "rules/$rule")" "$target" \
+  text=$(cat "rules/$rule")
+  [ -n "$text" ] || { missing_rule="$missing_rule $rule(empty rule file)"; continue; }
+  grep -qF "$text" "$target" \
     || missing_rule="$missing_rule $target(missing $rule)"
 done < rules/manifest.tsv
 [ -z "$missing_rule" ] && ok "every file owing a canonical rule carries it verbatim" \
