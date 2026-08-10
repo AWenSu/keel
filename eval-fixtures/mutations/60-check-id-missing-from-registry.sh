@@ -1,4 +1,4 @@
-# touches-checker: yes — the registry is the subject of this check
+# touches-checker: check-id-registry — the registry IS the subject of this check
 # expect: check-id-registry
 # class:  derivation-too-narrow
 # origin: gate-6 — the harness denominator came from what a run printed, so a

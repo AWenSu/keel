@@ -1,4 +1,4 @@
-# touches-checker: yes — this mutation IS the exemption-list disarm
+# touches-checker: exemption-guard — the exemption list IS what this check guards
 # expect: exemption-guard
 # class:  self-disarm
 # origin: gate-4 (nothing asserted a NONAGENT token was not a real agent)

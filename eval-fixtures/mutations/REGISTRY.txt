@@ -64,3 +64,9 @@
 62-all-markers-disabled.sh
 63-route-inserted-mid-table-repairs-rows.sh
 64-roster-tools-cell-hand-edited.sh
+65-optin-launders-an-unrelated-red.sh
+66-commit-hides-the-self-edit.sh
+67-generated-block-holds-a-stray-line.sh
+68-generated-header-columns-swapped.sh
+69-reviewer-restriction-only-in-a-comment.sh
+70-readme-documents-an-unrestricted-shell.sh

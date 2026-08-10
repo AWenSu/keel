@@ -133,21 +133,34 @@ worker() {   # worker <slot>: its own copy, its own slice, its own result file
   MYHOME="$WORK/h$slot"; cp -R "$BASE_HOME" "$MYHOME" || return 2
   export HOME="$MYHOME"
   cd "$dir" || return 2
+  BASE_COMMIT=$(git rev-parse HEAD)
   n=0
   for name in $MUTS; do
     n=$((n + 1))
     [ $(( (n - 1) % JOBS )) -eq "$slot" ] || continue
+    exp0=$(sed -n 's/^# expect: *//p' "$MUT_DIR/$name.sh" | head -1)
     ( /bin/bash "$MUT_DIR/$name.sh" ) >/dev/null 2>&1
     # A mutation that edits the checker proves nothing: "I broke the check" is
     # not "the check enforces the rule". Opt in per file when the apparatus
     # itself is the subject (mutation 14 disarms the exemption list on purpose).
-    touched=$(git status --porcelain | awk '{print $NF}')
+    # `git status` alone is an observation surface the mutation can rewrite:
+    # one `git commit` moved the edit out of the porcelain output and the
+    # checker edit was graded as proof. Compare against the baseline commit.
+    touched=$( { git status --porcelain | awk '{print $NF}'
+                 git diff --name-only "$BASE_COMMIT" 2>/dev/null; } | sort -u )
     selfedit=""
-    if ! grep -q '^# touches-checker: yes' "$MUT_DIR/$name.sh"; then
+    # first token only: the header carries a justification after the id
+    optin=$(sed -n 's/^# touches-checker: *//p' "$MUT_DIR/$name.sh" | head -1 | awk '{print $1}')
+    # the opt-in must name the check it is the subject of, and that must be the
+    # check it expects: `# touches-checker: yes` let any mutation launder any
+    # red — 23 of them could have "covered" all 23 ids without touching the repo
+    if [ -n "$optin" ] && [ "$optin" != "$exp0" ]; then
+      selfedit="opt-in names '$optin' but expects '$exp0'"
+    elif [ -z "$optin" ]; then
       selfedit=$(printf '%s\n' "$touched" | grep -E '^(eval-fixtures/(check-structure|run-mutations)\.sh|eval-fixtures/CHECK-IDS\.txt|eval-fixtures/mutations/|tables/render\.)' || true)
     fi
     out=$(run_checks)
-    exp=$(sed -n 's/^# expect: *//p' "$MUT_DIR/$name.sh" | head -1)
+    exp="$exp0"
     if [ "$exp" = "refused" ]; then
       # a negative control: the harness itself is on trial, and passing means
       # this mutation was rejected rather than graded
@@ -167,10 +180,17 @@ worker() {   # worker <slot>: its own copy, its own slice, its own result file
     # and the fake install, which lives outside the git copy entirely: mutation
     # 55 appends to it, the append survived every later mutation in the run,
     # and a no-op mutation then inherited the red it caused
+    git reset -q --hard "$BASE_COMMIT" >/dev/null 2>&1
     rm -rf "$MYHOME/.claude"
     mkdir -p "$MYHOME/.claude/skills" "$MYHOME/.claude/agents"
     cp -R skills/. "$MYHOME/.claude/skills/"
     cp -R agents/. "$MYHOME/.claude/agents/"
+    # per-mutation integrity, not one sampled control: a mutation that
+    # committed survived checkout+clean and every later mutation in the same
+    # worker lane inherited its red, while a different JOBS value put the
+    # control in another lane and reported the board clean
+    resid=$( { git status --porcelain; git log -1 --format=%H | grep -v "^$BASE_COMMIT$"; } | head -3 )
+    [ -z "$resid" ] || v="RESIDUE"
     printf '%s\t%s\t%s\n' "$n" "$v" "$name" >> "$WORK/res"
   done
 }
@@ -194,6 +214,7 @@ while IFS="$(printf '\t')" read -r idx v name; do
     CONTROL_DIRTY) printf '  \033[31mDIRTY BOARD\033[0m  %-34s → a previous mutation was not fully reverted\n' "$name"; RED=$((RED+1)) ;;
     FAIL)   printf '  \033[32m red \033[0m  %-42s → [%s]\n' "$name" "$exp"; GREEN=$((GREEN+1)) ;;
     PASS)   printf '  \033[31mSTILL GREEN\033[0m  %-34s → [%s] did not fire\n' "$name" "$exp"; RED=$((RED+1)) ;;
+    RESIDUE)  printf '  \033[31mRESIDUE    \033[0m  %-34s → state survived the revert; every later mutation in this lane is tainted\n' "$name"; RED=$((RED+1)) ;;
     SELFEDIT) printf '  \033[31mSELF-EDIT  \033[0m  %-34s → edits the checker; add `# touches-checker: yes` if that is the point\n' "$name"; RED=$((RED+1)) ;;
     *)      printf '  \033[31mNO SUCH ID \033[0m  %-34s → [%s] never printed\n' "$name" "$exp"; RED=$((RED+1)) ;;
   esac
