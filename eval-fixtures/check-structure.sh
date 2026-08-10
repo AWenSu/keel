@@ -22,6 +22,19 @@ head_() { printf '\n\033[1m%s\033[0m\n' "$1"; }
 AGENTS=(agents/*.md)
 N_AGENTS=${#AGENTS[@]}
 
+# `|| true` at the end of a pipeline makes a broken path indistinguishable
+# from "no hits", so the inputs every check depends on are asserted up front
+# rather than discovered as a silent pass.
+for req in agents skills eval-fixtures README.md README.zh-TW.md \
+           skills/keel-workflow/SKILL.md eval-fixtures/RULE-INVENTORY.md \
+           eval-fixtures/README.md; do
+  [ -e "$req" ] || { printf '\033[31mFATAL\033[0m  missing %s — checks would pass vacuously\n' "$req"; exit 2; }
+done
+[ "$N_AGENTS" -ge 1 ] && [ -e "${AGENTS[0]}" ] \
+  || { printf '\033[31mFATAL\033[0m  agents/ is empty\n'; exit 2; }
+git rev-parse --git-dir >/dev/null 2>&1 \
+  || { printf '\033[31mFATAL\033[0m  not a git repo — the naming check needs git ls-files\n'; exit 2; }
+
 # Agents allowed to hold write tools. Everything else is read-only by grant.
 WRITERS="keel-exec-implementer keel-exec-fixer keel-exec-fixer-critical"
 # Agents allowed to hold Bash: the writers, plus the three diff reviewers that
@@ -115,7 +128,19 @@ done
 # ── F4/F5: dispatch names resolve to a roster row ───────────────────────────
 head_ "F4/F5  dispatched subagent_types exist and are rostered"
 ROSTER=$(grep -oE '^\| `keel-[a-z-]+`' skills/keel-workflow/SKILL.md | tr -d '|` ')
-EXTERNAL="planner code-reviewer security-auditor test-engineer silent-failure-hunter build-error-resolver"
+# Derived, not listed: a hardcoded six meant any external agent added later
+# (Explore, Plan, claude-code-guide…) was silently exempt from the
+# declared-in-the-roster requirement.
+EXTERNAL=$(grep -rhoE '`[A-Za-z][A-Za-z0-9_-]{3,}`' skills/*/*.md | tr -d '`' | sort -u \
+  | while read -r n; do
+      [ -f "agents/$n.md" ] && continue
+      case "$n" in
+        keel-*|*.md|*.sh|model|general-purpose|subagent_type|Delivers|Files|Skills|Interfaces) continue;;
+      esac
+      grep -rqE "(dispatch|Dispatch|派工|派出).{0,80}\`$n\`|\`$n\` (agent|subagent)" skills/*/*.md \
+        && echo "$n"
+    done)
+
 missing=""
 for a in "${AGENTS[@]}"; do
   n=$(basename "$a" .md)
@@ -263,7 +288,9 @@ nfix=$(ls eval-fixtures/[0-9]*.md 2>/dev/null | wc -l | tr -d ' ')
 if [ "$nfix" -eq 0 ]; then
   bad "no fixture files found — check ran against nothing"
 else
-  cites=$(grep -hnE '^\*{0,2}Rule source' eval-fixtures/[0-9]*.md | grep -E '\.md:[0-9]' || true)
+  # any Rule-source line, bolded or not, citing any .md with a line number
+  cites=$(grep -hniE '^\**Rule source' eval-fixtures/[0-9]*.md \
+          | grep -E '\.md:[0-9]+' || true)
   [ -z "$cites" ] && ok "none of the $nfix fixtures pins a rule to a line number" \
     || { bad "line-number citation will drift:"; echo "$cites" | sed 's/^/         /'; }
 
