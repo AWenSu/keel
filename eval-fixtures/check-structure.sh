@@ -120,12 +120,29 @@ done
   || bad "dispatched but absent from roster →$undecl"
 
 # ── F6: no model override at any dispatch site ──────────────────────────────
+# The previous version grepped a pattern with zero pre-filter matches, so its
+# whole exclusion list was dead code guarding nothing — and, worse, deleting
+# the no-override rule outright would not have failed it. Two checks now: the
+# rule must still be stated, and no override syntax may appear at a call site.
 head_ "F6  no model override at dispatch sites"
-if hits=$(grep -rnE 'model[:=] *(opus|sonnet|haiku)' skills/*/SKILL.md \
-          | grep -viE 'do not|never|pins|pinned|matrix|\| *(opus|sonnet)' || true); [ -z "$hits" ]; then
-  ok "no dispatch instruction tells a caller to pass a model"
+norule=""
+for f in keel-workflow keel-execute keel-plan-review; do
+  # tolerate emphasis markup and wording variants; require a real prohibition
+  grep -qiE '(do \*{0,2}not\*{0,2}|never)[^.]{0,40}(`?model`? +(override|parameter)|pass[^.]{0,15}`?model`?)' \
+    "skills/$f/SKILL.md" || norule="$norule $f"
+done
+[ -z "$norule" ] && ok "the no-override rule is still stated in all 3 dispatching stages" \
+  || bad "no-override rule weakened or deleted in →$norule"
+
+# Override *syntax* at a call site. Roster/matrix table cells legitimately name
+# models, so exclude table rows; frontmatter legitimately pins one, so exclude
+# lines starting `model:`.
+if hits=$(grep -rnE 'model *[:=] *"?(opus|sonnet|haiku)' --include='*.md' skills agents \
+          | grep -v ':model:' | grep -vE ':[0-9]+:\|' \
+          | grep -viE 'do not|never|instead of|rather than|not by passing' || true); [ -z "$hits" ]; then
+  ok "no dispatch site carries model-override syntax"
 else
-  bad "possible model override instruction:"; echo "$hits" | sed 's/^/         /'
+  bad "model-override syntax at a call site:"; echo "$hits" | sed 's/^/         /'
 fi
 
 # ── F7: fan-out ceiling — one scope, stated the same way everywhere ─────────

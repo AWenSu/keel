@@ -53,6 +53,18 @@ verdict, even when clean.
   needed". A migration whose rollback is "restore from backup" needs the
   backup step to appear earlier in the same plan, or the rollback is fiction.
   Missing or unnamed → finding, with the concrete step as the proposed edit.
+- **Domain-skill routing on non-UI tasks (`Skills:` field).** `keel-plan`
+  writes this field so execution does not have to rediscover which domain
+  skills apply, and the implementer invokes whatever it names.
+  `keel-plan-lens-design` §C checks it for user-visible surfaces; **the rest
+  is yours** — platform work (a specific cloud, runtime, or serverless
+  target), protocol/tooling work (MCP servers, CLIs, SDKs), and anything with
+  a house skill for its idioms. A task building on a platform that has a
+  skill, with `Skills: none`, is a finding: the implementer will rediscover
+  the platform's idioms from memory, which is where deprecated APIs come
+  from. Name the *capability* in your proposed edit, not a hardcoded skill
+  name — the installed set differs per environment, and a stale list is
+  worse than none.
 - **Risk grade sanity.** A task that migrates data, touches an
   authentication/authorization path, or performs an irreversible operation and
   is graded `Low` or `Med` is a finding in its own right — the grade drives

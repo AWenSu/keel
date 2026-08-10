@@ -24,6 +24,11 @@ OUTPUT  a plan file: header (Goal, Spec Version, Global Constraints, Success
         Skills, no placeholder phrases
 ```
 
+Missing INPUT → `BLOCKED: 缺 <approved spec | requirements naming exact file
+paths> → 退回 keel-discover`. This is the INPUT-contract miss every stage
+declares; it is distinct from the spec-status gate below, which fires when a
+spec *exists* but is not yet approved.
+
 **If INPUT is the spec path**, the spec's `Status:` field must read
 `approved` before this skill proceeds; otherwise `BLOCKED: spec 未核准 →
 退回 keel-discover`. This check is scoped to an actual spec file — it does

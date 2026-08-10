@@ -46,7 +46,7 @@ the executing agent's improvisation. The second is worse, and both fixture
 | A3 | Plan review round 3 still unresolved → keel-discover | `keel-workflow` Backward routes | `keel-plan-review` Step 5 exit gate | `07` |
 | A4 | keel-finish can't produce required evidence → keel-debug | `keel-workflow` Backward routes | `keel-finish` Part 1 gate-function failure branch | `08` |
 | A5 | Debugging concludes the requirement is wrong → keel-discover | `keel-workflow` Backward routes | `keel-debug` Phase 2 third outcome | `09` |
-| A6 | A stage's INPUT contract is unsatisfiable → the owing stage | `keel-workflow` Backward routes | `BLOCKED: 缺 <field>` line in keel-discover, keel-plan-review, keel-execute, keel-finish, keel-debug; `keel-wayfind` states it as prose; **`keel-plan` has none** — its only BLOCKED is the spec-status gate (D1), not an INPUT-contract miss | — |
+| A6 | A stage's INPUT contract is unsatisfiable → the owing stage | `keel-workflow` Backward routes | `BLOCKED: 缺 <field>` line in all seven stages; `keel-wayfind` additionally states the wrong-stage case as prose | — |
 
 ## B. Gates that may stop for a user answer
 
@@ -132,6 +132,7 @@ context fork.
 | F5 | Every dispatched `subagent_type` is a roster row | `keel-workflow` pre-dispatch self-check | same | `check-structure.sh` |
 | F6 | No `model` override at any dispatch site | `keel-workflow` roster note | every skill's dispatch instruction | `check-structure.sh` |
 | F7 | Fan-out ceiling | `keel-workflow` fan-out note (concurrency), `keel-execute` Fan-out ceiling (per task loop) | each stage | `check-structure.sh` |
+| F8 | Coverage stars are awarded by named-test count, not impression | `keel-execute` Finish coverage table | same — each star cites a test `file:name`; an uncitable star is a GAP | — |
 
 ## P. Plan-field contracts
 
@@ -149,7 +150,7 @@ Add a row here whenever a field is added to the plan template.
 | P1 | `Delivers:` | `keel-plan` Step 3 | implementer; staleness relocation | `keel-exec-reviewer-spec` — the whole axis is "did it do what this says" | `06` |
 | P2 | `Files:` | `keel-plan` Step 3 | implementer staleness check | `keel-execute` drift threshold (accumulates relocations) | `06` |
 | P3 | `Interfaces:` | `keel-plan` Step 3 | `keel-execute` brief extraction | `keel-exec-reviewer-spec` interface-drift check | — |
-| P4 | `Skills:` | `keel-plan` Step 3 | implementer invokes them | `keel-plan-lens-design` §C — **UI surfaces only**; a non-UI task naming the wrong domain skill is still unverified | `21` |
+| P4 | `Skills:` | `keel-plan` Step 3 | implementer invokes them | `keel-plan-lens-design` §C for user-visible surfaces; `keel-plan-lens-eng` for platform / protocol / tooling work | `21` |
 | P5 | `Depends on:` | `keel-plan` Step 3 | `keel-execute` step 0 — order, parallelism, which Interfaces to include | user at G2 (edge correctness); `BLOCKED` on an edge naming a nonexistent task | `22` |
 | P6 | `[Risk: …]` | `keel-plan` Step 3 | `keel-execute` R4 condition 3; `keel-plan-lens-eng` error registry | `keel-plan-lens-eng` — rollback present on every High, and grade-sanity against what the task actually does | `22` |
 | P7 | `Spec Version:` | `keel-plan` Step 2 header | `keel-execute` pre-flight drift check | same check (mismatch routes back) | `03` |
@@ -191,7 +192,7 @@ or `Enforced at` points into that file.
 
 ## Current coverage
 
-**75 rules. 51 verified (68%)** — 44 by scenario fixture, 7 by
+**76 rules. 51 verified (67%)** — 44 by scenario fixture, 7 by
 `check-structure.sh`. Recount with:
 
 ```
@@ -210,8 +211,8 @@ plausible number in a table reads as verified.
 
 ## This is the ceiling, and it is deliberate
 
-68% is not a milestone on the way to 100% — it is the intended end state. The
-remaining 24 rows should stay uncovered:
+67% is not a milestone on the way to 100% — it is the intended end state. The
+remaining 25 rows should stay uncovered:
 
 **V1–V5** (Iron Law, red-green regression, the evidence gate, "an agent's
 success report is not evidence", untrusted search results) and **H1–H5**
@@ -222,11 +223,11 @@ expected result — tautological, zero information. And they fail loudly in
 normal use: a run that skips the ledger is visibly broken by the next
 compaction, which is a faster and harsher test than any document.
 
-**B2–B5, D5–D6, A6, E7–E9, P3, P9, H6–H7** are in the same family — gates and dispatch
+**B2–B5, D5–D6, E7–E9, P3, P9, F8, H6–H7** are in the same family — gates and dispatch
 triggers that fire on ordinary runs, or persistence rules whose absence is
 immediately apparent.
 
-Chasing the last 24 would be the anti-pattern this repo already names:
+Chasing the last 25 would be the anti-pattern this repo already names:
 optimizing for the check rather than the behavior. Adding a rule that
 genuinely has a trigger/no-trigger boundary and a high cost of being wrong?
 That earns a fixture. Adding one to move a percentage does not.

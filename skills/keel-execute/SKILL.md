@@ -369,9 +369,23 @@ two-axis rules: spec axis against the plan's
 Goal + Success Criteria, quality axis with [smells.md](smells.md), no merged
 ranking). The final reviewer additionally produces a **coverage diagram
 (from gstack)**: trace each entry point through its branches and error
-paths as an ASCII tree, grade each path [★★★ behavior+edge+error / ★★ /
-★ smoke / GAP], and end with one line — `COVERAGE: N/M paths tested (X%)`.
-Coverage claims without the diagram are vibes.
+paths as an ASCII tree, grade each path, and end with one line —
+`COVERAGE: N/M paths tested (X%)`. Coverage claims without the diagram are
+vibes.
+
+**Grade by checklist, not by impression.** Each star is one named test that
+exists and passes; count them, do not judge them. Cite the test's
+`file:name` for each star awarded — a star you cannot point at is a GAP.
+
+| Grade | Requires |
+|-------|----------|
+| ★★★ | a test for the **happy path**, one for a **boundary** (empty, zero, max, longest plausible input), and one for the **error path** (the failure actually reachable here, not a generic throw) |
+| ★★ | happy path plus **one** of boundary or error |
+| ★ | happy path only — the path is exercised, nothing about it is pinned |
+| GAP | no test reaches this path, or the only test asserts it "doesn't crash" |
+
+Three named tests is a count. "Feels well covered" is not, and the star
+rating existed for two weeks as exactly that before this table.
 
 If this plan edited the pipeline's own skill/rule files (this repo, not a
 consumer repo): **run `bash eval-fixtures/check-structure.sh` and paste its
