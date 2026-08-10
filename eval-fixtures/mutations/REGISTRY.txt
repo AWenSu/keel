@@ -60,3 +60,7 @@
 58-mutation-edits-the-checker-not-the-repo.sh
 59-noop-must-not-inherit-a-red.sh
 60-check-id-missing-from-registry.sh
+61-open-marker-disabled-by-one-space.sh
+62-all-markers-disabled.sh
+63-route-inserted-mid-table-repairs-rows.sh
+64-roster-tools-cell-hand-edited.sh

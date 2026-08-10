@@ -9,9 +9,10 @@ like a defect count and is not: it is roughly what one agent produces in an
 hour of mutation testing. Reading a work rate as a defect rate kept the work
 open indefinitely.
 
-The number that does converge is **defect classes**. Five audits produced six,
-and the fifth produced no new one. So the brief changed: your job is to find a
-class nobody has encoded, not to re-find instances of the six below. Instances
+The number that does converge is **defect classes**. Six audits have produced eight. The fifth produced none; the sixth produced
+two, both in machinery built between the fifth and the sixth — which is where
+new classes come from. So the brief changed: your job is to find a
+class nobody has encoded, not to re-find instances of the eight below. Instances
 are cheap now — they are a missing file in `mutations/`, not a work stream.
 
 ## Before you start: get the current state yourself
@@ -33,7 +34,7 @@ If the first three are not clean before you touch anything, stop and report
 that — it is a more interesting finding than anything you were going to look
 for.
 
-## The six known classes
+## The eight known classes
 
 Each has red tests in `eval-fixtures/mutations/`; the `# class:` header names
 which. Read three or four of them before you begin.
@@ -46,11 +47,13 @@ which. Read three or four of them before you begin.
 | `derivation-too-narrow` | a derived set that misses real members, so a declaration looks complete | dispatching stages found by the literal token `dispatch`, missing "Launch four subagents" |
 | `present-but-inert` | required text present somewhere unreachable | a rule sentence inside an HTML comment, with the file contradicting it three lines later |
 | `self-disarm` | the apparatus switched off from inside its own inputs | emptying `rules/anti-patterns.txt`, which the rule-file validator explicitly skipped |
+| `unattributed-red` | a red light taken as proof without establishing what caused it | a mutation that edited the checker's own allowlist, graded as evidence the check enforces the rule |
+| `round-trip-laundering` | a provenance stamp wider than what the generator derives | the table generator read prose back out of the document and joined it to the source by position |
 
 ## What counts as a new class
 
 A finding is a **new class** only if fixing it requires a different *kind* of
-countermeasure than the six above — not a wider regex, not another derivation
+countermeasure than the eight above — not a wider regex, not another derivation
 input, not one more validated file. If your fix is "add this string to the
 blocklist" or "scan this directory too", it is an instance of an existing
 class. Say which one.
