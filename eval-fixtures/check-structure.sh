@@ -128,22 +128,16 @@ done
 # ── F4/F5: dispatch names resolve to a roster row ───────────────────────────
 head_ "F4/F5  dispatched subagent_types exist and are rostered"
 ROSTER=$(grep -oE '^\| `keel-[a-z-]+`' skills/keel-workflow/SKILL.md | tr -d '|` ')
-# Derived, not listed: a hardcoded six meant any external agent added later
-# (Explore, Plan, claude-code-guide…) was silently exempt from the
-# declared-in-the-roster requirement.
-# Derived, not listed: a hardcoded six meant any external agent added later
-# (Explore, Plan, claude-code-guide…) was silently exempt from the
-# declared-in-the-roster requirement.
+
 # Written without `case` inside the pipeline — bash 3.2, which is what
 # /bin/bash is on macOS, aborts the whole script there with a syntax error.
-EXTERNAL=$(grep -rhoE '`[A-Za-z][A-Za-z0-9_-]{3,}`' skills/*/*.md | tr -d '`' | sort -u \
-  | grep -vE '^(keel-|model$|general-purpose$|subagent_type$|Delivers$|Files$|Skills$|Interfaces$)' \
-  | grep -vE '\.(md|sh)$' \
-  | while read -r n; do
-      [ -f "agents/$n.md" ] || \
-        grep -rqE "(dispatch|Dispatch|派工|派出).{0,80}\`$n\`|\`$n\` (agent|subagent)" skills/*/*.md \
-        && [ ! -f "agents/$n.md" ] && echo "$n"
-    done)
+# Derived from the roster itself: anything the keel-workflow roster lists that
+# has no file in agents/ is external by definition. The previous derivation
+# used a dispatch-verb proximity regex and found 2 of 6 — it replaced a
+# hardcoded six that was at least complete.
+EXTERNAL=$(grep -oE '^\| `[A-Za-z][A-Za-z0-9_-]+`' skills/keel-workflow/SKILL.md \
+  | tr -d '|` ' | sort -u \
+  | while read -r n; do [ -f "agents/$n.md" ] || echo "$n"; done)
 
 missing=""
 for a in "${AGENTS[@]}"; do
@@ -182,18 +176,11 @@ done
 # Judged over a 2-line window: the prohibition often wraps onto the next line
 # ("a `general-purpose` agent inside\n this pipeline is a bug").
 gp=$(for f in $( { git ls-files 'skills/**/*.md' 'agents/*.md'; git ls-files -o --exclude-standard 'skills/**/*.md' 'agents/*.md'; } | sort -u); do
-  awk -v F="$f" '
-    { win = prev "\n" $0 "\n" nextline }
-    /general-purpose/ {
-      ctx = prev " " $0 " " getline_next
-      hits[NR]=$0; ctxs[NR]=prev " " $0
-    }
-    { prev=$0 }
-    END{}
-  ' "$f" >/dev/null 2>&1
   grep -n 'general-purpose' "$f" | while IFS=: read -r ln rest; do
-    ctx=$(sed -n "$((ln>1?ln-1:1)),$((ln+1))p" "$f")
-    echo "$ctx" | grep -qiE 'never|not |no |avoid|instead of|rather than|falls back|fallback|is a bug|forbidden|silently|絕不|不要' \
+    # flattened: the negation and the term routinely sit on different lines,
+    # and a line-oriented grep can only see them together if the window is one line
+    ctx=$(sed -n "$((ln>1?ln-1:1)),$((ln+1))p" "$f" | tr '\n' ' ')
+    echo "$ctx" | grep -qiE '(never|not|no|avoid|instead of|rather than|forbidden|絕不|不要)[^.]{0,30}`?general-purpose`?|`?general-purpose`?[^.]{0,40}(is a bug|forbidden|falls back|fallback|silently)' \
       || echo "$f:$ln:$rest"
   done
 done)
@@ -213,12 +200,17 @@ norule=""
 # A stage dispatches if it says so anywhere — a narrower predicate silently
 # excluded three stages, and a green line naming a count is what makes that
 # dangerous.
-DISPATCHERS=$(grep -rlE '\b(dispatch|Dispatch|dispatches|dispatching)\b' skills/*/SKILL.md \
-              | xargs -n1 dirname | xargs -n1 basename)
+# Any stage that names a shipped agent is dispatching, whatever verb it uses —
+# keel-wayfind says "Fire ... subagents" and was invisible to a keyword list.
+DISPATCHERS=$(grep -rlE '`keel-(exec|plan-lens|plan-skeptic|discover-designer|wayfind-researcher)[a-z-]*`|\b(dispatch|Dispatch|dispatches|dispatching)\b' \
+              skills/*/SKILL.md | xargs -n1 dirname | xargs -n1 basename)
 for f in $DISPATCHERS; do
   # tolerate emphasis markup and wording variants; require a real prohibition
+  # `|\b` used to make any sentence containing "never ... model" satisfy this,
+  # including "Never re-dispatch the same prompt to the same model" — retry
+  # discipline, not override policy. The prohibition must name the override.
   tr '\n' ' ' < "skills/$f/SKILL.md" \
-    | grep -qiE '(do \*{0,2}not\*{0,2}|never|no) [^.]{0,40}`?model`?( +override| +parameter|\b)' \
+    | grep -qiE '(do \*{0,2}not\*{0,2}|never|no)[^.]{0,40}(`?model`? +(override|parameter)|pass[^.]{0,20}`?model`?)' \
     || norule="$norule $f"
 done
 ndisp=$(echo "$DISPATCHERS" | grep -c . || true)
@@ -267,26 +259,19 @@ head_ "F7  fan-out ceiling consistent repo-wide"
 noscope=$(for f in $( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } \
                       | sort -u | grep -v '^docs/plans/' ); do
   awk -v F="$f" '
-    /總量|[0-9]+ +total/ {
-      line = $0
-      ctx = prev " " line " " ((getline nxt) > 0 ? nxt : "")
-      # scope must attach to the TOTAL clause itself: a concurrency cap or a
-      # per-round skeptic cap elsewhere on the same line rescued a mis-scoped
-      # total twice, in two different rewrites.
-      # Cut at the clause boundary, not at a byte count: substr(…,40) spans
-      # only ~13 CJK characters yet still reached the next clause, whose
-      # "每輪" then rescued a mis-scoped total. Third time this line was wrong.
-      clause = line
-      if (match(clause, /總量|[0-9]+ +total/))
-        clause = substr(clause, RSTART)
-      if (match(clause, /[。.，,；;（(]/))
-        clause = substr(clause, 1, RSTART - 1)
-      if (ctx ~ /agent|隻|個|skeptic/ &&
-          clause !~ /task loop|每個 ?task|per round|每輪|skeptics per/)
-        printf "%s:%d: %s\n", F, NR, substr(line,1,90)
-      prev = nxt; next
+    { L[NR] = $0 }
+    END {
+      for (i = 1; i <= NR; i++) {
+        if (L[i] !~ /總量|[0-9]+ +total/) continue
+        ctx = (i>1 ? L[i-1] : "") " " L[i] " " (i<NR ? L[i+1] : "")
+        clause = L[i]
+        if (match(clause, /總量|[0-9]+ +total/)) clause = substr(clause, RSTART)
+        if (match(clause, /[。.，,；;（(]/)) clause = substr(clause, 1, RSTART - 1)
+        if (ctx ~ /agent|隻|個|skeptic/ &&
+            clause !~ /task loop|每個 ?task|per round|每輪|skeptics per/)
+          printf "%s:%d: %s\n", F, i, substr(L[i],1,90)
+      }
     }
-    { prev = $0 }
   ' "$f"
 done)
 nb=$(grep -rocE '總量|[0-9]+ +total' --include='*.md' . 2>/dev/null \
@@ -355,7 +340,7 @@ for sec in $(echo "$allmd" | xargs grep -hoE '`## [A-Z][A-Za-z0-9 -]{1,30}`' 2>/
   expr "$name" : 'Task ' >/dev/null && continue
   # sections a stage tells a *plan or spec file* to create live in those
   # artifacts, not here — recognised by the instruction verb near the mention
-  echo "$allmd" | xargs grep -hE "(save it under|write it under|goes in|writes|written into|new) \`?## ${name}\`?" \
+  echo "$allmd" | xargs grep -hE "(save it under|write it under|goes in|writes|written into|create|add|produce)( a new| the)? \`?## ${name}\`?" \
     >/dev/null 2>&1 && continue
   echo "$allmd" | grep -v '^docs/plans/' | grep -v '^eval-fixtures/[0-9]' \
     | xargs grep -lE "^## ${name}([[:space:]]|\\(|$)" >/dev/null 2>&1 \
@@ -385,6 +370,22 @@ badq=$(for fx in eval-fixtures/[0-9]*.md; do
 done)
 [ -z "$badq" ] && ok "every fixture blockquote is verbatim from its cited source" \
   || { bad "fixture quotes text absent from its source:"; echo "$badq" | sed 's/^/         /'; }
+
+# ── F11: the backward-route table is the same length in all three documents ──
+# The A7 route (post-merge Signals → keel-discover) was added to keel-workflow
+# and to neither README for a week: the source of truth grew a route and the
+# two documents users actually read did not. Counting rows catches that without
+# needing to match wording across two languages.
+head_ "F11  backward routes documented everywhere"
+rows_after() {   # rows of the first table following the given heading match
+  awk -v pat="$2" '$0 ~ pat {f=1; next} f && /^\|/ {if ($0 !~ /^\|[- :|]+\|$/ && $0 !~ /Trigger|發生什麼/) n++; next} f && n {exit} END {print n+0}' "$1"
+}
+wf=$(rows_after skills/keel-workflow/SKILL.md 'Backward routes')
+en=$(rows_after README.md 'Backward routes')
+zh=$(rows_after README.zh-TW.md '回退路由')
+[ "$wf" = "$en" ] && [ "$wf" = "$zh" ] && [ "$wf" -gt 0 ] \
+  && ok "all three backward-route tables list $wf routes" \
+  || bad "backward-route count differs → keel-workflow=$wf README=$en README.zh-TW=$zh"
 
 # ── maintainer-only: repo vs. installed copy ────────────────────────────────
 # Skips entirely when no keel install is present, so it is a no-op for anyone

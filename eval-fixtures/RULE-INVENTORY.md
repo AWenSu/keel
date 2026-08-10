@@ -43,7 +43,7 @@ the executing agent's improvisation. The second is worse, and both fixture
 |---|------|-------------|-------------|---------|
 | A1 | Plan contradicts current code beyond one task's fix → keel-plan | `keel-workflow` Backward routes | `keel-execute` drift-accumulation threshold | `06` |
 | A2 | Spec body changed vs. plan's `Spec Version` → keel-plan | `keel-workflow` Backward routes | `keel-execute` pre-flight spec-drift check | `03` |
-| A3 | Plan review round 3 still unresolved → keel-discover | `keel-workflow` Backward routes | `keel-plan-review` Step 5 exit gate | `07` |
+| A3 | Plan review pass 3 still unresolved → keel-discover | `keel-workflow` Backward routes | `keel-plan-review` Step 5 exit gate | `07` |
 | A4 | keel-finish can't produce required evidence → keel-debug | `keel-workflow` Backward routes | `keel-finish` Part 1 gate-function failure branch | `08` |
 | A5 | Debugging concludes the requirement is wrong → keel-discover | `keel-workflow` Backward routes | `keel-debug` Phase 2 third outcome | `09` |
 | A7 | Shipped work's Signals say the requirement was wrong → keel-discover | `keel-workflow` Backward routes | `keel-finish` Part 2d writes the signal; `keel-discover` intake reads it on arrival | `23` |
@@ -137,6 +137,7 @@ context fork.
 | F8 | Coverage stars are awarded by named-test count, not impression | `keel-execute` Finish coverage table | same — each star cites a test `file:name`; an uncitable star is a GAP | — |
 | F9 | Every `## section` a file references is defined somewhere | — (the requirement is implicit in every cross-reference) | `check-structure.sh` | `check-structure.sh` |
 | F10 | A fixture's blockquote is verbatim from the source it cites | `eval-fixtures/README.md` grading instruction | `check-structure.sh` | `check-structure.sh` |
+| F11 | Every backward route in `keel-workflow` is documented in both READMEs | `keel-workflow` Backward routes | both READMEs' backward-route tables | `check-structure.sh` |
 
 ## P. Plan-field contracts
 
@@ -197,8 +198,10 @@ or `Enforced at` points into that file.
 
 ## Current coverage
 
-**81 rules. 56 verified (69%)** — 46 by scenario fixture, 10 by
-`check-structure.sh`. Recount with:
+**82 rules. 57 verified (70%)** — 47 by scenario fixture, 10 by
+`check-structure.sh`. Every number on this line is produced by the commands
+below — including the split, which used to be the one figure no command
+emitted and was wrong by one in each direction for a week. Recount with:
 
 ```
 bash eval-fixtures/check-structure.sh                                   # F series, live

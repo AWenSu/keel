@@ -252,7 +252,7 @@ chain here is normal and must not be mistaken for that.)
   user's stated direction as the default option
 
 Apply every answer from a batch to the plan file before computing the next
-round's frontier — an answer often resolves or reshapes what's still open;
+batch's frontier — an answer often resolves or reshapes what's still open;
 drop questions an earlier answer already settled. The session's Step 5 is
 done when the frontier is empty.
 

@@ -34,7 +34,7 @@ truth, no inlined copies to go stale).
 |---------|------|---------|
 | Execution finds the plan contradicts the code as it now is (beyond one task's fix) | keel-execute | `keel-plan` |
 | Spec body changed during execution and no longer matches plan's recorded Spec Version | keel-execute | `keel-plan` |
-| Plan review round 3 still has unresolved decisions — the plan is fighting the spec | keel-plan-review | `keel-discover` |
+| Plan review pass 3 still has unresolved decisions — the plan is fighting the spec | keel-plan-review | `keel-discover` |
 | keel-finish gate cannot produce the evidence a claim requires | keel-finish | `keel-debug` |
 | Debugging concludes the requirement itself is wrong | keel-debug | `keel-discover` |
 | Shipped work's `## Signals` say it did not work — the requirement was wrong, not the code | post-merge reality | `keel-discover` |

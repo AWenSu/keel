@@ -18,7 +18,7 @@
 └──────────────┘   └──────────┘   └─────────────────┘   └─────────────┘   └────────────┘
         ▲                                  │                     │
         └──────────── keel-discover ◀───────┘   keel-plan ◀────────┘   keel-debug ◀── keel-finish
-                (round 3 still unresolved)   (contradicts plan)   (evidence can't be produced)
+                (pass 3 still unresolved)    (contradicts plan)   (evidence can't be produced)
         ▲
         └──────────────────────────────────────────── post-merge Signals came back negative
                                                       (the requirement was wrong, not the code)
@@ -173,10 +173,11 @@ frontier is empty.
 | Trigger | From | Back to |
 |---------|------|---------|
 | Execution finds the plan contradicts the code as it now stands (beyond one task's fix) | `keel-execute` | `keel-plan` |
-| Plan review round 3 still has unresolved decisions — the plan is fighting the spec | `keel-plan-review` | `keel-discover` |
+| Plan review pass 3 still has unresolved decisions — the plan is fighting the spec | `keel-plan-review` | `keel-discover` |
 | `keel-finish`'s evidence gate can't produce proof for a claim | `keel-finish` | `keel-debug` |
 | Debugging concludes the requirement itself is wrong | `keel-debug` | `keel-discover` |
 | The plan's `Spec Version` doesn't match the current spec | `keel-execute` | `keel-plan` |
+| Shipped work's `## Signals` say it did not work — the requirement was wrong, not the code | post-merge reality | `keel-discover` |
 | A stage's INPUT contract cannot be satisfied | any stage | the stage that owes the missing artifact |
 
 ### Suggested routing (what `keel-workflow` detects)

@@ -122,10 +122,11 @@ G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續
 | 發生什麼 | 從哪個階段 | 退回哪個階段 |
 |---------|-----------|-------------|
 | 執行時發現計畫跟現況不合，而且不是改一個 task 就能收尾的 | `keel-execute` | `keel-plan` |
-| 計畫審查吵到第 3 輪還沒共識——代表計畫在跟 spec 打架 | `keel-plan-review` | `keel-discover` |
+| 計畫審查完整跑到第 3 遍還沒共識——代表計畫在跟 spec 打架 | `keel-plan-review` | `keel-discover` |
 | `keel-finish` 查證據時，某個宣稱怎麼都拿不出證明 | `keel-finish` | `keel-debug` |
 | debug 到最後發現，根本是需求本身就錯了 | `keel-debug` | `keel-discover` |
 | 計畫引用的 `Spec Version` 跟現行 spec 對不上 | `keel-execute` | `keel-plan` |
+| 已上線的東西，`## Signals` 顯示沒效——是需求錯了，不是程式錯 | 上線後的真實回饋 | `keel-discover` |
 | 某階段的 INPUT 契約無法滿足 | 任何階段 | 欠交那份產物的階段 |
 
 ### 建議路由（`keel-workflow` 怎麼判斷）
