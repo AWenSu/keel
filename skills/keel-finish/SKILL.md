@@ -278,7 +278,10 @@ pipeline.
 
 Do not pass a `model` override at the call site — each agent file pins its own.
 
-All boxes checked, evidence fresh — present the user exactly these options:
+All boxes checked, evidence fresh — put exactly these four to the user in
+**one AskUserQuestion call** (single question, `multiSelect: false`), your
+recommended option marked; do not print them as plain text and wait for a
+typed reply:
 
 1. **Merge** back to the base branch locally
 2. **Push + PR** — PR body summarizes what/why, links spec + plan. If the
@@ -287,10 +290,14 @@ All boxes checked, evidence fresh — present the user exactly these options:
    (pre-deploy checks, deploy command, post-deploy verification commands,
    rollback command) and write it into the PR body; otherwise skip it.
 3. **Keep the branch** — user integrates later
-4. **Discard** — the work was exploratory. The pipeline's most destructive
-   path: list exactly what will be deleted (branch name, commit list,
-   worktree path), then require the user to type `discard` verbatim. Wait
-   for that exact word — "yes", "ok", "sure" do not count.
+4. **Discard** — the work was exploratory
+
+The `AskUserQuestion` answer only *selects* among these four — it never
+substitutes for a destructive-path confirmation. If the answer is
+**Discard**, that selection is not the go-ahead: list exactly what will be
+deleted (branch name, commit list, worktree path) as a follow-up message,
+then require the user to type `discard` verbatim in reply. Wait for that
+exact word — "yes", "ok", "sure", or re-selecting the option do not count.
 
 Then clean up: ledger closed with a final line, plan file marked complete.
 
