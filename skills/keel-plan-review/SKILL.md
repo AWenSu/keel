@@ -9,6 +9,7 @@ provenance:
     - gstack plan-{eng,ceo,devex}-review sections/ @1.60.1.0 (evidence gate + confidence, regression iron rule, E2E/EVAL matrix, error registry, DX persona/TTHW/journey, cross-lens themes, TODOS.md; added 2026-07-23)
     - mattpocock/skills batch-grill-me @in-progress (frontier-based question batching for Step 5; added 2026-08-01)
     - 20260807 資安審查缺口需求書 R1/R2/R7 (security lens integration; added 2026-08-07)
+    - show-me-first (Step 5 structural-question SVG checkpoint, by reference not by copy; added 2026-08-24)
   dropped: Codex dual-voice (external CLI dep), telemetry, restore points, comparison-board mockups. For the full heavyweight version with dual-model consensus, use gstack /autoplan directly.
 ---
 
@@ -244,6 +245,11 @@ chain here is normal and must not be mistaken for that.)
   down to one question per call just to be safe). A question whose answer
   depends on another still open this batch belongs to a **later** batch, not
   this one — batching is bounded by dependency, not by convenience.
+- When a batch's questions hinge on structure (module boundaries, data flow,
+  blast radius) and the session is interactive, load the `show-me-first`
+  skill and show that structure as its browser SVG before asking — an
+  unconfirmed edge in the diagram often IS the question. Invoke the skill;
+  don't copy its diagram rules here.
 - Never proceed on an unanswered question. Each question still carries full
   detail:
 

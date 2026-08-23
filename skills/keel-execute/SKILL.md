@@ -11,6 +11,7 @@ provenance:
     - mattpocock/skills code-review @1.2.0 (Fowler smell baseline in smells.md, two-axis no-merged-ranking rule, staleness/relocate-by-Delivers rule; added 2026-07-22)
     - gstack plan-eng-review sections @1.60.1.0 (evidence gate, coverage diagram; added 2026-07-23)
     - 20260807 keel-security-review-requirements 需求書 R3/R4/R5 (conditionally-triggered third review axis `keel-exec-reviewer-security`, opus-pinned, independent no-merge-ranking; added 2026-08-07)
+    - show-me-first (final-review evidence/待確認 discipline text-ported; completion-report SVG checkpoint by reference, ASCII-only inside pipeline per its ~30-60% cost eval; added 2026-08-24)
   dropped: task-brief/review-package helper scripts (plugin-internal paths; inlined their intent as prompt rules)
 ---
 
@@ -385,6 +386,12 @@ paths as an ASCII tree, grade each path, and end with one line —
 `COVERAGE: N/M paths tested (X%)`. Coverage claims without the diagram are
 vibes.
 
+Findings follow the same evidence discipline as the plan's Architecture
+field: every claim cites `file:line`, and a suspicion the reviewer could not
+verify is reported as `待確認: <why unverified + what would confirm it>` —
+never silently dropped, never asserted as fact. A 待確認 edge is a ready-made
+attack target for the next verification pass.
+
 **Grade by checklist, not by impression.** Each star is one named test that
 exists and passes; count them, do not judge them. Cite the test's
 `file:name` for each star awarded — a star you cannot point at is a GAP.
@@ -427,6 +434,14 @@ final-review: PASS — 2 Important (svc/order.py:44 unwired guard; api/admin.py:
 `FAIL` with findings still open is a legitimate value; what is not legitimate
 is the line being absent, because absent and clean are indistinguishable to
 the stage that reads it. → **keel-finish**.
+
+**Reporting completion to the user in an interactive session**, when the
+branch's structure is complex: load the `show-me-first` skill and present
+the risk-path map as its browser SVG — the review's 待確認 edges double as
+the reader's "look here first" guide. This is for the human checkpoint only:
+inside the pipeline (subagents, ledger, plan files) stay on the ASCII lane —
+SVG per subagent would spray browser tabs and costs ~30-60% extra
+tokens/time per agent (show-me-first's own eval).
 
 ## INLINE mode
 

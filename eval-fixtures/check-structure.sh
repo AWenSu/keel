@@ -190,7 +190,7 @@ ROSTER=$(grep -oE '^\| `keel-[a-z-]+`' skills/keel-workflow/SKILL.md | tr -d '|`
 # Hyphenated backticked tokens are agent-shaped; these are the ones that are
 # not agents. Anything new that lands here needs a deliberate line, which is
 # the point — an unrecognised agent-shaped name should stop the build.
-NONAGENT="general-purpose plan-global doubt-driven-development frontend-workflow planning-with-files model subagent_type inherit opus sonnet haiku"
+NONAGENT="general-purpose plan-global doubt-driven-development frontend-workflow planning-with-files model subagent_type inherit opus sonnet haiku show-me-first"
 # skills/*/*.md, not skills/*/SKILL.md: the ghost check next to this one
 # already scanned the wider set, and a dispatch written in smells.md was
 # invisible to this one. Unbackticked prose forms count too — "dispatch the

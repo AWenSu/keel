@@ -8,6 +8,7 @@ provenance:
     - gstack:spec @1.60.1.0 (five-question intake, code-evidence rule, dedupe, scope lock)
     - mattpocock/skills domain-modeling @1.2.0 (CONTEXT.md glossary: challenge terms, sharpen fuzzy language, inline updates; ADR three-condition trigger added 2026-07-23)
     - mattpocock/skills codebase-design + DEEPENING @1.2.0 (design.md vocabulary, deletion test, dependency-category test strategy, design-it-twice; added 2026-07-23)
+    - show-me-first (spec-approval SVG checkpoint, by reference not by copy; added 2026-08-24)
   dropped: visual companion (niche, heavy), Codex quality gate (external dep), telemetry, GitHub issue filing (use gstack spec directly when you need issues)
 ---
 
@@ -287,6 +288,11 @@ One inline pass before showing the user — fix and move on, no re-review loop:
 - Scope: does anything in the design exceed what was locked in step 5?
 
 Then the user reviews the written spec. Wait for explicit approval.
+**Interactive session + structurally complex spec** (multi-component data
+flow, several user-visible states)? Load the `show-me-first` skill and show
+the structure as its browser SVG alongside the written spec — its diagram
+rules (per-node evidence, 待確認 badges, layout checks) live in that skill;
+invoke it, never copy its rules here.
 
 Once approved, flip the header line to `**Status:** approved`, and record the
 commit hash or timestamp at approval time on the same line — e.g.

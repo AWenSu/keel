@@ -7,6 +7,7 @@ provenance:
     - superpowers:writing-plans @6.1.1 (plan artifact format, Interfaces block, No Placeholders, task right-sizing, type-consistency check)
     - ~/.claude/agents/planner.md (risk grading, sizing guide, success-criteria checklist)
     - mattpocock/skills to-tickets + tdd @1.2.0 (Delivers behavior line, tests-only-at-confirmed-seams, expand–contract wide-refactor sequencing; added 2026-07-22); vertical-slice task framing and post-breakdown granularity/dependency quiz added 2026-08-01
+    - show-me-first (Architecture-field per-node evidence + full-semantics 待確認 badge, text-ported; added 2026-08-24)
   dropped: nothing significant — the sources composed cleanly
 ---
 
@@ -96,7 +97,12 @@ Save to `docs/plans/YYYY-MM-DD-<feature>.md` with this header:
 **Spec:** <link to the keel-discover spec>
 **Spec Version:** <commit hash or timestamp copied from the spec's `Status:`
   field at the moment it was approved>
-**Architecture:** <2-3 sentences, ASCII diagram if data flows>
+**Architecture:** <2-3 sentences, ASCII diagram if data flows. Every
+  node/edge carries its evidence — `file:line` for existing code, a spec
+  section for new behavior. Anything unverified is marked
+  `待確認: <why unverified + what would confirm it>` — the badge without
+  that second half is decoration, and an unmarked node is a claim asserted
+  as fact.>
 **Global Constraints:** <exact values copied verbatim from the spec —
   limits, formats, naming, versions. Never paraphrase.>
 **Success Criteria:** <checklist copied from the spec's "how will we know
