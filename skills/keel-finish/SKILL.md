@@ -8,7 +8,7 @@ provenance:
     - superpowers:finishing-a-development-branch @6.1.1 (integration options; typed discard confirmation added 2026-07-23)
     - built-in /verify concept (drive the real flow, not just the test suite)
     - gstack TODOS.md deferral + mattpocock ADR offer (added 2026-07-23)
-    - learned skill ~/.claude/skills/learned (dod.sh as default IDENTIFY command; Part 2e findings → rulebook promotion, by reference; added 2026-09-04)
+    - learned skill ~/.claude/skills/learned (dod.sh as default IDENTIFY command; Part 2e findings → rulebook promotion, by reference; added 2026-09-04. Part 2b deferrals → backlog when .learned/ exists; added 2026-09-10)
     - 20260807 keel-security-review-requirements 需求書 R6 (security
       exit gate section; added 2026-08-07)
 ---
@@ -154,10 +154,20 @@ them is a decision nobody will find again:
 | Flagged concerns | every `DONE_WITH_CONCERNS` in `.keel/progress.md` and the task report files |
 
 Every item gets one of two dispositions: **resolved** (with the evidence) or
-**explicitly deferred** (with its `TODOS.md` line number). **An item with
-neither blocks completion.** Present the reconciled list in the final summary
-even when everything is clean — "nothing outstanding" is a claim, and like
-every other claim here it needs to show its work.
+**explicitly deferred**. **An item with neither blocks completion.** Present
+the reconciled list in the final summary even when everything is clean —
+"nothing outstanding" is a claim, and like every other claim here it needs to
+show its work.
+
+Where a deferral lands depends on what the repo has. With a `.learned/`
+(`python3 ~/.claude/skills/learned/scripts/learned.py root`), a confirmed
+problem deferred to a later round goes to
+`learned.py backlog add <H|M|L> <狀態> <slug> "<中文>"` — the backlog carries
+priority, an overdue hook, and a close discipline (`--rule <ID>` or a stated
+reason) that a TODO line cannot enforce — and the disposition cites the
+backlog file it created. Without one, `TODOS.md` with a line number, as
+before. Either way the reference must resolve: a deferral pointing at
+nothing is the "neither" case and blocks.
 
 ## Part 2c: Security exit gate
 
@@ -266,7 +276,9 @@ repo has a `.learned/` (`python3 ~/.claude/skills/learned/scripts/learned.py roo
    attempt, a framework/tool behaved counter to its docs, a reviewer finding
    that matched no existing rule, a plan premise the code refuted. Drop
    one-off fixes, obvious usage, and anything about how the *user* likes to
-   work (that is auto-memory feedback, not a rule).
+   work (that is auto-memory feedback, not a rule). A finding that is an
+   **unfixed problem** rather than a lesson is not a rule either — it is
+   work, and it goes through Part 2b's deferral lane (backlog), not here.
 3. For each survivor: `learned.py search "<kw>"` first — a near-duplicate
    gets a `**補充（date）**` paragraph on the existing rule, not a new ID.
    Otherwise `learned.py add <cat> "<title>"` per the skill's rule-format.

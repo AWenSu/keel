@@ -103,6 +103,7 @@ does not bind a subagent.
 | D15 | Fix-loop round 4 → reviewer brief switches to the verdict-matrix form (every outstanding finding + NEW-defect/regression/test-adequacy answered per-area) | `keel-execute` fix loop | same | — |
 | D16 | Build/test/lint verification claims default to `learned` dod.sh; a repo it cannot classify is a "not executed — <why>" disclosure, not a pass | `keel-finish` Part 1 evidence table | same | — |
 | D17 | Before integrating, `.keel/findings.md` survivors are promoted to the project rulebook (near-duplicate → 補充 on the existing rule; "no new rules" said, not skipped) | `keel-finish` Part 2e | same | — |
+| D18 | Part 2b deferrals land in `learned` backlog when the repo has `.learned/` (`TODOS.md` otherwise); the disposition cites the created item, and an unresolvable reference blocks. Part 2e routes unfixed problems there too — work is not a rule | `keel-finish` Part 2b, Part 2e step 2 | same two sections | — |
 
 ## E. Security chain
 
