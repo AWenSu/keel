@@ -76,6 +76,7 @@ proceed with a known regression.
 | `21-design-lens-visual-routing.md` | Visual source of truth + design-skill routing on UI tasks | `keel-plan-lens-design` |
 | `22-plan-field-contracts.md` | `Depends on:` consumption; rollback + risk-grade verification | `keel-execute`, `keel-plan-lens-eng` |
 | `23-signals-before-integration.md` | Success/failure signals named before merge; the return path | `keel-finish` Part 2d |
+| `24-show-me-first-checkpoints-and-evidence-badges.md` | show-me-first checkpoint triggers; full-semantics 待確認 badges | `keel-discover`, `keel-plan-review`, `keel-execute`, `keel-plan` |
 
 Adding a rule that is a **fact about files**? Add a check to
 `check-structure.sh`, not a fixture — a test nobody runs is worse than no test,
