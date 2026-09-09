@@ -10,6 +10,7 @@ provenance:
     - mattpocock/skills batch-grill-me @in-progress (frontier-based question batching for Step 5; added 2026-08-01)
     - 20260807 資安審查缺口需求書 R1/R2/R7 (security lens integration; added 2026-08-07)
     - show-me-first (Step 5 structural-question SVG checkpoint, by reference not by copy; added 2026-08-24)
+    - learned skill ~/.claude/skills/learned (project rulebook injection into lens briefs before dispatch, by reference; added 2026-09-04)
   dropped: Codex dual-voice (external CLI dep), telemetry, restore points, comparison-board mockups. For the full heavyweight version with dual-model consensus, use gstack /autoplan directly.
 ---
 
@@ -75,6 +76,19 @@ Do not pass a `model` override at the call site — each agent file pins its own
 Optional specialist lenses, added when the plan warrants: `test-engineer`
 (the plan proposes a new test strategy), `silent-failure-hunter` (the plan
 touches network/DB/file error paths).
+
+**Project rulebook injection (before dispatching any lens).** If the repo has
+a `.learned/` (check with `python3 ~/.claude/skills/learned/scripts/learned.py root`),
+extract 3–5 keywords from the plan (touched modules, frameworks, data stores,
+protocols) and run `learned.py search "<kw>"` for each. Put every hit as
+`<ID>: <one-line title>` into a **Known pitfalls** block appended to each
+lens's brief, and tell the lens to treat those as findings to verify against
+the plan, not background reading. A lens without rule IDs reviews against
+generic OWASP/SOLID and misses exactly the project-specific failure modes
+the rulebook exists to carry (the `learned` skill's method.md §一.1). No
+`.learned/` → say so in the roster line and proceed. Hits are also the
+input to the Eng lens's ten-point deep check (`learned` method.md §一.11)
+when the plan deletes functions, changes fields, or touches DB operators.
 
 **Announce the roster before dispatching**, naming which conditional lenses
 were skipped and why. Then broadcast each lens the moment it returns — score,

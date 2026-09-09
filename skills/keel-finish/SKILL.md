@@ -8,6 +8,7 @@ provenance:
     - superpowers:finishing-a-development-branch @6.1.1 (integration options; typed discard confirmation added 2026-07-23)
     - built-in /verify concept (drive the real flow, not just the test suite)
     - gstack TODOS.md deferral + mattpocock ADR offer (added 2026-07-23)
+    - learned skill ~/.claude/skills/learned (dod.sh as default IDENTIFY command; Part 2e findings → rulebook promotion, by reference; added 2026-09-04)
     - 20260807 keel-security-review-requirements 需求書 R6 (security
       exit gate section; added 2026-08-07)
 ---
@@ -39,6 +40,10 @@ Run this before ANY status claim — "done", "fixed", "passing", "ready":
 
 ```
 1. IDENTIFY  What command proves this claim?
+             Default for build/test/lint claims:
+             ~/.claude/skills/learned/scripts/dod.sh <repo>
+             (stack-detected; a repo it cannot classify says so — that is
+             a "not executed — <why>" disclosure, not a pass)
 2. RUN       Execute the FULL command — fresh, complete, no cached result
 3. READ      The whole output. Exit code. Count the failures yourself.
 4. VERIFY    Does the output actually confirm the claim?
@@ -250,7 +255,31 @@ exist. Part 2c check 0 makes the same allowance for its own missing input. **One
 and it does not block integration; a user who answers "nothing to watch, it's
 a docs fix" has answered it correctly.
 
-Why it sits here rather than in a sixth stage: the pipeline ends at merge,
+## Part 2e: Promote findings to the project rulebook
+
+`keel-execute` wrote `.keel/findings.md` (what was learned) as session
+memory; it dies with the branch unless promoted. Before integrating, if the
+repo has a `.learned/` (`python3 ~/.claude/skills/learned/scripts/learned.py root`):
+
+1. Read `findings.md` and the ledger's parked/adjudicated findings.
+2. Keep only what is **non-obvious AND reusable**: needed more than one
+   attempt, a framework/tool behaved counter to its docs, a reviewer finding
+   that matched no existing rule, a plan premise the code refuted. Drop
+   one-off fixes, obvious usage, and anything about how the *user* likes to
+   work (that is auto-memory feedback, not a rule).
+3. For each survivor: `learned.py search "<kw>"` first — a near-duplicate
+   gets a `**補充（date）**` paragraph on the existing rule, not a new ID.
+   Otherwise `learned.py add <cat> "<title>"` per the skill's rule-format.
+   Unverified inferences are written as `**待驗證**`, never as the fix.
+4. Report the IDs added or amended in one line; "no new rules" is a valid
+   answer and must be said, not skipped.
+
+No `.learned/` → one line offering `learned.py init`; do not block on it.
+Rules are the only artifact from this stage that the *next* plan reads —
+`keel-plan-review` and `keel-execute` inject them into every brief — so this
+step closes the loop the whole pipeline otherwise leaves open.
+
+Why Part 2d sits here rather than in a sixth stage: the pipeline ends at merge,
 which is where the code's life starts. A full post-release stage would be a
 scope this repo cannot honestly claim to run — but the *cheap* half of a
 product loop is writing down, while the context still exists, what reality

@@ -12,6 +12,7 @@ provenance:
     - gstack plan-eng-review sections @1.60.1.0 (evidence gate, coverage diagram; added 2026-07-23)
     - 20260807 keel-security-review-requirements 需求書 R3/R4/R5 (conditionally-triggered third review axis `keel-exec-reviewer-security`, opus-pinned, independent no-merge-ranking; added 2026-08-07)
     - show-me-first (final-review evidence/待確認 discipline text-ported; completion-report SVG checkpoint by reference, ASCII-only inside pipeline per its ~30-60% cost eval; added 2026-08-24)
+    - learned skill ~/.claude/skills/learned (project rulebook injection into implementer/reviewer briefs; verdict-matrix reviewer form from fix-loop round 4, by reference; added 2026-09-04)
   dropped: task-brief/review-package helper scripts (plugin-internal paths; inlined their intent as prompt rules)
 ---
 
@@ -64,6 +65,16 @@ Tasks tightly coupled with shared evolving state? → INLINE, or go re-split the
   beyond the diff (who else calls the changed code). One query typically
   replaces a dozen grep/read round-trips. CodeGraph caveat: query in
   English — Chinese queries silently return empty, not an error.
+- **Project rulebook:** if the repo has a `.learned/` (check once with
+  `python3 ~/.claude/skills/learned/scripts/learned.py root`), then for every
+  task run `learned.py search "<kw>"` on the task's Files / Interfaces
+  keywords and append the hits as a **Known pitfalls** block (`<ID>: <title>`)
+  to both the implementer brief and every reviewer brief. Implementers treat
+  hits as Global Constraints; reviewers treat each hit as one more checklist
+  line in the form "看到 X → 問 Y". Reviewer findings that match a rule cite
+  its ID. The rulebook is the project's memory of what already went wrong;
+  a brief without it re-discovers the same failures. No `.learned/` → note
+  it once in the ledger header and proceed.
 - **Filesystem is memory** (from planning-with-files): keep `progress.md`
   (what happened) and `findings.md` (what was learned) next to the plan.
   After every ~2 exploratory operations, write findings down. Context windows
@@ -274,6 +285,15 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
    fixer, that's the exact anti-pattern this pipeline's model-pinning rule
    exists to prevent. A fixer that failed twice with the same context and
    model is not going to succeed a third time unchanged.
+   **From round 4, the reviewer brief switches to the verdict-matrix form**
+   (`~/.claude/skills/learned/references/templates/verdict-matrix.md`): one
+   named area per outstanding finding plus the three fixed areas — NEW
+   defect introduced by the fix itself, previous-RESOLVED regression, and
+   test adequacy (does the test enter the failure window or only the happy
+   path) — each answered RESOLVED / PARTIAL / NOT_RESOLVED with a line
+   anchor. Selective reporting is what lets a fix loop spin; round 4 on a
+   race/lifecycle fix is itself the signal the design is wrong, not the
+   patch (`learned` method.md §一.3).
    At round 5, if findings remain: **circuit breaker trips.** Adjudicate each
    remaining finding — load-bearing (breaks a Delivers: line, security, data
    integrity) → `BLOCKED`, report to the user, do not mark the task done;

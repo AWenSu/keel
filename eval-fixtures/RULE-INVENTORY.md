@@ -99,6 +99,10 @@ does not bind a subagent.
 | D8 | Prior-art scan at discovery — internal + external, three sections, 差異點 as a hard gate | `keel-discover` Step 2b | same; consumed by `keel-plan-lens-ceo` Step A | `20` |
 | D9 | The scan's decision (adopt/adapt/build) is written to the spec's `## Prior art` section | `keel-discover` Step 2b | `keel-discover` Step 6 spec template | `20` |
 | D13 | Interactive session + structurally complex → load `show-me-first` (by reference, never copied) at the three user checkpoints: spec approval, structural review questions, completion report; pipeline internals stay ASCII | `keel-discover` Step 7, `keel-plan-review` Step 5, `keel-execute` Finish | same three sections | `24` |
+| D14 | Repo has `.learned/` → rulebook hits injected as a Known pitfalls block into every implementer/reviewer brief and every lens brief; no `.learned/` is disclosed, never silently skipped | `keel-execute` universal rules, `keel-plan-review` Step 2 | same two sections | — |
+| D15 | Fix-loop round 4 → reviewer brief switches to the verdict-matrix form (every outstanding finding + NEW-defect/regression/test-adequacy answered per-area) | `keel-execute` fix loop | same | — |
+| D16 | Build/test/lint verification claims default to `learned` dod.sh; a repo it cannot classify is a "not executed — <why>" disclosure, not a pass | `keel-finish` Part 1 evidence table | same | — |
+| D17 | Before integrating, `.keel/findings.md` survivors are promoted to the project rulebook (near-duplicate → 補充 on the existing rule; "no new rules" said, not skipped) | `keel-finish` Part 2e | same | — |
 
 ## E. Security chain
 
