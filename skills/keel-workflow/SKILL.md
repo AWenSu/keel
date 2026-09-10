@@ -137,6 +137,7 @@ silent-inheritance bug it exists to prevent.
 Never dispatch `general-purpose` from this pipeline — name the `subagent_type`.
 
 Do not pass a `model` override at the call site — each agent file pins its own.
+Name the agent, not the role: announce each dispatch before it runs and broadcast each result when it lands, both using the agent's literal `keel-*` name.
 
 **Read-only is enforced by the tool list, not by prose.** Lenses, skeptics,
 the designer, and the researcher hold `Read, Grep, Glob` (plus search tools

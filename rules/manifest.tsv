@@ -8,6 +8,14 @@ no-model-override.txt	skills/keel-debug/SKILL.md	dispatching-stage
 no-model-override.txt	skills/keel-wayfind/SKILL.md	dispatching-stage
 no-model-override.txt	skills/keel-workflow/SKILL.md	dispatching-stage
 no-general-purpose.txt	skills/keel-workflow/SKILL.md	-
+dispatch-announce.txt	skills/keel-debug/SKILL.md	dispatching-stage
+dispatch-announce.txt	skills/keel-discover/SKILL.md	dispatching-stage
+dispatch-announce.txt	skills/keel-execute/SKILL.md	dispatching-stage
+dispatch-announce.txt	skills/keel-finish/SKILL.md	dispatching-stage
+dispatch-announce.txt	skills/keel-plan/SKILL.md	dispatching-stage
+dispatch-announce.txt	skills/keel-plan-review/SKILL.md	dispatching-stage
+dispatch-announce.txt	skills/keel-wayfind/SKILL.md	dispatching-stage
+dispatch-announce.txt	skills/keel-workflow/SKILL.md	dispatching-stage
 fanout-task-loop.txt	skills/keel-execute/SKILL.md	fanout-section
 fanout-task-loop.txt	README.md	fanout-section
 fanout-task-loop.txt	README.zh-TW.md	fanout-section

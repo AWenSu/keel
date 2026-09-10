@@ -47,6 +47,7 @@ artifact. This skill's full artifact is for work that will be executed over
 multiple sessions or by subagents.
 
 Do not pass a `model` override at the call site — each agent file pins its own.
+Name the agent, not the role: announce each dispatch before it runs and broadcast each result when it lands, both using the agent's literal `keel-*` name.
 
 **The lightweight path still owes the four fields.** `keel-execute` consumes
 `Delivers:` (spec-axis review + staleness relocation), `Files:` (brief

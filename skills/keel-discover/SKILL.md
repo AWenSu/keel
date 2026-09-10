@@ -189,6 +189,7 @@ recommendation, not a menu. Approaches from one context correlate — they
 share your blind spots; constraint-differentiated ones don't.
 
 Do not pass a `model` override at the call site — each agent file pins its own.
+Name the agent, not the role: announce each dispatch before it runs and broadcast each result when it lands, both using the agent's literal `keel-*` name.
 
 ### 5. Lock scope
 

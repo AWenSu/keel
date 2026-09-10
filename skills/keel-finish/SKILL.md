@@ -353,6 +353,7 @@ inherit-strongest is the most expensive way to duplicate work in this
 pipeline.
 
 Do not pass a `model` override at the call site — each agent file pins its own.
+Name the agent, not the role: announce each dispatch before it runs and broadcast each result when it lands, both using the agent's literal `keel-*` name.
 
 All boxes checked, evidence fresh — put exactly these four to the user in
 **one AskUserQuestion call** (single question, `multiSelect: false`), your

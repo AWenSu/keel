@@ -154,6 +154,7 @@ context fork.
 | F17 | The manifest of who owes which rule cannot go stale | `rules/manifest.tsv` | derived set of dispatching stages / fan-out sections | `check-structure.sh` |
 | F18 | Every canonical rule file is exactly one non-empty line and is claimed by the manifest | `rules/README.md` | `rules/*.txt` | `check-structure.sh` (an empty file makes `grep -F` match everything; a two-line file makes it an OR) |
 | F19 | Every check id the script emits is declared in `CHECK-IDS.txt` | `eval-fixtures/CHECK-IDS.txt` | `check-structure.sh` | `check-structure.sh` (the mutation harness's denominator; a check behind an environment guard used to be exempt from needing a mutation) |
+| F20 | Every dispatch is announced before it runs and every result broadcast by the agent's literal `keel-*` name — the prefix is what tells a watcher the stage | `rules/dispatch-announce.txt` (canonical) | all 8 dispatching stages, verbatim; `keel-plan-review` roster/verdict and `keel-execute` per-task broadcast additionally spell out the fields | `35` |
 
 ## P. Plan-field contracts
 

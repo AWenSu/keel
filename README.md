@@ -48,8 +48,12 @@ themselves.
 work as anonymous `general-purpose` subagents. Every role — implementer,
 spec reviewer, quality reviewer, five review lenses, two tiers of adversarial
 skeptic, fixer, research ticket — is a named agent definition with its own
-pinned model and its own tool access. You can watch a run and know, from the
-name alone, exactly who is doing what. See [Subagent roster](#subagent-roster).
+pinned model and its own tool access, and the name carries the stage in its
+prefix — `keel-exec-*` is stage 4, `keel-plan-lens-*` is stage 3. A name only
+helps if it is said out loud, so a canonical rule
+(`rules/dispatch-announce.txt`) requires every stage to announce each dispatch
+before it runs and broadcast each result by that literal name when it lands.
+See [Subagent roster](#subagent-roster).
 
 ## The five stages
 
@@ -250,8 +254,10 @@ each implementer's brief.
 ## Subagent roster
 
 Every dispatch in this pipeline names a specific `subagent_type` — never the
-generic `general-purpose` fallback. The name alone tells you the stage and the
-role; the frontmatter pins the model and locks the tool access, so the
+generic `general-purpose` fallback. The name's prefix tells you the stage and
+its tail the role — and the announce rule above is what puts that name in
+front of you rather than leaving it in the tool call. The frontmatter pins
+the model and locks the tool access, so the
 decision can't quietly drift the way a prose instruction ("remember to use
 opus here") tends to.
 

@@ -161,6 +161,7 @@ research tickets excepted (they may run in parallel as background subagents).
 5. Stop. Charting is one session's work.
 
 Do not pass a `model` override at the call site — each agent file pins its own.
+Name the agent, not the role: announce each dispatch before it runs and broadcast each result when it lands, both using the agent's literal `keel-*` name.
 
 ### Work the map (every later session)
 

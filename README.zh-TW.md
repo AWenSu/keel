@@ -32,7 +32,7 @@ Claude Code 裝備齊全一點，規劃類的 skill 就會越堆越多：superpo
 
 這個 repo 只留**每階段一個 skill**。有用的機制才留下——硬性關卡、證據規則、決策分類、進度帳本、驗證鐵律；沒用的就砍（外部 CLI 依賴、遙測、重複的廢話）。每個 skill 就一份自包含的 `SKILL.md`，不用建置、不用掛 hook，除了檔案本身什麼都不用裝。
 
-**跟第一版比，這次改了什麼：** pipeline 不再把工作丟給一個沒名字的 `general-purpose` subagent 打混。implementer、規格審查、品質審查、五種審查視角、兩層懷疑者、fixer、研究票——每個角色都是獨立命名的 agent，模型釘死、工具權限也鎖死。你盯著畫面看誰在跑，光看名字就知道現在誰在幹嘛，不用猜。細節看下面〈[Subagent 名冊](#subagent-名冊)〉。
+**跟第一版比，這次改了什麼：** pipeline 不再把工作丟給一個沒名字的 `general-purpose` subagent 打混。implementer、規格審查、品質審查、五種審查視角、兩層懷疑者、fixer、研究票——每個角色都是獨立命名的 agent，模型釘死、工具權限也鎖死，而且名字的前綴就帶著階段——`keel-exec-*` 是第 4 階段、`keel-plan-lens-*` 是第 3 階段。但名字要講出來才有用：正本規則 `rules/dispatch-announce.txt` 要求每個階段**派工前先報名字、結果回來時再用同一個名字播報**，逐字寫進全部八個 skill，位元組比對。細節看下面〈[Subagent 名冊](#subagent-名冊)〉。
 
 ## 五個階段在幹嘛
 

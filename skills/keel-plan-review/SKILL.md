@@ -71,6 +71,7 @@ Dispatch by name — never `general-purpose`, never a `model` override (each
 agent file pins its own model and read-only tool set):
 
 Do not pass a `model` override at the call site — each agent file pins its own.
+Name the agent, not the role: announce each dispatch before it runs and broadcast each result when it lands, both using the agent's literal `keel-*` name.
 
 | Lens | subagent_type | Condition |
 |------|---------------|-----------|

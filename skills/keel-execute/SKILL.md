@@ -267,8 +267,11 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
    Splitting the axes across separate agents is what makes the no-merge rule
    below structural rather than aspirational: no reviewer can see, and so
    cannot be swayed by, another's verdict.
-   **Broadcast every verdict the moment it lands** — axis, PASS/FAIL, the
-   single worst issue with its `file:line` anchor, and what you do next.
+   **Broadcast every verdict the moment it lands** — the agent's own name
+   (`keel-exec-reviewer-quality`, not "the quality reviewer"), its axis,
+   PASS/FAIL, the single worst issue with its `file:line` anchor, and what
+   you do next. The name is what tells a watcher which stage they are in
+   and which of the three axes just spoke; a paraphrase loses both.
    **Never merge or rerank across axes** — each axis (spec, quality, and
    security when triggered) reports its own findings and its own worst
    issue, no single winner (from mattpocock code-review: a change can follow
@@ -355,6 +358,7 @@ file pins its own model and tool set, and overriding re-introduces the silent
 model-inheritance problem those pins exist to prevent.
 
 Do not pass a `model` override at the call site — each agent file pins its own.
+Name the agent, not the role: announce each dispatch before it runs and broadcast each result when it lands, both using the agent's literal `keel-*` name.
 
 ### Implementer status protocol
 
