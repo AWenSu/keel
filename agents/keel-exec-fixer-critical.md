@@ -77,6 +77,13 @@ plausible but wasn't tested against the actual failure mode. The circuit
 breaker exists for exactly this case — a load-bearing finding neither tier
 could fix belongs in front of the user, not shipped silently.
 
+## Glossary
+
+If `CONTEXT.md` exists at the repo root, your code and test names follow its
+vocabulary. Arriving with a fresh context is what makes this easy to miss:
+the vocabulary the earlier attempts were using is not in your memory, it is
+in that file.
+
 ## Output
 
 ```

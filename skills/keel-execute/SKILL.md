@@ -19,17 +19,21 @@ provenance:
 # keel-execute — Plan Execution
 
 ```
-INPUT   a plan file with a header carrying Spec Version + Success Criteria,
-        and every task carrying Delivers / Files / Depends on /
-        Interfaces / Skills; if it came from keel-plan-review, a REVIEW
-        REPORT ending in NO UNRESOLVED DECISIONS
+INPUT   a plan file with a header carrying Spec Version + Global Constraints
+        + Success Criteria, and every task carrying Delivers / Files /
+        Depends on / Interfaces / Skills; if it came from keel-plan-review,
+        a REVIEW REPORT ending in NO UNRESOLVED DECISIONS
 OUTPUT  all tasks committed and reviewed on a non-main branch; ledger complete
         in .keel/progress.md; final whole-branch review passed
 ```
 
 Missing INPUT → `BLOCKED: 缺 <field> → 退回 keel-plan`. A plan without those
 fields silently disables brief extraction, the staleness check, and the
-spec-compliance axis — three of this stage's four safety mechanisms.
+spec-compliance axis — three of this stage's four safety mechanisms. An
+**empty** `Global Constraints:` is the one that hides best: the pre-flight
+scan checks tasks against it, so a blank field makes that scan pass on
+nothing, and a clean scan reads identically whether the constraints were
+satisfied or absent. Blank is a miss, not a permissive default.
 
 Two modes, one decision at the top:
 
@@ -128,7 +132,15 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
    carries a `Depends on:` line — that is the plan's statement of what must
    finish first — confirmed by the user at G2, or re-examined by
    `keel-plan-lens-eng` when G2 was skipped because the plan routed through
-   `keel-plan-review`. It governs three
+   `keel-plan-review`. There is a third provenance and it is weaker than
+   both: a `keel-workflow` **Medium** shortcut plan reaches here having had
+   neither, because it never entered `keel-plan` (no Step 6) and never
+   entered `keel-plan-review` (no lens). The edges are present and
+   unconfirmed. Say so once in the ledger header —
+   `breakdown: unconfirmed — Medium shortcut, no G2, no eng lens` — and hold
+   the graph to a higher bar of suspicion before parallelising on it: an
+   unconfirmed edge that is merely missing costs a serialised run, while an
+   unconfirmed edge that is wrong costs a conflict. It governs three
    decisions here, and nothing else in this stage can substitute for it:
    - **Order.** Never dispatch a task whose `Depends on:` names a task the
      ledger does not yet record as DONE. Task number is not dependency order.
@@ -491,7 +503,10 @@ tokens/time per agent (show-me-first's own eval).
 2. Create a todo per task. Execute in **dependency order** per step 0, not
    task-number order: follow each step exactly, run each verification, mark
    complete. Update the ledger the same as orchestrated mode — inline
-   sessions crash too. **The rulebook injection applies here too:** with a
+   sessions crash too — and overwrite `.keel/state.md` on the same beat, for
+   the same reason: a resumed controller reads that file to learn where it
+   is, and INLINE is the mode with no per-task reviewer to notice it went
+   stale. **The rulebook injection applies here too:** with a
    `.learned/`, run the per-task `learned.py search` and hold the hits as
    your own Global Constraints and self-review checklist — there is no brief
    to append them to, but the brief was only ever the carrier, not the rule.

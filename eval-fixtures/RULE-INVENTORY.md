@@ -47,7 +47,7 @@ the executing agent's improvisation. The second is worse, and both fixture
 | A4 | keel-finish can't produce required evidence → keel-debug | `keel-workflow` Backward routes | `keel-finish` Part 1 gate-function failure branch | `08` |
 | A5 | Debugging concludes the requirement is wrong → keel-discover | `keel-workflow` Backward routes | `keel-debug` Phase 2 third outcome | `09` |
 | A7 | Shipped work's Signals say the requirement was wrong → keel-discover | `keel-workflow` Backward routes | `keel-finish` Part 2d writes the signal; `keel-discover` intake reads it on arrival | `23` |
-| A6 | A stage's INPUT contract is unsatisfiable → the owing stage | `keel-workflow` Backward routes | `BLOCKED: 缺 <field>` line in all seven stages; `keel-wayfind` additionally states the wrong-stage case as prose | — |
+| A6 | A stage's INPUT contract is unsatisfiable → the owing stage | `keel-workflow` Backward routes + Stage contracts (the routes row says only `(see below)`; the `BLOCKED:` template and the check-on-entry duty are in Stage contracts) | `BLOCKED: 缺 <field>` line in all seven stages; `keel-wayfind` additionally states the wrong-stage case as prose | `28` |
 
 ## B. Gates that may stop for a user answer
 
@@ -58,10 +58,10 @@ therefore not merely undocumented but actively countermanded.
 | # | Gate | Declared at | Enforced at | Fixture |
 |---|------|-------------|-------------|---------|
 | B1 | G1 spec approval (keel-discover) | `keel-workflow` gate table | `keel-discover` Step 7 self-review/user-review ("Wait for explicit approval") | `01`, `02` |
-| B2 | G2 task-breakdown quiz | `keel-workflow` gate table | `keel-plan` Step 6 | — |
-| B3 | G3 premise confirmation | `keel-workflow` gate table | `keel-plan-review` Step 0 | — |
-| B4 | G4 Taste / User-Challenge questions | `keel-workflow` gate table | `keel-plan-review` Step 5 | — |
-| B5 | G5 pre-flight plan contradictions | `keel-workflow` gate table | `keel-execute` pre-flight plan review | — |
+| B2 | G2 task-breakdown quiz | `keel-workflow` gate table | `keel-plan` Step 6 | `28` |
+| B3 | G3 premise confirmation | `keel-workflow` gate table | `keel-plan-review` Step 0 | `28` |
+| B4 | G4 Taste / User-Challenge questions | `keel-workflow` gate table | `keel-plan-review` Step 5 | `28` |
+| B5 | G5 pre-flight plan contradictions | `keel-workflow` gate table | `keel-execute` pre-flight plan review (ORCHESTRATED); re-lifted by name in INLINE step 1 | `28` |
 | B6 | G6 `PLAN-CONFLICT` arbitration | `keel-workflow` gate table | `keel-execute` fix loop step 4; INLINE mode step 3 | `10`, `11` |
 | B7 | G7 Success Criteria live confirmation | `keel-workflow` gate table | `keel-finish` Part 2 | `19` |
 | B8 | G8 branch-integration choice | `keel-workflow` gate table | `keel-finish` Part 3 | `19`, `16` |
@@ -90,8 +90,8 @@ does not bind a subagent.
 | D2 | UI-heavy plans (2+ keywords) produce a feature matrix | `keel-plan` Step 2b | same | `04` |
 | D3 | ADR offer when 3 criteria met; skip if Step 5 already emitted one | `keel-finish` Part 2 ADR check | same | `05` |
 | D4 | Security lens dispatch (2+ keywords / high-risk / new endpoint) | `keel-plan-review` Step 1 | `keel-plan-review` Step 2 roster | `14` |
-| D5 | Design lens dispatch (2+ UI keywords) | `keel-plan-review` Step 1 | Step 2 roster | — |
-| D6 | DX lens dispatch (2+ API/CLI/SDK keywords) | `keel-plan-review` Step 1 | Step 2 roster | — |
+| D5 | Design lens dispatch (2+ UI keywords) | `keel-plan-review` Step 1 | Step 2 roster | `33` |
+| D6 | DX lens dispatch (2+ API/CLI/SDK keywords) | `keel-plan-review` Step 1 | Step 2 roster | `33` |
 | D12 | Success and failure signals are named before integrating | `keel-finish` Part 2d | same — one question, written to the plan's `## Signals` | `23` |
 | D10 | Design lens checks the visual source of truth exists | `keel-plan-lens-design` §B *(only when keel-plan-review runs — most plans skip it)* | same | `21` |
 | D11 | Design lens checks UI tasks route to a design skill via `Skills:` | `keel-plan-lens-design` §C | same | `21` |
@@ -120,9 +120,9 @@ context fork.
 | E4 | R4 condition 4 — plan lens previously flagged this task | `keel-execute` step 3c R4 | plan file `## SECURITY FINDINGS` table | `13` |
 | E5 | R4 condition 5 — sensitive-string pattern | `keel-execute` step 3c R4 | same | `13` |
 | E6 | Skipping the security axis requires an auditable ledger line | `keel-execute` step 3c skip rule | same | `13` |
-| E7 | Security-axis findings are persisted for keel-finish to read | — | `keel-execute` ledger security field | — |
-| E8 | Plan-lens security findings are persisted for downstream stages | — | `keel-plan-review` `## SECURITY FINDINGS` section | — |
-| E9 | Part 2c check 1 — full-branch secrets scan | `keel-finish` Part 2c (1) | same | — |
+| E7 | Security-axis findings are persisted for keel-finish to read | `keel-execute` step 3c ("Findings go in the ledger, not just the conversation") | `keel-execute` ledger security field | `30` |
+| E8 | Plan-lens security findings are persisted for downstream stages | same (the write instruction is the declaration) | `keel-plan-review` `## SECURITY FINDINGS` section | `30` |
+| E9 | Part 2c check 1 — full-branch secrets scan | `keel-finish` Part 2c (1) | same | `30` |
 | E10 | Part 2c check 2 — execution-stage findings closed | `keel-finish` Part 2c (2) | same (reads E7) | `12` |
 | E11 | Part 2c check 3b — dependency existence (anti-slopsquatting), no exemption | `keel-finish` Part 2c (3b) | same | `12` |
 | E12 | Part 2c check 4 — plan-lens findings disposition | `keel-finish` Part 2c (4) | same (reads E8) | `12` |
@@ -140,7 +140,7 @@ context fork.
 | F5 | Every shipped agent appears in the roster | `agents/` | `tables/agents.tsv` → generated rosters | `check-structure.sh` (generated-block check) |
 | F6 | No `model` override at any dispatch site | `rules/no-model-override.txt` (canonical) | all 8 dispatching stages, verbatim | `check-structure.sh` (byte comparison; the stage list is cross-checked against a derivation) |
 | F7 | Fan-out ceiling | `keel-workflow` fan-out note (concurrency), `keel-execute` Fan-out ceiling (per task loop) | each stage | `check-structure.sh` |
-| F8 | Coverage stars are awarded by named-test count, not impression | `keel-execute` Finish coverage table | same — each star cites a test `file:name`; an uncitable star is a GAP | — |
+| F8 | Coverage stars are awarded by named-test count, not impression | `keel-execute` Finish coverage table | same — each star cites a test `file:name`; an uncitable star is a GAP | `29` |
 | F9 | Every `## section` a file references is defined somewhere | — (the requirement is implicit in every cross-reference) | `check-structure.sh` | `check-structure.sh` |
 | F10 | A fixture's blockquote is verbatim from the source it cites | `eval-fixtures/README.md` grading instruction | `check-structure.sh` | `check-structure.sh` |
 | F11 | Every backward route appears in all three documents with the same from/to | `tables/routes.tsv` | generated into `keel-workflow` + both READMEs | `check-structure.sh` (generated-block check) |
@@ -168,13 +168,13 @@ Add a row here whenever a field is added to the plan template.
 |---|-------|-------------|-------------|-------------|---------|
 | P1 | `Delivers:` | `keel-plan` Step 3 | implementer; staleness relocation | `keel-exec-reviewer-spec` — the whole axis is "did it do what this says" | `06` |
 | P2 | `Files:` | `keel-plan` Step 3 | implementer staleness check | `keel-execute` drift threshold (accumulates relocations) | `06` |
-| P3 | `Interfaces:` | `keel-plan` Step 3 | `keel-execute` brief extraction | `keel-exec-reviewer-spec` interface-drift check | — |
+| P3 | `Interfaces:` | `keel-plan` Step 3 | `keel-execute` brief extraction | `keel-exec-reviewer-spec` interface-drift check | `33` |
 | P4 | `Skills:` | `keel-plan` Step 3 | implementer invokes them | `keel-plan-lens-design` §C for user-visible surfaces; `keel-plan-lens-eng` for platform / protocol / tooling work *(only when keel-plan-review runs — most plans skip it)* | `21` |
 | P5 | `Depends on:` | `keel-plan` Step 3 | `keel-execute` step 0 — order, parallelism, which Interfaces to include | user at G2 (edge correctness); `keel-plan-lens-eng` when G2 was skipped for review; `BLOCKED` on a missing field or an edge naming a nonexistent task | `22` |
 | P6 | `[Risk: …]` | `keel-plan` Step 3 | `keel-execute` R4 condition 3; `keel-plan-lens-eng` error registry | `keel-plan-lens-eng` — rollback present on every High, and grade-sanity against what the task actually does *(only when keel-plan-review runs — most plans skip it)* | `22` |
 | P7 | `Spec Version:` | `keel-plan` Step 2 header | `keel-execute` pre-flight drift check | same check (mismatch routes back) | `03` |
 | P8 | `Success Criteria:` | `keel-plan` Step 2 header | `keel-finish` Part 2; final `code-reviewer` spec axis | user at G7, one criterion at a time | `19` |
-| P9 | `Global Constraints:` | `keel-plan` Step 2 header | `keel-execute` brief extraction | `keel-execute` pre-flight (tasks violating them) | — |
+| P9 | `Global Constraints:` | `keel-plan` Step 2 header | `keel-execute` brief extraction | `keel-execute` pre-flight (tasks violating them) | `33` |
 | P11 | `## Signals` section reserved in the plan | `keel-plan` Step 2a | `keel-finish` Part 2d writes into it; `keel-workflow` and `keel-discover` read it | `check-structure.sh` (F9) | `23` |
 | P10 | `Visual source of truth:` | `keel-plan` Step 2b (same UI trigger as the feature matrix) | implementer; sets the bar the built screen is judged against | `keel-plan-lens-design` §B | `21` |
 
@@ -189,21 +189,21 @@ verified-looking number this file exists to stop.
 | # | Rule | Declared at | Enforced at | Fixture |
 |---|------|-------------|-------------|---------|
 | S1 | Confirmed test seams go in the spec's `## Test seams` section | `keel-discover` step 5b | spec template | `check-structure.sh` (section defined) |
-| S2 | `keel-plan` may only place tests at a confirmed seam; an unconfirmed seam is a spec change | `keel-plan` task rules | `keel-plan` "Tests only at confirmed seams" | — |
-| S3 | `keel-debug` reproduces through a seam, not through internals | `keel-debug` loop-first section | same | — |
-| S4 | `CONTEXT.md` glossary vocabulary binds task names, symbols, and Interfaces blocks | `keel-discover` glossary step | `keel-plan` step 1; `keel-execute` brief rule | — |
-| S5 | Every implementer/reviewer brief carries the `CONTEXT.md` path when the file exists | `keel-execute` universal rules | `keel-exec-implementer`, `keel-exec-reviewer-quality` | — |
-| S6 | New domain terms introduced by the work are added to `CONTEXT.md` before integration | `keel-finish` Part 2 | same | — |
+| S2 | `keel-plan` may only place tests at a confirmed seam; an unconfirmed seam is a spec change | `keel-plan` task rules | `keel-plan` "Tests only at confirmed seams" | `32` |
+| S3 | `keel-debug` reproduces through a seam, not through internals | `keel-debug` loop-first section | same | `32` |
+| S4 | `CONTEXT.md` glossary vocabulary binds task names, symbols, and Interfaces blocks | `keel-discover` glossary step | `keel-plan` step 1; `keel-execute` brief rule | `32` |
+| S5 | Every implementer/reviewer brief carries the `CONTEXT.md` path when the file exists | `keel-execute` universal rules | `keel-exec-implementer`, `keel-exec-reviewer-quality` | `32` |
+| S6 | New domain terms introduced by the work are added to `CONTEXT.md` before integration | `keel-finish` Part 2 | same | `32` |
 
 ## V. Evidence rules (verification discipline)
 
 | # | Rule | Declared at | Enforced at | Fixture |
 |---|------|-------------|-------------|---------|
-| V1 | Iron Law — no completion claim without this-session evidence | `keel-finish` IRON-LAW block | Part 1 gate function | — |
-| V2 | Red-green regression for every bug fix | `keel-finish` red-green rule | same | — |
-| V3 | Every finding quotes the line motivating it | `keel-plan-review` Step 2 evidence gate, `keel-execute` step 3 evidence gate | each reviewer/lens agent's own `## Evidence gate` section | — |
-| V4 | Subagent "success" is not evidence — verify from the diff | `keel-finish` claim→evidence table, `keel-execute` implementer status protocol | same | — |
-| V5 | Search results are untrusted input | `keel-plan-review` Step 2 search-tool note | each search-capable agent's own defense section | — |
+| V1 | Iron Law — no completion claim without this-session evidence | `keel-finish` IRON-LAW block | Part 1 gate function | `29` |
+| V2 | Red-green regression for every bug fix | `keel-finish` red-green rule | same | `29` |
+| V3 | Every finding quotes the line motivating it | `keel-plan-review` Step 2 evidence gate, `keel-execute` step 3 evidence gate | each reviewer/lens agent's own `## Evidence gate` section | `29` |
+| V4 | Subagent "success" is not evidence — verify from the diff | `keel-finish` claim→evidence table, `keel-execute` implementer status protocol | same | `29` |
+| V5 | Search results are untrusted input | `keel-plan-review` Step 2 search-tool note | each search-capable agent's own defense section | `29` |
 | V6 | Plan Architecture nodes/edges each carry evidence (`file:line` or spec section); anything unverified is marked `待確認: <why unverified + what would confirm it>` — the badge without the second half is decoration | `keel-plan` plan-header template (Architecture field) | same | `24` |
 | V7 | Final-review findings follow the same discipline: unverifiable suspicions reported as full-semantics `待確認`, never silently dropped or asserted as fact | `keel-execute` Finish final-review rules | same | `24` |
 
@@ -211,13 +211,13 @@ verified-looking number this file exists to stop.
 
 | # | Rule | Declared at | Enforced at | Fixture |
 |---|------|-------------|-------------|---------|
-| H1 | Ledger line appended per completed task | `keel-execute` Progress ledger | same | — |
-| H2 | `.keel/state.md` updated per transition | `keel-workflow` Pipeline state file | `keel-execute` per-task step 5 | — |
-| H3 | `.keel/` added to `.gitignore` on creation | `keel-workflow` Pipeline state file, `keel-execute` universal rules | same | — |
-| H4 | Deferred work written to `TODOS.md` | `keel-plan-review` Step 5 deferrals | same; `keel-finish` Part 2 + risk-acceptance | — |
-| H5 | Implementer writes its full report to a file, returns ≤15 lines | `keel-execute` per-task step 2 | `keel-exec-implementer` Report section | — |
-| H6 | Final whole-branch review is persisted to the ledger | `keel-execute` Finish | same (`final-review:` line); `keel-finish` Part 3 reads it and treats a missing line as a gap | — |
-| H7 | Pre-flight and the final review run in **both** modes, not only ORCHESTRATED | `keel-execute` INLINE steps 1 and 4 | same | — |
+| H1 | Ledger line appended per completed task | `keel-execute` Progress ledger | same | `31` |
+| H2 | `.keel/state.md` updated per transition | `keel-workflow` Pipeline state file | `keel-execute` ORCHESTRATED per-task step 5; INLINE step 2 (added 2026-09-11 — INLINE had no carrier at all before) | `31` |
+| H3 | `.keel/` added to `.gitignore` on creation | `keel-workflow` Pipeline state file, `keel-execute` universal rules | same | `31` |
+| H4 | Deferred work written to `TODOS.md` | `keel-plan-review` Step 5 deferrals | same; `keel-finish` Part 2 + risk-acceptance | `31` |
+| H5 | Implementer writes its full report to a file, returns ≤15 lines | `keel-execute` per-task step 2 | `keel-exec-implementer` Report section | `31` |
+| H6 | Final whole-branch review is persisted to the ledger | `keel-execute` Finish | same (`final-review:` line); `keel-finish` Part 3 reads it and treats a missing line as a gap | `31` |
+| H7 | Pre-flight and the final review run in **both** modes, not only ORCHESTRATED | `keel-execute` INLINE steps 1 and 4 | same | `31` |
 | H8 | On session start or after compaction, every stage reads its own OUTPUT artifact FIRST (spec / plan file / REVIEW REPORT / ledger+plan header / repro loop / MAP.md) before trusting recollection | each stage SKILL.md's "On session start or after compaction" paragraph (all seven stages) | same | `25` |
 | H9 | findings.md discipline is keel's own, not the planning-with-files plugin's: the Finish ledger entry carries `findings: <n> entries` or `findings: none — <why>`, and `keel-finish` Part 2e flags a missing/contradicted line as an execute-side gap | `keel-execute` universal rules + Finish | `keel-execute` Finish ledger line; `keel-finish` Part 2e reads it | `25` |
 
@@ -288,10 +288,13 @@ that passed on live defects and failed on correctly stated rules.
 
 ## Current coverage
 
-**96 rules. 66 verified (69%)** — 47 by scenario fixture, 19 by
+**106 rules. 106 verified (100%)** — 86 by scenario fixture, 20 by
 `check-structure.sh`. Every number on this line is produced by the commands
 below — including the split, which used to be the one figure no command
-emitted and was wrong by one in each direction for a week. Recount with:
+emitted and was wrong by one in each direction for a week. 100% is a fact
+about this table, not a claim that the pipeline is correct: see
+"What the two columns mean, separately" below, and the section before it for
+why the previous ceiling argument was retired rather than met. Recount with:
 
 ```
 bash eval-fixtures/check-structure.sh                                   # F series, live
@@ -307,35 +310,51 @@ is catching claims nobody checked. The reviewer auditing that same file
 independently reported "all 46 rows" too. Two readers, same error, because a
 plausible number in a table reads as verified.
 
-## This is the ceiling, and it is deliberate
+## The ceiling was a prediction, and the audit falsified it
 
-68% is not a milestone on the way to 100% — it is the intended end state. The
-remaining 30 rows — the list below is produced by the command in
-Current coverage, not maintained by hand; it was 25 for a week after section S
-added five more:
+This section used to argue that 68% was the intended end state, not a
+milestone — that the then-remaining 30 rows (V1–V5, H1–H7, A6, B2–B5, D5–D6,
+E7–E9, P3, P9, F8, S2–S6) were **behaviors every run exercises**, so a
+fixture for them would "state the rule as its own expected result —
+tautological, zero information," and that they "fail loudly in normal use."
 
-**V1–V5** (Iron Law, red-green regression, the evidence gate, "an agent's
-success report is not evidence", untrusted search results) and **H1–H5**
-(ledger append, state file, `.gitignore`, `TODOS.md`, report-to-file) are
-**behaviors every single run exercises**, not conditional branches with a
-trigger boundary. A fixture for the Iron Law would state the rule as its own
-expected result — tautological, zero information. And they fail loudly in
-normal use: a run that skips the ledger is visibly broken by the next
-compaction, which is a faster and harsher test than any document.
+On 2026-09-11 all 30 were covered by fixtures `28`–`33`, and the prediction
+did not survive contact with them. Both halves turned out to be wrong in the
+same way:
 
-**A6, B2–B5, D5–D6, E7–E9, P3, P9, F8, H6–H7** are in the same family — gates
-and dispatch triggers that fire on ordinary runs, or persistence rules whose
-absence is immediately apparent.
+- **They had boundaries.** Not dispatch triggers, which is what the old
+  argument was looking for, but enumerable near-misses that look exactly like
+  compliance: a completion claim in 中文 or hedged into 「應該可以了」(V1); a
+  regression test that was green from birth (V2); a real `file:line` quote
+  under a finding it only permits rather than implies (V3); `security: none`
+  written for an axis that never ran (E7); `lens not run` and `no findings`
+  collapsed into one another (E8); a secrets scan whose unit was the tip
+  commit (E9). None of those restate a rule; each one distinguishes two
+  states the rule treats differently and a hurried reader does not.
+- **They did not fail loudly.** The audit found five live wiring defects
+  inside these very rows, every one of them silent: `.keel/state.md` had no
+  carrier anywhere in INLINE mode (H2); both fixer agents — the only
+  code-writing agents in the fix loop — had zero references to `CONTEXT.md`
+  (S5); a Medium-shortcut plan reached execution with `Depends on:` edges
+  that neither G2 nor the eng lens had ever confirmed, and step 0's text
+  implied that path did not exist (A6/B2); the Design lens's keyword list
+  disagreed between its two restatements, one word apart (D5); and
+  `keel-execute`'s INPUT contract never named `Global Constraints:`, so a
+  blank field made the pre-flight scan pass on nothing (P9). Each was closed
+  the same day, and the fixture scenario that found it is now its regression
+  check.
 
-**S2–S6** (seam discipline in plan and debug, the `CONTEXT.md` glossary chain)
-are read-and-obey rules with no trigger boundary: every task that places a
-test touches S2, every brief touches S5. Their producer sections (S1) are
-checked mechanically; the obedience is what a reviewer sees in the diff.
+The old argument's own standard is what condemns it: it asserted, from
+memory, that these rules were self-evidently fine — in the file whose entire
+purpose is catching claims nobody checked. That is the failure mode described
+two sections up, applied to the coverage table instead of to a rule.
 
-Chasing the last 30 would be the anti-pattern this repo already names:
-optimizing for the check rather than the behavior. Adding a rule that
-genuinely has a trigger/no-trigger boundary and a high cost of being wrong?
-That earns a fixture. Adding one to move a percentage does not.
+**What survives.** The narrower claim was right and still stands: a fixture
+written to move a percentage is worthless, and this repo does not want one.
+The test is not "is this row uncovered" but "can I name two states this rule
+separates, and would a reader plausibly confuse them." Every scenario in
+`28`–`33` had to answer that before it was written; rows that cannot answer
+it should not get a fixture no matter what the table looks like.
 
 ## What the two columns mean, separately
 

@@ -59,6 +59,11 @@ Run the full test command after your fixes. Report the actual output.
 If the repo has `.codegraph/` or codebase-memory-mcp is connected, query it
 (English only) to see the blast radius before editing.
 
+If `CONTEXT.md` exists at the repo root, your code and test names follow its
+vocabulary. You write code in the fix loop, so the glossary binds you exactly
+as it binds the implementer — a fix that renames a glossary concept plants
+the same inconsistency, later and in a smaller diff where it is harder to see.
+
 ## Output
 
 ```

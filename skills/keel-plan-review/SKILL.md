@@ -75,7 +75,7 @@ Do not pass a `model` override at the call site — each agent file pins its own
 | Lens | subagent_type | Condition |
 |------|---------------|-----------|
 | CEO | `keel-plan-lens-ceo` | always |
-| Design | `keel-plan-lens-design` | 2+ view/UI/component/screen keywords |
+| Design | `keel-plan-lens-design` | 2+ view/rendering/UI/component/screen keywords |
 | Eng | `keel-plan-lens-eng` | always |
 | Security | `keel-plan-lens-security` | 2+ security keywords／high-risk marker／new external endpoint |
 | DX | `keel-plan-lens-dx` | 2+ API/CLI/SDK/docs/MCP keywords |

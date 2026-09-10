@@ -80,6 +80,12 @@ proceed with a known regression.
 | `25-compaction-recovery-and-findings-enforcement.md` | per-stage recovery after compaction; findings.md binds without the plugin | all seven stage skills |
 | `26-project-rulebook-integration-boundaries.md` | rulebook injection triggers/else branches; round-4 switch; dod.sh disclosure; promotion filters | `keel-execute`, `keel-plan-review`, `keel-finish` |
 | `27-deferral-lane-and-backlog-routing.md` | Part 2b deferral lane choice; disposition must cite a resolvable artifact | `keel-finish` Part 2b |
+| `28-gate-stops-and-blocked-routes.md` | G2–G5 stop conditions; BLOCKED lines name a field and a destination | `keel-workflow` + all seven stages |
+| `29-evidence-discipline.md` | Iron Law, red-green, evidence gate, subagent-success, untrusted search, coverage stars | `keel-finish`, `keel-execute`, `keel-plan-review`, reviewer/lens agents |
+| `30-security-chain-persistence.md` | the security chain's producer end — ledger security line, SECURITY FINDINGS table, full-branch scan | `keel-execute`, `keel-plan-review`, `keel-finish` |
+| `31-ledger-and-artifact-persistence.md` | ledger/state/gitignore/TODOS/report-file writes; both-mode coverage | `keel-execute`, `keel-workflow`, `keel-exec-implementer` |
+| `32-spec-artifact-contracts.md` | confirmed seams and the `CONTEXT.md` glossary chain, including its carriers | `keel-discover`, `keel-plan`, `keel-debug`, `keel-execute`, `keel-finish` |
+| `33-lens-dispatch-and-plan-field-consumption.md` | Design/DX lens keyword thresholds; `Interfaces:` and `Global Constraints:` consumption | `keel-plan-review`, `keel-plan`, `keel-execute` |
 
 Adding a rule that is a **fact about files**? Add a check to
 `check-structure.sh`, not a fixture — a test nobody runs is worse than no test,
