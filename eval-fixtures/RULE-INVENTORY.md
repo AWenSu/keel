@@ -288,13 +288,25 @@ that passed on live defects and failed on correctly stated rules.
 
 ## Current coverage
 
-**106 rules. 106 verified (100%)** — 86 by scenario fixture, 20 by
-`check-structure.sh`. Every number on this line is produced by the commands
-below — including the split, which used to be the one figure no command
-emitted and was wrong by one in each direction for a week. 100% is a fact
-about this table, not a claim that the pipeline is correct: see
-"What the two columns mean, separately" below, and the section before it for
-why the previous ceiling argument was retired rather than met. Recount with:
+**This section deliberately reports no percentage.** As of 2026-09-11 every
+row carries a verifier — but "every row has one" is a fact about this table,
+not a statement about the pipeline, and a single reassuring figure is exactly
+the shape of claim this file exists to distrust. It was reported as a
+percentage until that date; the number is gone because the number is what
+gets quoted, and what gets quoted here should be a row, not a ratio.
+
+What each column of the tables above actually asserts, and how far it goes:
+
+- **`Fixture` = `check-structure.sh`** — a script asserts this and can fail.
+  The strongest claim in the file. Verify by running it.
+- **`Fixture` = `NN`** — a scenario file pins two states the rule separates.
+  It only binds when someone walks it; nothing runs it for you.
+- **`Enforced at`** — the rule's text was confirmed present at that location
+  when the row was written. Says nothing about whether it operates.
+- **`Declared at`** — where the promise is made. Weakest of the four.
+
+Counts, when a count is genuinely what you need (a `FIXTURE COVERAGE: N/M`
+line, say), come from the commands — never from prose in this file:
 
 ```
 bash eval-fixtures/check-structure.sh                                   # F series, live
@@ -303,12 +315,15 @@ grep -E '^\|\s*[A-HPVS][0-9]+\s*\|' eval-fixtures/RULE-INVENTORY.md \
   | grep -vcE '\|\s*—\s*\|?\s*$'                                     # rows with any verifier
 ```
 
-**Run the commands; do not carry the number forward from this line.** The
-first version of this section said "46/46 enforced, 28/46 fixture-covered" —
-both figures written from memory, both wrong, in the file whose entire purpose
-is catching claims nobody checked. The reviewer auditing that same file
+**Run the commands; never carry a count forward from prose.** The first
+version of this section said "46/46 enforced, 28/46 fixture-covered" — both
+figures written from memory, both wrong, in the file whose entire purpose is
+catching claims nobody checked. The reviewer auditing that same file
 independently reported "all 46 rows" too. Two readers, same error, because a
-plausible number in a table reads as verified.
+plausible number in a table reads as verified. Removing the headline figure
+on 2026-09-11 was the second half of that lesson: the first half stopped the
+number from being wrong, and a wrong number is not the only way a number
+misleads. A correct one that reads as "we are covered" does the same work.
 
 ## The ceiling was a prediction, and the audit falsified it
 
@@ -317,6 +332,12 @@ milestone — that the then-remaining 30 rows (V1–V5, H1–H7, A6, B2–B5, D5
 E7–E9, P3, P9, F8, S2–S6) were **behaviors every run exercises**, so a
 fixture for them would "state the rule as its own expected result —
 tautological, zero information," and that they "fail loudly in normal use."
+
+Note what it was and was not right about, because the two halves were
+separated deliberately when this was rewritten: the *warning* (a fixture
+written to move a percentage is worthless) survives and is why the section
+above no longer reports a percentage at all. The *prediction* (these
+particular rules cannot break quietly) is what died.
 
 On 2026-09-11 all 30 were covered by fixtures `28`–`33`, and the prediction
 did not survive contact with them. Both halves turned out to be wrong in the
@@ -349,12 +370,23 @@ memory, that these rules were self-evidently fine — in the file whose entire
 purpose is catching claims nobody checked. That is the failure mode described
 two sections up, applied to the coverage table instead of to a rule.
 
-**What survives.** The narrower claim was right and still stands: a fixture
-written to move a percentage is worthless, and this repo does not want one.
-The test is not "is this row uncovered" but "can I name two states this rule
-separates, and would a reader plausibly confuse them." Every scenario in
-`28`–`33` had to answer that before it was written; rows that cannot answer
-it should not get a fixture no matter what the table looks like.
+**What survives, and what it now costs.** The narrower claim was right: a
+fixture written to move a percentage is worthless, and this repo does not
+want one. The test for adding one is not "is this row uncovered" but "can I
+name two states this rule separates, and would a reader plausibly confuse
+them." Every scenario in `28`–`33` had to answer that before it was written;
+rows that cannot answer it should not get a fixture no matter what the table
+looks like.
+
+That warning is harder to obey now than it was, and the difficulty is the
+point. While rows read `—`, the table itself supplied the discipline: an
+empty cell was visible, and filling it looked like progress, so the warning
+had something concrete to push against. With every cell filled there is no
+gap to point at — the only thing stopping a future fixture written to keep
+the table tidy is a reader who asks the two-states question and is willing to
+answer "no, this one doesn't earn it." Removing the headline percentage from
+the section above was part of the same move: nothing in this file should any
+longer make coverage look like a score.
 
 ## What the two columns mean, separately
 
