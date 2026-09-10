@@ -72,16 +72,21 @@ tools, every dispatched name resolves to a definition — run it before
 committing any change to this repo:
 
 ```bash
-bash eval-fixtures/check-structure.sh    # 22 checks, exit 0 = all pass
+bash eval-fixtures/check-structure.sh    # exit 0 = all pass
 bash eval-fixtures/run-mutations.sh      # prove each of those checks can fail
 bash tables/render.sh                    # regenerate the three duplicated tables
 ```
 
-The second one is the one that matters. It injects 55 real defects — every
-mutation five independent audits of this repo ever ran — one at a time in a
-throwaway copy, and asserts the named check goes red. Its final assertion is
-that **every check has at least one mutation**: a check nothing has ever
-tested fails the run.
+The second one is the one that matters. It injects every mutation five
+independent audits of this repo ever ran — one at a time in a throwaway copy
+— and asserts the named check goes red. Its final assertion is that **every
+check has at least one mutation**: a check nothing has ever tested fails the
+run.
+
+Counts of checks, mutations, fixtures and rules are deliberately absent from
+this paragraph. `check-structure.sh`'s ratchet line prints all of them on
+every run; hardcoding them here went stale twice before it was worth
+noticing that a number in prose has no way to stay true.
 
 **Rules that appear in more than one file have a single source.**
 [`rules/`](rules/) holds the canonical text of each one; every file that
@@ -103,9 +108,14 @@ description is shared across the three documents, by design.
 The `NN-*.md` files are scenario fixtures for rules a script can't judge
 (does a spec marked `draft` block `keel-plan`? does a plan-vs-code
 contradiction route back?), graded by walkthrough. `RULE-INVENTORY.md` lists
-every declared rule with where each is enforced and what verifies it — a
-row with no verifier is a rule that can regress silently, and a row whose
-`Enforced at` is empty is a rule that is already broken.
+every declared rule with where each is enforced and what verifies it. A row
+whose `Enforced at` is empty is a rule that is already broken; a row with no
+verifier is one that can regress silently. As of 2026-09-11 there are none
+of either — which that file reports as a fact about its own table and
+pointedly **not** as a coverage percentage, because a reassuring ratio is
+the kind of claim it exists to distrust. Read the rows you depend on: the
+four columns make four different strengths of claim, and the file says which
+is which.
 
 ## Install
 
