@@ -79,6 +79,7 @@ proceed with a known regression.
 | `24-show-me-first-checkpoints-and-evidence-badges.md` | show-me-first checkpoint triggers; full-semantics 待確認 badges | `keel-discover`, `keel-plan-review`, `keel-execute`, `keel-plan` |
 | `25-compaction-recovery-and-findings-enforcement.md` | per-stage recovery after compaction; findings.md binds without the plugin | all seven stage skills |
 | `26-project-rulebook-integration-boundaries.md` | rulebook injection triggers/else branches; round-4 switch; dod.sh disclosure; promotion filters | `keel-execute`, `keel-plan-review`, `keel-finish` |
+| `27-deferral-lane-and-backlog-routing.md` | Part 2b deferral lane choice; disposition must cite a resolvable artifact | `keel-finish` Part 2b |
 
 Adding a rule that is a **fact about files**? Add a check to
 `check-structure.sh`, not a fixture — a test nobody runs is worse than no test,
