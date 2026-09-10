@@ -78,6 +78,7 @@ proceed with a known regression.
 | `23-signals-before-integration.md` | Success/failure signals named before merge; the return path | `keel-finish` Part 2d |
 | `24-show-me-first-checkpoints-and-evidence-badges.md` | show-me-first checkpoint triggers; full-semantics 待確認 badges | `keel-discover`, `keel-plan-review`, `keel-execute`, `keel-plan` |
 | `25-compaction-recovery-and-findings-enforcement.md` | per-stage recovery after compaction; findings.md binds without the plugin | all seven stage skills |
+| `26-project-rulebook-integration-boundaries.md` | rulebook injection triggers/else branches; round-4 switch; dod.sh disclosure; promotion filters | `keel-execute`, `keel-plan-review`, `keel-finish` |
 
 Adding a rule that is a **fact about files**? Add a check to
 `check-structure.sh`, not a fixture — a test nobody runs is worse than no test,
@@ -93,8 +94,8 @@ Finish step reports whenever a plan edits this repo's own skill files.
 ## Two harnesses, and where each one stops
 
 ```
-check-structure.sh     asserts facts about the repo         (27 checks)
-run-mutations.sh       asserts those checks can fail        (55 mutations)
+check-structure.sh     asserts facts about the repo         (count: the ratchet line prints it)
+run-mutations.sh       asserts those checks can fail        (count: ditto — hardcoded numbers here went stale twice)
 NN-*.md                scenario walkthroughs a script can't judge
 ```
 

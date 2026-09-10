@@ -491,14 +491,17 @@ tokens/time per agent (show-me-first's own eval).
 2. Create a todo per task. Execute in **dependency order** per step 0, not
    task-number order: follow each step exactly, run each verification, mark
    complete. Update the ledger the same as orchestrated mode — inline
-   sessions crash too.
+   sessions crash too. **The rulebook injection applies here too:** with a
+   `.learned/`, run the per-task `learned.py search` and hold the hits as
+   your own Global Constraints and self-review checklist — there is no brief
+   to append them to, but the brief was only ever the carrier, not the rule.
 3. Stop and ask rather than guess when: blocked, the plan has a critical
    gap, an instruction is ambiguous, or a verification keeps failing.
    **G6 gate applies here too:** a finding that conflicts with the plan's
    own text is never self-decided just because there's no separate reviewer
    subagent to raise it — the same single session that wrote the code must
    still stop and ask the user which wins, exactly as ORCHESTRATED mode's
-   step 3 fix loop requires.
+   step 4 fix loop requires.
 4. **Run the ORCHESTRATED `### Finish` block unchanged** — the final
    whole-branch `code-reviewer`, its coverage diagram, the `FIXTURE COVERAGE`
    report when this repo's own rule files were touched, then one fix pass for
