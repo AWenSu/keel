@@ -86,6 +86,7 @@ proceed with a known regression.
 | `31-ledger-and-artifact-persistence.md` | ledger/state/gitignore/TODOS/report-file writes; both-mode coverage | `keel-execute`, `keel-workflow`, `keel-exec-implementer` |
 | `32-spec-artifact-contracts.md` | confirmed seams and the `CONTEXT.md` glossary chain, including its carriers | `keel-discover`, `keel-plan`, `keel-debug`, `keel-execute`, `keel-finish` |
 | `33-lens-dispatch-and-plan-field-consumption.md` | Design/DX lens keyword thresholds; `Interfaces:` and `Global Constraints:` consumption | `keel-plan-review`, `keel-plan`, `keel-execute` |
+| `34-critical-flows-driven-early.md` | critical flows named at discovery, driven during execution, not chosen at Finish | `keel-discover`, `keel-plan`, `keel-execute`, `keel-finish` |
 
 Adding a rule that is a **fact about files**? Add a check to
 `check-structure.sh`, not a fixture — a test nobody runs is worse than no test,

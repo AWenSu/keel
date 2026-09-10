@@ -104,6 +104,8 @@ does not bind a subagent.
 | D16 | Build/test/lint verification claims default to `learned` dod.sh; a repo it cannot classify is a "not executed — <why>" disclosure, not a pass | `keel-finish` Part 1 gate function (IDENTIFY step) | same | `26` |
 | D17 | Before integrating, `.keel/findings.md` survivors are promoted to the project rulebook (near-duplicate → 補充 on the existing rule; "no new rules" said, not skipped) | `keel-finish` Part 2e | same | `26` |
 | D18 | Part 2b deferrals land in `learned` backlog when the repo has `.learned/` (`TODOS.md` otherwise); the disposition cites the created item, and an unresolvable reference blocks. Part 2e routes unfixed problems there too — work is not a rule | `keel-finish` Part 2b, Part 2e step 2 | same two sections | `27`, `26` (J) |
+| D19 | Spec names 1–3 **critical flows**, each crossing at least one integration boundary; `Crosses: none` is invalid and an unnameable flow is stated, not omitted | `keel-discover` step 5c | same; spec template section list | `34` |
+| D20 | Plan carries the flows across with an executable `Drive` column; a spec with no such section still gets an explicit `none — <why>` row | `keel-plan` step 2a-0 | same | `34` |
 
 ## E. Security chain
 
@@ -220,6 +222,7 @@ verified-looking number this file exists to stop.
 | H7 | Pre-flight and the final review run in **both** modes, not only ORCHESTRATED | `keel-execute` INLINE steps 1 and 4 | same | `31` |
 | H8 | On session start or after compaction, every stage reads its own OUTPUT artifact FIRST (spec / plan file / REVIEW REPORT / ledger+plan header / repro loop / MAP.md) before trusting recollection | each stage SKILL.md's "On session start or after compaction" paragraph (all seven stages) | same | `25` |
 | H9 | findings.md discipline is keel's own, not the planning-with-files plugin's: the Finish ledger entry carries `findings: <n> entries` or `findings: none — <why>`, and `keel-finish` Part 2e flags a missing/contradicted line as an execute-side gap | `keel-execute` universal rules + Finish | `keel-execute` Finish ledger line; `keel-finish` Part 2e reads it | `25` |
+| H10 | Each critical flow is driven at the earliest task after which it can run — both modes — and its verdict written to that task's ledger line as `flow: <name> — ok` / `FAILED`; a failing flow stops the loop, and `keel-finish` drives the named rows rather than choosing a surface | `keel-execute` per-task step 5; INLINE step 2 | same; `keel-finish` Drive the real flow reads the `flow:` lines and treats a missing `## Critical flows` section as a gap | `34` |
 
 ## Maintenance
 

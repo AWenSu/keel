@@ -63,9 +63,13 @@ next round."
 
 **Expected:**
 
-> **Ledger append** (see below), update `.keel/state.md`, next task.
+> then **ledger append** (see
+> below), update `.keel/state.md`, next task.
 
-which implements the router's own declaration of the file's purpose:
+(Step 5 gained a first clause on 2026-09-11 — driving any critical flow that
+can now run, graded in fixture `34` — but the state.md half is unchanged and
+still shares the beat.) It implements the router's own declaration of the
+file's purpose:
 
 > Maintain `.keel/state.md`, overwritten on every stage transition and
 > every task completion.

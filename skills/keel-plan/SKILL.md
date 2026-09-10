@@ -118,6 +118,35 @@ Save to `docs/plans/YYYY-MM-DD-<feature>.md` with this header:
   not rewritten into prose>
 ```
 
+### 2a-0. Carry the critical flows across, as commands
+
+Copy the spec's `## Critical flows` table into the plan under the same
+heading, and add the column the spec could not fill: **how to drive it**.
+The spec names flows; only the plan knows the file paths, entry points and
+commands, so this is the stage that turns each row into something a later
+agent can actually run without re-deriving it.
+
+```markdown
+## Critical flows
+<!-- from the spec; Drive filled in here; keel-execute and keel-finish run these -->
+
+| Flow | Crosses | Drive | Observable result |
+|------|---------|-------|-------------------|
+| <copied from spec> | <copied from spec> | <exact command(s) or numbered steps> | <copied from spec> |
+```
+
+`Drive` must be executable by someone with zero context: a command line, or
+numbered UI steps naming the actual screen and control. "Run the app and try
+it" is a placeholder and fails the No Placeholders rule like any other.
+Where a flow cannot be driven until several tasks land, say which task
+unblocks it — `Drive` may read `after T4: <command>`; that is what lets
+`keel-execute` know when to run it rather than waiting for the end.
+
+**Spec has no `## Critical flows` section** (it predates 5c, or the work is
+a pure refactor with no boundary crossing): write the section anyway with a
+single row reading `none — <why>`. A missing section and an explicit "none"
+are different downstream, and `keel-finish` treats the first as a gap.
+
 ### 2a. Reserve the Signals section
 
 Immediately after the header, write the section `keel-finish` Part 2d fills

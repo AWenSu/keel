@@ -102,6 +102,29 @@ surface once: start the app/CLI/endpoint, perform the changed behavior,
 observe the result. Any change to product source has a runtime surface to
 drive; "all tests pass but the feature doesn't work" is a routine failure.
 
+**Which surface is not yours to choose here.** Read the plan's
+`## Critical flows` and drive every row, against its own `Observable result`
+column — an agent picking the surface at this stage picks the one it can get
+green, which is the shallowest, and the flows were named at discovery
+precisely so the choice would already be made by someone not under pressure
+to finish. The ledger's `flow:` lines say which were already driven during
+execution; drive each one again if anything has changed since, and drive
+every row the ledger never recorded at all.
+
+Three ways this section ends, and they are not interchangeable:
+
+- **Every row driven, each matching its `Observable result`** — the claim
+  "feature works" now has its evidence.
+- **A row you cannot drive here** (needs an environment this session has no
+  access to) → `not executed — <why>`, the same honest-absence line the
+  paragraph below grants. A stated absence is a caveat in the summary.
+- **The plan has no `## Critical flows` section at all** → that is a
+  **gap, not an exemption**. Say so as `critical flows: no section — plan
+  predates keel-discover 5c`, fall back to the ad-hoc drive above, and know
+  that you are now doing the thing this section exists to stop: choosing the
+  surface yourself, at the stage least able to judge it. An explicit
+  `none — <why>` row is different and is a legitimate answer.
+
 **Name the target environment before driving anything.** If you cannot show
 it is local, preview, or otherwise ephemeral, stop and get explicit consent
 naming that environment and the exact command (gate G9). Migrations, deploys,

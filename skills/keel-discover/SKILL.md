@@ -234,6 +234,47 @@ an unconfirmed seam is a spec change, not a planning decision. `keel-plan`
 greps for that exact heading; a seam list under any other name reads to it as
 a spec with no seams, and every task then invents its own.
 
+### 5c. Name the critical flows
+
+Seams answer "where is this observable to a caller". They do not answer
+"does the whole thing still work", and the gap between those two questions
+is where the expensive failures live: every unit green, every seam covered,
+and the feature broken at the join. A seam is inside your process by
+construction — that is what makes it testable — so no number of them
+exercises the place where your code hands off to something it does not
+control.
+
+Name the **critical flows** this change must keep working. One to three; if
+you cannot name one, say so explicitly rather than leaving the section out.
+Each flow must **cross at least one integration boundary** — a point where
+the code hands off to something outside its own process: another service, the
+network, a browser, the filesystem, a database, a third-party API, a
+different machine. A flow that stays inside one process is a unit test with
+extra steps; it is already covered by 5b and adds nothing here.
+
+Confirm them with the user in the same question as the seams — the two lists
+are two halves of one answer about what "working" means. Write them into the
+spec's `## Critical flows` section:
+
+```markdown
+## Critical flows
+
+| Flow | Crosses | Observable result |
+|------|---------|-------------------|
+| <what a user or caller does, end to end> | <the boundary/boundaries it crosses> | <what you look at to know it worked> |
+```
+
+`Crosses` is the load-bearing column. "None" is not a valid entry — a flow
+that crosses nothing does not belong in this table. `Observable result` must
+be something a person can look at and judge, not "no errors": the failures
+this section exists to catch are the ones where nothing throws and the
+output is wrong.
+
+Downstream, `keel-plan` turns each row into an executable drive step,
+`keel-execute` drives each flow at the earliest task after which it can run,
+and `keel-finish` treats a flow that was never driven as a gap rather than a
+pass.
+
 **On session start or after compaction: read the newest `docs/specs/*.md`
 for this effort FIRST**, plus the handoff file if one was written. The
 `**Status:**` line says where you are — `approved` means this stage is done,
@@ -251,7 +292,7 @@ this field is what downstream `keel-plan` checks before entering (see step 7
 for the approved transition).
 Sections: Problem / Current behavior (with evidence) / **Prior art** (from
 2b) / Proposed design / Alternatives considered / Test seams (from 5b) /
-Out of scope / Success criteria.
+Critical flows (from 5c) / Out of scope / Success criteria.
 
 The **Prior art** section carries the scan's three parts plus the decision:
 

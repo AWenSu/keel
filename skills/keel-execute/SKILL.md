@@ -315,7 +315,27 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
    integrity) → `BLOCKED`, report to the user, do not mark the task done;
    cosmetic/non-load-bearing → park in the ledger with the ruling and proceed.
    Never loop past round 5 silently hoping the next attempt converges.
-5. **Ledger append** (see below), update `.keel/state.md`, next task.
+5. **Drive any critical flow that can now run**, then **ledger append** (see
+   below), update `.keel/state.md`, next task.
+
+   Read the plan's `## Critical flows`. After this task, ask of each flow not
+   yet driven since its last touching change: can its `Drive` column run now?
+   If yes, run it and compare against `Observable result` — then record the
+   verdict on the ledger line as `flow: <name> — ok` or
+   `flow: <name> — FAILED: <what you saw>`. A flow whose `Drive` reads
+   `after T<n>` is not askable until task n is DONE; say nothing about it
+   until then.
+
+   **A failing flow stops the loop the way a failing task does.** It is not
+   a note for the summary: the join it crosses is broken now, and every
+   later task builds on it. Diagnose before dispatching anything else.
+
+   Why here and not at Finish: a flow that cannot work at all is a design
+   error, and finding it after the last task means every task was written
+   against a shape that does not hold. The whole point of driving early is
+   that the cheapest moment to learn "these two sides do not fit" is the
+   first moment it is knowable, which is the first task after which the
+   boundary exists at all.
 
 ### Fan-out ceiling
 
@@ -510,6 +530,12 @@ tokens/time per agent (show-me-first's own eval).
    `.learned/`, run the per-task `learned.py search` and hold the hits as
    your own Global Constraints and self-review checklist — there is no brief
    to append them to, but the brief was only ever the carrier, not the rule.
+   **Driving critical flows applies here too**, on the same beat as the
+   ledger: after each task, run any `## Critical flows` row whose `Drive`
+   can now run, and record `flow: <name> — ok` / `FAILED: <what you saw>`.
+   A failed flow stops this loop exactly as it stops the orchestrated one —
+   more so, because here there is no per-task reviewer who might have
+   noticed the join was broken.
 3. Stop and ask rather than guess when: blocked, the plan has a critical
    gap, an instruction is ambiguous, or a verification keeps failing.
    **G6 gate applies here too:** a finding that conflicts with the plan's
