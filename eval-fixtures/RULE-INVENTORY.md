@@ -218,6 +218,8 @@ verified-looking number this file exists to stop.
 | H5 | Implementer writes its full report to a file, returns ≤15 lines | `keel-execute` per-task step 2 | `keel-exec-implementer` Report section | — |
 | H6 | Final whole-branch review is persisted to the ledger | `keel-execute` Finish | same (`final-review:` line); `keel-finish` Part 3 reads it and treats a missing line as a gap | — |
 | H7 | Pre-flight and the final review run in **both** modes, not only ORCHESTRATED | `keel-execute` INLINE steps 1 and 4 | same | — |
+| H8 | On session start or after compaction, every stage reads its own OUTPUT artifact FIRST (spec / plan file / REVIEW REPORT / ledger+plan header / repro loop / MAP.md) before trusting recollection | each stage SKILL.md's "On session start or after compaction" paragraph (all seven stages) | same | `25` |
+| H9 | findings.md discipline is keel's own, not the planning-with-files plugin's: the Finish ledger entry carries `findings: <n> entries` or `findings: none — <why>`, and `keel-finish` Part 2e flags a missing/contradicted line as an execute-side gap | `keel-execute` universal rules + Finish | `keel-execute` Finish ledger line; `keel-finish` Part 2e reads it | `25` |
 
 ## Maintenance
 

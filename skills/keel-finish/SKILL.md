@@ -34,6 +34,13 @@ of the code, you cannot claim it passes. Violating the letter of this rule
 by paraphrase ("should work now", "looks good") violates the rule.
 </IRON-LAW>
 
+**On session start or after compaction: read the ledger (`.keel/progress.md`),
+the plan header (Success Criteria, `## Signals`, `## REVIEW REPORT`), and
+`TODOS.md` FIRST.** Evidence gathered before the compaction now exists only
+as a summarized claim, and the Iron Law treats it as stale: re-run the
+verification commands for every box not yet presented to the user, and
+re-confirm nothing from recollection.
+
 ## Part 1: The Gate Function
 
 Run this before ANY status claim — "done", "fixed", "passing", "ready":
@@ -268,8 +275,13 @@ a docs fix" has answered it correctly.
 ## Part 2e: Promote findings to the project rulebook
 
 `keel-execute` wrote `.keel/findings.md` (what was learned) as session
-memory; it dies with the branch unless promoted. Before integrating, if the
-repo has a `.learned/` (`python3 ~/.claude/skills/learned/scripts/learned.py root`):
+memory; it dies with the branch unless promoted. First check the ledger's
+`findings:` line: `none — <why>` means promotion has nothing to read and
+this part is one quoted line in the final summary; a missing line, or a
+missing/empty `findings.md` the line's count contradicts, is an execute-side
+gap — record it in the final summary rather than silently skipping. Then,
+before integrating, if the repo has a `.learned/`
+(`python3 ~/.claude/skills/learned/scripts/learned.py root`):
 
 1. Read `findings.md` and the ledger's parked/adjudicated findings.
 2. Keep only what is **non-obvious AND reusable**: needed more than one

@@ -25,8 +25,8 @@ truth, no inlined copies to go stale).
 | Frontend/UI task | UI | `frontend-workflow` (own router; don't mix pipelines) |
 | Output should be a GitHub issue / backlog item | ISSUE | gstack `spec` |
 | Very large plan (>15 files, new product surface) needing dual-model review | HEAVY REVIEW | gstack `/autoplan` instead of keel-plan-review |
-| Multiple independent failures / parallelizable work | PARALLEL | `superpowers:dispatching-parallel-agents` |
-| Need isolated workspace for risky work | INFRA | `superpowers:using-git-worktrees` |
+| Multiple independent failures / parallelizable work | PARALLEL | 一則訊息內同時發多個 `Agent` tool 呼叫 |
+| Need isolated workspace for risky work | INFRA | `EnterWorktree` tool 或 `Agent` 的 `isolation: "worktree"` |
 
 ### Backward routes (a stage may send work back)
 

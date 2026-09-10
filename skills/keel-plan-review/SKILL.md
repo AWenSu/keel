@@ -35,6 +35,13 @@ OUTPUT  the same plan file, edited, with a REVIEW REPORT section ending in
 Missing INPUT → `BLOCKED: 缺 <field> → 退回 keel-plan`. Do not review a plan
 whose task fields are absent; the findings would have nothing to anchor to.
 
+**On session start or after compaction: read the plan file's
+`## REVIEW REPORT` FIRST.** Ending in `NO UNRESOLVED DECISIONS` → the stage
+is done. Findings listed without dispositions → resume at the step that owns
+them (unverified → Step 4, undecided → Step 5). No REVIEW REPORT section yet
+→ nothing from the lenses survived; re-run from Step 1, and re-ask Step 0's
+premise question unless its answer is already recorded in the report.
+
 ## Step 0: Premises — the ONE mandatory user question
 
 Before any review, confirm premises with the user in a single question:

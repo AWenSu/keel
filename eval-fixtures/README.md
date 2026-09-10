@@ -77,6 +77,7 @@ proceed with a known regression.
 | `22-plan-field-contracts.md` | `Depends on:` consumption; rollback + risk-grade verification | `keel-execute`, `keel-plan-lens-eng` |
 | `23-signals-before-integration.md` | Success/failure signals named before merge; the return path | `keel-finish` Part 2d |
 | `24-show-me-first-checkpoints-and-evidence-badges.md` | show-me-first checkpoint triggers; full-semantics 待確認 badges | `keel-discover`, `keel-plan-review`, `keel-execute`, `keel-plan` |
+| `25-compaction-recovery-and-findings-enforcement.md` | per-stage recovery after compaction; findings.md binds without the plugin | all seven stage skills |
 
 Adding a rule that is a **fact about files**? Add a check to
 `check-structure.sh`, not a fixture — a test nobody runs is worse than no test,

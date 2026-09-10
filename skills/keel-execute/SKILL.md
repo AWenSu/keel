@@ -75,11 +75,15 @@ Tasks tightly coupled with shared evolving state? → INLINE, or go re-split the
   its ID. The rulebook is the project's memory of what already went wrong;
   a brief without it re-discovers the same failures. No `.learned/` → note
   it once in the ledger header and proceed.
-- **Filesystem is memory** (from planning-with-files): keep `progress.md`
-  (what happened) and `findings.md` (what was learned) next to the plan.
-  After every ~2 exploratory operations, write findings down. Context windows
-  get compacted; files don't. If the planning-with-files plugin is installed,
-  its hooks enforce this automatically — don't duplicate, just comply.
+- **Filesystem is memory** (absorbed from planning-with-files; the rule is
+  keel's own and binds with no plugin installed): keep the ledger
+  `.keel/progress.md` (what happened) and `.keel/findings.md` (what was
+  learned) current. After every ~2 exploratory operations, write findings
+  down. Context windows get compacted; files don't. Enforcement is keel's
+  too: the Finish ledger entry carries a `findings:` line (see Finish), and
+  `keel-finish` Part 2e treats its absence as a gap — not a style choice.
+  If the planning-with-files plugin happens to be installed, its hooks add
+  automatic nudges; treat them as a bonus, comply, don't duplicate.
 
 ## ORCHESTRATED mode
 
@@ -387,6 +391,12 @@ Critical/Important finding with its `file:line` and disposition, or
 the skip justification instead (see step 3c). `keel-finish` Part 2c check (2)
 reads these lines — with no producer here, that gate has nothing to check and
 passes vacuously, which is not the same as passing.
+
+The same ledger entry carries a `findings:` line: `findings: <n> entries`
+counted from `.keel/findings.md`, or `findings: none — <why>` written by
+hand when the file is absent or empty (legitimate for a branch with no
+exploratory work; a branch that explored and wrote nothing down has no
+honest `<why>`). `keel-finish` Part 2e reads this line before promotion.
 
 **On session start or after compaction: read the ledger FIRST.** Trust the
 ledger and `git log` over your recollection — controllers that lost their

@@ -43,6 +43,13 @@ that reproduces the user's exact symptom, you may not theorize about causes
 or read code "to build a theory". Fix nothing you cannot watch fail.
 </IRON-LAW>
 
+**On session start or after compaction: re-run the Phase 1 repro command
+FIRST.** The loop, the `[DEBUG-xxxx]`-tagged instrumentation (one grep finds
+it), and any regression test already written are the only durable state;
+ranked hypotheses are not — regenerate them from the repro's current output,
+not from recollection. If you can no longer name the repro command, you are
+back in Phase 1, not resuming.
+
 ## Phase 1 — Build the feedback loop
 
 This is the skill; everything after it is mechanical. Spend disproportionate

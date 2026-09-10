@@ -84,6 +84,13 @@ ADRs record decisions the plan must not re-litigate; a task that
 contradicts one must say so explicitly ("contradicts ADR-0007 — reopened
 because …"), never silently.
 
+**On session start or after compaction: read the plan file FIRST**
+(`docs/plans/YYYY-MM-DD-<feature>.md`), then the spec's `**Status:**` /
+`Spec Version` lines. Tasks already written in the plan file are the state —
+resume after the last complete task rather than re-deriving them. No plan
+file yet → restart from the approved spec; the spec is on disk, and nothing
+else from this stage is.
+
 ### 2. Write the plan header
 
 Save to `docs/plans/YYYY-MM-DD-<feature>.md` with this header:

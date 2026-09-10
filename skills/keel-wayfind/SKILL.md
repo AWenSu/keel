@@ -37,6 +37,12 @@ the map's edge and it's time to exit, not to code inside the map.
 open questions, skip the map — this skill's overhead only pays off when the
 deciding itself spans sessions.
 
+**On session start or after compaction: re-read `MAP.md` and the open
+tickets FIRST.** The map is the only truth about which decisions are made
+and which are still fogged; a recollection of ticket state is not. MAP.md is
+designed to be loaded every session anyway — compaction just makes the
+re-read non-optional.
+
 ## File layout
 
 ```

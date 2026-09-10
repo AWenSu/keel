@@ -234,6 +234,15 @@ an unconfirmed seam is a spec change, not a planning decision. `keel-plan`
 greps for that exact heading; a seam list under any other name reads to it as
 a spec with no seams, and every task then invents its own.
 
+**On session start or after compaction: read the newest `docs/specs/*.md`
+for this effort FIRST**, plus the handoff file if one was written. The
+`**Status:**` line says where you are — `approved` means this stage is done,
+hand off to `keel-plan`; `draft` means resume at user review of what the file
+already contains. No spec file yet → the exploration lived only in context
+and is gone: restart from the raw idea rather than reconstructing
+conclusions from recollection. (The "do not compact mid-stage" rule above is
+prevention; this is the fallback when prevention failed.)
+
 ### 6. Write the spec
 
 Write the design to `docs/specs/YYYY-MM-DD-<topic>.md` and commit it.
