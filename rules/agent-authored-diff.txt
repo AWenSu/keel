@@ -1,0 +1,1 @@
+The author was an agent, so cleanliness carries no signal: the mess a confused human leaves — odd names, stale TODOs, inconsistent style — was never generated here, and its absence is not evidence the code is right.

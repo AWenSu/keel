@@ -68,6 +68,12 @@ right thing badly. One axis must not mask the other.
 should do; reading them before the implementation is how you notice the
 belief is wrong, rather than absorbing it and grading the code against it.
 
+## Review bar
+
+VERDICT is PASS unless a Critical or Important finding stands: the bar is that the diff definitely improves code health, not that it is perfect, and Minor findings are reported without blocking.
+
+The author was an agent, so cleanliness carries no signal: the mess a confused human leaves — odd names, stale TODOs, inconsistent style — was never generated here, and its absence is not evidence the code is right.
+
 ## Evidence gate
 
 Every finding quotes the diff or code line that motivates it: `file:line` +

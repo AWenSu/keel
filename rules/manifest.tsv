@@ -20,6 +20,12 @@ failure-scenario.txt	agents/keel-exec-reviewer-quality.md	-
 failure-scenario.txt	agents/keel-exec-reviewer-security.md	-
 failure-scenario.txt	agents/keel-exec-reviewer-spec.md	-
 failure-scenario.txt	skills/keel-execute/SKILL.md	-
+review-bar.txt	agents/keel-exec-reviewer-quality.md	-
+review-bar.txt	agents/keel-exec-reviewer-security.md	-
+review-bar.txt	agents/keel-exec-reviewer-spec.md	-
+agent-authored-diff.txt	agents/keel-exec-reviewer-quality.md	-
+agent-authored-diff.txt	agents/keel-exec-reviewer-security.md	-
+agent-authored-diff.txt	agents/keel-exec-reviewer-spec.md	-
 fanout-task-loop.txt	skills/keel-execute/SKILL.md	fanout-section
 fanout-task-loop.txt	README.md	fanout-section
 fanout-task-loop.txt	README.zh-TW.md	fanout-section

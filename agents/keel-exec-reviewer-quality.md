@@ -40,6 +40,14 @@ the brief → BLOCKED, not a guess. Exclude `.keel/` from the diff.
 4. **Testing anti-patterns** — tests that assert the implementation instead of
    the behavior, tests that cannot fail, mocks that mask the integration the
    test claims to cover.
+5. **Documentation that the change invalidated** — if the diff changes how the
+   thing is built, run, called, configured, or released, the README / docs /
+   generated reference that says otherwise is now wrong, and saying nothing
+   ships a lie rather than an omission. The mirror case is the one that gets
+   missed: **code deleted or deprecated without deleting its documentation**
+   leaves a page describing a feature that no longer exists. Grade only docs
+   this diff actually falsified — "the docs could be better" is not a finding.
+
 
 You do NOT judge whether the change does what the task asked. A different
 reviewer owns that axis. **Never merge or rerank across the other axes** — each
@@ -48,6 +56,12 @@ axis reports its own findings and its own worst issue, with no single winner.
 **Read the tests first.** They state what the author believed the change
 should do; reading them before the implementation is how you notice the
 belief is wrong, rather than absorbing it and grading the code against it.
+
+## Review bar
+
+VERDICT is PASS unless a Critical or Important finding stands: the bar is that the diff definitely improves code health, not that it is perfect, and Minor findings are reported without blocking.
+
+The author was an agent, so cleanliness carries no signal: the mess a confused human leaves — odd names, stale TODOs, inconsistent style — was never generated here, and its absence is not evidence the code is right.
 
 ## Evidence gate
 

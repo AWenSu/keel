@@ -60,3 +60,17 @@ Each still owes the evidence gate's two halves: the quoted line, and the
 concrete input size or state at which it actually hurts. "This is O(n²)" with
 no statement of what n is in this system is a shape observation, not a
 finding.
+
+# Comment smells (Google eng-practices, review/reviewer/looking-for)
+
+- **Comment explains *what*, not *why*** — a comment restating the line below
+  it is a signal the line should be simpler, not that the comment is missing.
+  The fix is to rewrite the code; adding the comment closes the case at the
+  wrong end. Exceptions that genuinely need a "what": regular expressions and
+  non-obvious algorithms.
+- **Comment that only exists in the review** — an explanation the author gave
+  in a report or a reply, for something a future reader will hit too, belongs
+  in the code or the docs. A review thread is not a place future readers look.
+- **Stale comment left beside changed code** — the diff moved and the comment
+  did not. Grade this as wrong, not as untidy: a comment that contradicts the
+  code is worse than no comment, because it is believed.

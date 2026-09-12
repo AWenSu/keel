@@ -1,0 +1,1 @@
+VERDICT is PASS unless a Critical or Important finding stands: the bar is that the diff definitely improves code health, not that it is perfect, and Minor findings are reported without blocking.

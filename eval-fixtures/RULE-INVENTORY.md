@@ -107,6 +107,7 @@ does not bind a subagent.
 | D19 | Spec names 1–3 **critical flows**, each crossing at least one integration boundary; `Crosses: none` is invalid and an unnameable flow is stated, not omitted | `keel-discover` step 5c | same; spec template section list | `34` |
 | D20 | Plan carries the flows across with an executable `Drive` column; a spec with no such section still gets an explicit `none — <why>` row | `keel-plan` step 2a-0 | same | `34` |
 | D21 | Execution reviewers read the tests before the implementation, and grade runtime-cost smells (N+1, unbounded fetch, sync-in-async, per-item repeated work, re-render storms) against a named input size | `keel-exec-reviewer-quality` / `-spec` Read the tests first; `keel-execute/smells.md` Runtime cost smells | same | `36` |
+| D22 | Quality axis grades documentation the diff falsified (build/run/call/configure/release changed, or code deleted without deleting its docs) — not general doc quality; comment smells grade a "what" comment as a simplify-the-code signal and a stale comment as wrong rather than untidy | `keel-exec-reviewer-quality` Standards item 5; `keel-execute/smells.md` Comment smells | same | `37` |
 
 ## E. Security chain
 
@@ -211,6 +212,8 @@ verified-looking number this file exists to stop.
 | V6 | Plan Architecture nodes/edges each carry evidence (`file:line` or spec section); anything unverified is marked `待確認: <why unverified + what would confirm it>` — the badge without the second half is decoration | `keel-plan` plan-header template (Architecture field) | same | `24` |
 | V7 | Final-review findings follow the same discipline: unverifiable suspicions reported as full-semantics `待確認`, never silently dropped or asserted as fact | `keel-execute` Finish final-review rules | same | `24` |
 | V8 | A finding names the failure (concrete inputs/state → wrong output, crash, or missed requirement), not only the quoted line; cannot name one → capped at confidence 5 and reported as `失效: unproven`, never dropped | `rules/failure-scenario.txt` (canonical) | the three `keel-exec-reviewer-*` Evidence gates + `keel-execute` step 3, verbatim; `失效:` field in all three output templates | `36` |
+| V9 | `VERDICT: PASS` unless a Critical or Important finding stands — the bar is "definitely improves code health", not perfection; Minor is reported and never blocks (matches `keel-exec-fixer`'s pre-existing `Do not fix Minor` scope) | `rules/review-bar.txt` (canonical) | the three `keel-exec-reviewer-*` Review bar sections, verbatim | `37` |
+| V10 | Cleanliness carries no signal on an agent-authored diff — the absence of the mess a confused human leaves is not evidence the code is right; the evidence gate still forbids compensating with unanchored findings | `rules/agent-authored-diff.txt` (canonical) | same three Review bar sections, verbatim | `37` |
 
 ## H. Persistence
 

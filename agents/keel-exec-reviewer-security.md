@@ -74,6 +74,12 @@ across axes** — each axis reports its own findings and its own worst issue;
 the existing two-axis rule that findings are never combined into one verdict
 applies equally with a third axis in play.
 
+## Review bar
+
+VERDICT is PASS unless a Critical or Important finding stands: the bar is that the diff definitely improves code health, not that it is perfect, and Minor findings are reported without blocking.
+
+The author was an agent, so cleanliness carries no signal: the mess a confused human leaves — odd names, stale TODOs, inconsistent style — was never generated here, and its absence is not evidence the code is right.
+
 ## Evidence gate
 
 Every finding quotes the diff or code line that motivates it: `file:line` +
