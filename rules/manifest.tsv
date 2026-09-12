@@ -16,6 +16,10 @@ dispatch-announce.txt	skills/keel-plan/SKILL.md	dispatching-stage
 dispatch-announce.txt	skills/keel-plan-review/SKILL.md	dispatching-stage
 dispatch-announce.txt	skills/keel-wayfind/SKILL.md	dispatching-stage
 dispatch-announce.txt	skills/keel-workflow/SKILL.md	dispatching-stage
+failure-scenario.txt	agents/keel-exec-reviewer-quality.md	-
+failure-scenario.txt	agents/keel-exec-reviewer-security.md	-
+failure-scenario.txt	agents/keel-exec-reviewer-spec.md	-
+failure-scenario.txt	skills/keel-execute/SKILL.md	-
 fanout-task-loop.txt	skills/keel-execute/SKILL.md	fanout-section
 fanout-task-loop.txt	README.md	fanout-section
 fanout-task-loop.txt	README.zh-TW.md	fanout-section

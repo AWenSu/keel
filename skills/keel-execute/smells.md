@@ -35,3 +35,28 @@ each one silently defeats the test's reason to exist.
 - **Test-only methods on production classes** — production code grows a method that exists only so a test can reach inside. → test through the public interface; if you can't, the seam is wrong (report it).
 - **Mock at the wrong level** — mocking an internal collaborator instead of the system boundary, so the test pins implementation, not behavior. → understand the dependency chain first; mock only what you don't control.
 - **Partial mock drift** — a mock that mirrors only part of the real structure; code paths reading the unmocked part fail silently or pass wrongly. → mocks mirror the complete real shape, or use a real/in-memory implementation instead.
+
+# Runtime cost smells (ported 2026-09-13 from a locally-installed reviewer agent's performance dimension)
+
+Fowler's catalogue is about structure; none of it fires on code that is
+correctly shaped and still too slow. These are the ones that reach production
+looking fine, because every unit test runs against three rows:
+
+- **N+1** — a query inside a loop over rows another query returned. Grade by
+  what the loop is over: a fixed-size config list is not an N+1, a user's
+  orders is.
+- **Unbounded fetch** — a list endpoint, a `SELECT` with no `LIMIT`, or a
+  read of a whole directory/table whose size the caller does not control.
+  Missing pagination on a collection that grows is this smell, not a feature
+  request.
+- **Sync in an async path** — a blocking call (file, network, crypto,
+  `sleep`) on a request path or event loop the rest of which is async.
+- **Repeated work per item** — recompiling a regex, re-reading a config,
+  re-establishing a connection, once per iteration instead of once.
+- **Re-render storms** (UI) — a new object/array/closure identity created in
+  render and passed as a prop or dependency, so memoisation never holds.
+
+Each still owes the evidence gate's two halves: the quoted line, and the
+concrete input size or state at which it actually hurts. "This is O(n²)" with
+no statement of what n is in this system is a shape observation, not a
+finding.

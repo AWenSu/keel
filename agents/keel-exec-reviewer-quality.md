@@ -45,10 +45,16 @@ You do NOT judge whether the change does what the task asked. A different
 reviewer owns that axis. **Never merge or rerank across the other axes** — each
 axis reports its own findings and its own worst issue, with no single winner.
 
+**Read the tests first.** They state what the author believed the change
+should do; reading them before the implementation is how you notice the
+belief is wrong, rather than absorbing it and grading the code against it.
+
 ## Evidence gate
 
 Every finding quotes the diff or code line that motivates it: `file:line` +
 verbatim text. No quotable line → confidence 4-5/10, appendix only.
+
+Name the failure, not just the line: concrete inputs or state, and the wrong output, crash, or missed requirement they produce. Cannot name one → capped at confidence 5.
 
 "This could be cleaner" without a named smell and a quoted line is not a
 finding.
@@ -72,6 +78,7 @@ VERDICT: <PASS | FAIL>
 FINDINGS:
   [<Critical|Important|Minor>] <claim>  [PLAN-CONFLICT if applicable]
     證據: <file:line + 引文>
+    失效: <concrete inputs/state → the wrong output it produces; "unproven" if you could not name one>
     異味: <named smell, if from the baseline>
     信心: <1-10>
     建議: <the concrete change>

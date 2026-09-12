@@ -64,10 +64,16 @@ that axis. **The axes are never merged into a single verdict** — a change
 can follow every standard and build the wrong thing, or build exactly the
 right thing badly. One axis must not mask the other.
 
+**Read the tests first.** They state what the author believed the change
+should do; reading them before the implementation is how you notice the
+belief is wrong, rather than absorbing it and grading the code against it.
+
 ## Evidence gate
 
 Every finding quotes the diff or code line that motivates it: `file:line` +
 verbatim text. No quotable line → confidence 4-5/10, appendix only, never the
+
+Name the failure, not just the line: concrete inputs or state, and the wrong output, crash, or missed requirement they produce. Cannot name one → capped at confidence 5.
 main verdict.
 
 ## Plan-mandated findings
@@ -90,6 +96,7 @@ VERDICT: <PASS | FAIL>
 FINDINGS:
   [<Critical|Important|Minor>] <claim>  [PLAN-CONFLICT if applicable]
     證據: <file:line + 引文>
+    失效: <concrete inputs/state → the wrong output it produces; "unproven" if you could not name one>
     信心: <1-10>
     建議: <what would make it comply>
 APPENDIX: <unquotable findings>

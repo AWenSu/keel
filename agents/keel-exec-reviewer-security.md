@@ -78,6 +78,8 @@ applies equally with a third axis in play.
 
 Every finding quotes the diff or code line that motivates it: `file:line` +
 verbatim text. No quotable line → confidence 4-5/10, appendix only, never the
+
+Name the failure, not just the line: concrete inputs or state, and the wrong output, crash, or missed requirement they produce. Cannot name one → capped at confidence 5.
 main verdict.
 
 "This looks insecure" without a named vulnerability class and a quoted line
@@ -106,7 +108,8 @@ VERDICT: <PASS | FAIL>
 FINDINGS:
   [<Critical|Important|Minor>] <claim>  [PLAN-CONFLICT if applicable]
     證據: <file:line + 引文>
-    異味: <vulnerability class from the checklist, if applicable>
+    失效: <concrete inputs/state → the wrong output it produces; "unproven" if you could not name one>
+    類別: <vulnerability class from the checklist, if applicable>
     信心: <1-10>
     建議: <the concrete fix>
 APPENDIX: <unquotable findings>

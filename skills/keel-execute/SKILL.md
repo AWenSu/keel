@@ -286,6 +286,8 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
    **Evidence gate:** every finding quotes the diff/code line that motivates
    it (file:line + verbatim text); no quotable line → confidence 4-5/10,
    appendix only, never the main verdict.
+
+Name the failure, not just the line: concrete inputs or state, and the wrong output, crash, or missed requirement they produce. Cannot name one → capped at confidence 5.
    **Plan-mandated findings (from superpowers):** a finding that conflicts
    with the plan's own text is the USER's decision. Present the finding and
    the plan line side by side and ask which wins. Never dismiss it because

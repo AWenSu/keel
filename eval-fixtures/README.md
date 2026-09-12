@@ -88,6 +88,7 @@ proceed with a known regression.
 | `33-lens-dispatch-and-plan-field-consumption.md` | Design/DX lens keyword thresholds; `Interfaces:` and `Global Constraints:` consumption | `keel-plan-review`, `keel-plan`, `keel-execute` |
 | `34-critical-flows-driven-early.md` | critical flows named at discovery, driven during execution, not chosen at Finish | `keel-discover`, `keel-plan`, `keel-execute`, `keel-finish` |
 | `35-dispatch-visibility.md` | announce before dispatching; broadcast by the agent's literal name, every fan-out site | all eight dispatching stages |
+| `36-failure-scenario-gate.md` | findings name the failure not just the line; tests-first; runtime-cost smells | the three `keel-exec-reviewer-*` agents, `keel-execute` |
 
 Adding a rule that is a **fact about files**? Add a check to
 `check-structure.sh`, not a fixture — a test nobody runs is worse than no test,
