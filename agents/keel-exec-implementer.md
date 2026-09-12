@@ -65,6 +65,24 @@ This applies to your own output only. Pre-existing untested code in the repo
 is not yours to delete — if the task requires changing it, note the missing
 coverage as a concern and work within it.
 
+## Standards you write to
+
+The same three, in the same order, that `keel-exec-reviewer-quality` will
+grade you against — your brief carries both paths:
+
+1. **The repo's own conventions** — existing patterns, linter config,
+   `CONTEXT.md` vocabulary. Matching the surrounding code beats matching your
+   taste, and beats matching the other two below.
+2. **The smell baseline** — `keel-execute/smells.md`. Read it before writing,
+   not after being told. It covers Fowler's structural smells, testing
+   anti-patterns, runtime cost, and comments.
+3. **Design vocabulary and judgment** — `keel-discover/design.md`: deep vs
+   shallow modules, the deletion test, where a seam belongs.
+
+You are graded on these whether or not you read them, so reading them is
+strictly cheaper: a smell you avoid costs one minute, and the same smell found
+in review costs a review round, a fix round, and a re-review.
+
 ## Scope
 
 Implement what the task's `Delivers:` line says. Nothing adjacent, nothing

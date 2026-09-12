@@ -90,6 +90,7 @@ proceed with a known regression.
 | `35-dispatch-visibility.md` | announce before dispatching; broadcast by the agent's literal name, every fan-out site | all eight dispatching stages |
 | `36-failure-scenario-gate.md` | findings name the failure not just the line; tests-first; runtime-cost smells | the three `keel-exec-reviewer-*` agents, `keel-execute` |
 | `37-review-bar-and-agent-authored-diff.md` | what PASS means; clean output proves nothing; documentation the diff falsified; comment smells | the three `keel-exec-reviewer-*` agents, `keel-execute/smells.md` |
+| `38-author-writes-to-the-review-bar.md` | the implementer is given the standards it will be graded against | `keel-exec-implementer`, `keel-execute` |
 
 Adding a rule that is a **fact about files**? Add a check to
 `check-structure.sh`, not a fixture — a test nobody runs is worse than no test,

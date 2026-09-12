@@ -108,6 +108,7 @@ does not bind a subagent.
 | D20 | Plan carries the flows across with an executable `Drive` column; a spec with no such section still gets an explicit `none — <why>` row | `keel-plan` step 2a-0 | same | `34` |
 | D21 | Execution reviewers read the tests before the implementation, and grade runtime-cost smells (N+1, unbounded fetch, sync-in-async, per-item repeated work, re-render storms) against a named input size | `keel-exec-reviewer-quality` / `-spec` Read the tests first; `keel-execute/smells.md` Runtime cost smells | same | `36` |
 | D22 | Quality axis grades documentation the diff falsified (build/run/call/configure/release changed, or code deleted without deleting its docs) — not general doc quality; comment smells grade a "what" comment as a simplify-the-code signal and a stale comment as wrong rather than untidy | `keel-exec-reviewer-quality` Standards item 5; `keel-execute/smells.md` Comment smells | same | `37` |
+| D23 | The implementer brief carries the same standards the quality axis grades by (`smells.md`, `keel-discover/design.md`), in the same priority order with repo conventions first — an author graded against an unseen bar turns every avoidable smell into a review round | `keel-exec-implementer` Standards you write to; `keel-execute` per-task step 2 | same | `38` |
 
 ## E. Security chain
 

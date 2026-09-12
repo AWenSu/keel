@@ -169,7 +169,10 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
    prompt — pasted history bloats every downstream dispatch.
 2. **Dispatch a fresh `keel-exec-implementer`** with the brief. If the task
    names domain skills (its `Skills:` field), the implementer invokes them
-   before writing code. It implements, tests, commits, and reports status.
+   before writing code. **The brief carries the same two standards paths the
+   quality reviewer gets** — [smells.md](smells.md) and
+   `keel-discover/design.md` — because an author graded against a bar it was
+   never shown turns every avoidable smell into a review round. It implements, tests, commits, and reports status.
    **Staleness rule:** before editing, the implementer verifies the task's
    `Files:` paths/lines still match reality. Mismatch → relocate using the
    task's `Delivers:` behavior, note the drift in the status report; never
