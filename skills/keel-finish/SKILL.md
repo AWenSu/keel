@@ -320,6 +320,32 @@ before integrating, if the repo has a `.learned/`
    Unverified inferences are written as `**待驗證**`, never as the fix.
 4. Report the IDs added or amended in one line; "no new rules" is a valid
    answer and must be said, not skipped.
+5. **Then ask the positive question once, because nothing else will.** Steps
+   1-4 admit only failure shapes — needed more than one attempt, behaved
+   counter to its docs, refuted a premise — so a branch where you learned a
+   *better way to do something that was never broken* leaves no trace. Ask:
+   **did this branch teach an approach you would now reach for instead of what
+   you would otherwise have written?** Sources include the prior-art harvest
+   from `keel-discover` step 2b, a reviewer's suggestion you adopted, and code
+   you read while working.
+
+   Two gates before recording it, and they are stricter than steps 1-3's:
+
+   - **Name what it replaces.** State the inferior thing you would otherwise
+     have written, concretely, and why it is worse. Cannot name it → do not
+     record it: you admired something you do not yet understand well enough to
+     reuse, and recording that is how a cargo cult starts.
+   - **Name where it does not apply.** Cross-project patterns are the most
+     context-dependent knowledge there is — a shape that is right for a
+     high-throughput service is wrong for a CLI — so the boundary is part of
+     the rule, not a caveat on it.
+
+   Where it goes depends on reach: something true only of this repo is a local
+   rule like any other; something that would change how you *design* in a
+   different project belongs in the cross-project rulebook this repo mounts
+   (its path is in `.learned/config.local.json`), written there rather than
+   here. "Nothing this round" is the common answer and is said, not skipped —
+   a pattern invented to fill this step is worse than an empty one.
 
 No `.learned/` → one line offering `learned.py init`; do not block on it.
 Rules are the only artifact from this stage that the *next* plan reads —

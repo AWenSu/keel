@@ -110,6 +110,7 @@ does not bind a subagent.
 | D22 | Quality axis grades documentation the diff falsified (build/run/call/configure/release changed, or code deleted without deleting its docs) — not general doc quality; comment smells grade a "what" comment as a simplify-the-code signal and a stale comment as wrong rather than untidy | `keel-exec-reviewer-quality` Standards item 5; `keel-execute/smells.md` Comment smells | same | `37` |
 | D23 | The implementer brief carries the same standards the quality axis grades by (`smells.md`, `keel-discover/design.md`), in the same priority order with repo conventions first — an author graded against an unseen bar turns every avoidable smell into a review round | `keel-exec-implementer` Standards you write to; `keel-execute` per-task step 2 | same | `38` |
 | D24 | Rulebook hits are routed by consumption point, keyed on the `project:` label: local pitfalls → `keel-execute` briefs; mounted cross-project patterns → `keel-discover` designer briefs and `keel-plan` scope check, where the shape is still open | `keel-execute` universal rules; `keel-discover` step 4; `keel-plan` step 1 | same three sections | `39` |
+| D25 | Part 2e step 5 asks the positive question once — did this branch teach an approach you would now reach for — with two gates stricter than steps 1-4: name what it replaces, and name where it does not apply; reach (not importance) decides local vs the mounted cross-project rulebook, and "nothing this round" is said, not skipped | `keel-finish` Part 2e step 5 | same | `40` |
 
 ## E. Security chain
 

@@ -92,6 +92,7 @@ proceed with a known regression.
 | `37-review-bar-and-agent-authored-diff.md` | what PASS means; clean output proves nothing; documentation the diff falsified; comment smells | the three `keel-exec-reviewer-*` agents, `keel-execute/smells.md` |
 | `38-author-writes-to-the-review-bar.md` | the implementer is given the standards it will be graded against | `keel-exec-implementer`, `keel-execute` |
 | `39-rulebook-scope-by-consumption-point.md` | local pitfalls to execute, mounted patterns to discover/plan | `keel-execute`, `keel-discover`, `keel-plan` |
+| `40-positive-learning-capture.md` | the positive question at Part 2e; replace-gate and boundary-gate; reach decides the rulebook | `keel-finish` Part 2e |
 
 Adding a rule that is a **fact about files**? Add a check to
 `check-structure.sh`, not a fixture — a test nobody runs is worse than no test,
