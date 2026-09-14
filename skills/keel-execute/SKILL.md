@@ -79,6 +79,12 @@ Tasks tightly coupled with shared evolving state? → INLINE, or go re-split the
   its ID. The rulebook is the project's memory of what already went wrong;
   a brief without it re-discovers the same failures. No `.learned/` → note
   it once in the ledger header and proceed.
+  **Use the `project:`-labelled hits only.** `search` also returns hits from
+  any rulebook the repo mounts, labelled by that rulebook instead; those are
+  cross-project design knowledge, and they are consumed at
+  `keel-discover`/`keel-plan`/`keel-plan-review`, where the shape is still
+  open. Arriving here they are unusable by construction — the architecture was
+  settled stages ago — so they cost brief length and buy nothing.
 - **Filesystem is memory** (absorbed from planning-with-files; the rule is
   keel's own and binds with no plugin installed): keep the ledger
   `.keel/progress.md` (what happened) and `.keel/findings.md` (what was

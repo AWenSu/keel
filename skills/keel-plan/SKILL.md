@@ -85,6 +85,14 @@ ADRs record decisions the plan must not re-litigate; a task that
 contradicts one must say so explicitly ("contradicts ADR-0007 — reopened
 because …"), never silently.
 
+**Search any mounted rulebook before choosing the shape**, not after:
+`learned.py search "<kw>"` on the modules, frameworks and protocols this plan
+touches, and read the non-`project:` hits — cross-project patterns, each
+carrying what it replaces and where it does not apply. A pattern that would
+have changed the decomposition is worth minutes here and nothing at all once
+the tasks are written. (`project:` hits are this repo's own pitfalls;
+`keel-execute` injects those per task, which is where they land.)
+
 **On session start or after compaction: read the plan file FIRST**
 (`docs/plans/YYYY-MM-DD-<feature>.md`), then the spec's `**Status:**` /
 `Spec Version` lines. Tasks already written in the plan file are the state —

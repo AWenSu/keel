@@ -182,7 +182,13 @@ changes): spawn 3 parallel `keel-discover-designer` subagents (never
 under a *different* constraint — "minimize the interface, 1-3 entry points max"
 / "maximize flexibility" / "optimize for the most common caller". Name the
 constraint in each dispatch and broadcast each proposal as it returns, so the
-divergence is visible before you compare. Each returns
+divergence is visible before you compare. **Before dispatching, search any
+mounted rulebook** (`learned.py search "<kw>"` on the problem's domain terms)
+and put the non-`project:` hits in every designer's brief: those are patterns
+already judged worth keeping across projects, and this is the last stage at
+which a proposal can still be shaped by one. The `project:` hits stay out —
+they are task-level pitfalls with nothing to say about which design to
+propose. Each returns
 interface + usage example + what's hidden + trade-offs. Compare by depth,
 locality, and seam placement (design.md terms), then present a strong
 recommendation, not a menu. Approaches from one context correlate — they
