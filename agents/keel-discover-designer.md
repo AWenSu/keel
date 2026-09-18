@@ -27,6 +27,15 @@ The brief names your constraint (for example: minimal change / clean-slate /
 optimize for a specific axis). **Commit to it fully.** A proposal that quietly
 drifts to the safe middle wastes the whole parallel dispatch.
 
+## Design vocabulary
+
+`design.md` — deep vs shallow modules, the deletion test, where a seam
+belongs — is the vocabulary your output is written in. **Use the absolute
+path your brief gives you, and never search the filesystem for it** — no
+path in the brief → report it missing in your output and proceed without
+it. A `find` or `bfs` from `/` or `~` to locate this file has pinned a
+whole machine for hours.
+
 ## Ground yourself in real code
 
 Read enough of the actual codebase to name real paths, real types, and real

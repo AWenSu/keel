@@ -177,8 +177,9 @@ say why. Always include the minimal-viable option — the user must see what
 **Design it twice (from mattpocock codebase-design)** — when the work
 centers on a new interface or module boundary (not for straightforward
 changes): spawn 3 parallel `keel-discover-designer` subagents (never
-`general-purpose`, no model override — the agent pins its own), each given the path to
-[design.md](design.md) in its brief and each designing
+`general-purpose`, no model override — the agent pins its own), each given
+`design.md` (next to this file) in its brief as an **absolute path, not a
+relative link** — resolve it to an absolute path from where this skill is actually installed (`~/.claude/skills/…` for a global install, `<repo>/.claude/skills/…` for a per-project one) and write that absolute path into the brief — a relative link resolves for you, reading this file, and for nobody in a subagent's cwd — and each designing
 under a *different* constraint — "minimize the interface, 1-3 entry points max"
 / "maximize flexibility" / "optimize for the most common caller". Name the
 constraint in each dispatch and broadcast each proposal as it returns, so the

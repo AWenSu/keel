@@ -37,6 +37,7 @@ the brief → BLOCKED, not a guess. Exclude `.keel/` from the diff.
    pipeline is also installed per-project.
 3. **Design vocabulary and judgment tools** — `keel-discover/design.md`, same
    rule: the path comes from the brief. Read it.
+   **Use the absolute path your brief gives you, and never search the filesystem for it** — no path in the brief → report it missing in your output and proceed without it. A `find` or `bfs` from `/` or `~` to locate this file has pinned a whole machine for hours.
 4. **Testing anti-patterns** — tests that assert the implementation instead of
    the behavior, tests that cannot fail, mocks that mask the integration the
    test claims to cover.

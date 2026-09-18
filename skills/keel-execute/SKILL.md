@@ -176,9 +176,11 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
 2. **Dispatch a fresh `keel-exec-implementer`** with the brief. If the task
    names domain skills (its `Skills:` field), the implementer invokes them
    before writing code. **The brief carries the same two standards paths the
-   quality reviewer gets** — [smells.md](smells.md) and
-   `keel-discover/design.md` — because an author graded against a bar it was
-   never shown turns every avoidable smell into a review round. It implements, tests, commits, and reports status.
+   quality reviewer gets** — `smells.md` next to this file and
+   `design.md` in the sibling `keel-discover` skill, each written into the
+   brief as an **absolute path, not a relative link**: resolve it to an absolute path from where this skill is actually installed (`~/.claude/skills/…` for a global install, `<repo>/.claude/skills/…` for a per-project one) and write that absolute path into the brief — a relative link resolves for you, reading this file, and for nobody in a subagent's cwd —
+   because an author graded against a bar it was never shown turns every
+   avoidable smell into a review round. It implements, tests, commits, and reports status.
    **Staleness rule:** before editing, the implementer verifies the task's
    `Files:` paths/lines still match reality. Mismatch → relocate using the
    task's `Delivers:` behavior, note the drift in the status report; never
@@ -214,8 +216,9 @@ plan's *premises* were right, possibly dozens of turns and one context fork ago.
    (a) `keel-exec-reviewer-spec` — does it do what the task's `Delivers:` says:
    missing behavior, scope creep, implemented-but-wrong, interface drift;
    (b) `keel-exec-reviewer-quality` — repo standards first, plus the smell
-   baseline in [smells.md](smells.md) and the design vocabulary/judgment tools
-   in `keel-discover/design.md` (include both paths in the brief). Both must
+   baseline in `smells.md` and the design vocabulary/judgment tools in
+   `keel-discover`'s `design.md` — both written into the brief as **absolute
+   paths, not relative links**: resolve it to an absolute path from where this skill is actually installed (`~/.claude/skills/…` for a global install, `<repo>/.claude/skills/…` for a per-project one) and write that absolute path into the brief — a relative link resolves for you, reading this file, and for nobody in a subagent's cwd. Both must
    pass, on every task, no trigger condition.
    (c) `keel-exec-reviewer-security` — dispatched as a **third, independent
    axis** only when at least one of these R4 conditions is met (check all
@@ -456,7 +459,8 @@ a crashed session.
 After all tasks: dispatch one final whole-branch `code-reviewer` (no model
 override — it inherits the strongest available; diff from merge-base, same
 two-axis rules: spec axis against the plan's
-Goal + Success Criteria, quality axis with [smells.md](smells.md), no merged
+Goal + Success Criteria, quality axis with `smells.md` given as an
+**absolute path, not a relative link** — resolve it to an absolute path from where this skill is actually installed (`~/.claude/skills/…` for a global install, `<repo>/.claude/skills/…` for a per-project one) and write that absolute path into the brief — a relative link resolves for you, reading this file, and for nobody in a subagent's cwd — no merged
 ranking). The final reviewer additionally produces a **coverage diagram
 (from gstack)**: trace each entry point through its branches and error
 paths as an ASCII tree, grade each path, and end with one line —

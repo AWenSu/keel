@@ -2,6 +2,7 @@
 
 **Rule source:** `agents/keel-exec-implementer.md` Standards you write to.
 **Rule source:** `skills/keel-execute/SKILL.md` ORCHESTRATED per-task loop step 2.
+**Rule source:** `agents/keel-exec-reviewer-quality.md` Standards, in priority order.
 
 Found 2026-09-13 while auditing the coding side after the review side was
 tightened: `smells.md` and `keel-discover/design.md` were named only in the
@@ -18,14 +19,24 @@ round, and a re-review.
 reviewer will be given:
 
 > **The brief carries the same two standards paths the
-> quality reviewer gets** — [smells.md](smells.md) and
-> `keel-discover/design.md` — because an author graded against a bar it was
-> never shown turns every avoidable smell into a review round.
+> quality reviewer gets**
+
+written as **absolute paths**, resolved from where the skill is installed:
+
+> a relative link resolves for you, reading this file, and for nobody in a subagent's cwd
 
 **Not expected:** a brief carrying only `Delivers` / `Files` / `Interfaces` /
 `Skills` on the theory that quality is the reviewer's department. Grading is
 the reviewer's department; meeting the bar is the author's, and it cannot meet
 a bar it has not read.
+
+**Not expected, and the failure that made this explicit (2026-09-18):** a bare
+`smells.md` in the brief. The subagent runs in the project's cwd, cannot
+resolve it, and — several sessions at once — fell back to `find /` sweeps
+that held a machine at load 104 for about five hours. The receiving agents now
+say so themselves:
+
+> **Use the absolute path your brief gives you, and never search the filesystem for it**
 
 ## B — the order is the same order, and the repo wins
 

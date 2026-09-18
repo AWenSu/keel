@@ -79,6 +79,8 @@ grade you against — your brief carries both paths:
 3. **Design vocabulary and judgment** — `keel-discover/design.md`: deep vs
    shallow modules, the deletion test, where a seam belongs.
 
+**Use the absolute path your brief gives you, and never search the filesystem for it** — no path in the brief → report it missing in your output and proceed without it. A `find` or `bfs` from `/` or `~` to locate this file has pinned a whole machine for hours.
+
 You are graded on these whether or not you read them, so reading them is
 strictly cheaper: a smell you avoid costs one minute, and the same smell found
 in review costs a review round, a fix round, and a re-review.
