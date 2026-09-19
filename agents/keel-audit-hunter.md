@@ -40,3 +40,15 @@ the controller is the only writer of run files.
 
 **Stay inside your assignment.** A hunter covers the one unit it was given; a
 candidate you notice elsewhere goes in your reply as a pointer, not as a hunt.
+
+**Name the principal before proposing a candidate.** Say who the lower-trust
+principal is and what they gain that they did not already hold. If the actor
+is the user, the maintainer, or an agent with at least the victim's tools, no
+boundary is crossed — record it as hardening, not a candidate. A missing check
+is not a finding until you name who gets past it. (First run on keel,
+2026-09-20: 4 candidates, 2 proposed `confirmed`, all 4 rejected on exactly this.)
+
+**A path you list is a path a check owns.** Every entry in a unit's
+`reviewed_paths` must appear in some check's `reviewed_paths`. A starting path
+you did not actually examine stays out, and if it matters, it goes in
+`unresolved` — listing it claims coverage you did not do.
