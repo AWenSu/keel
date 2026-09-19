@@ -33,3 +33,6 @@ fanout-per-round.txt	skills/keel-plan-review/SKILL.md	fanout-section
 fanout-router.txt	skills/keel-workflow/SKILL.md	fanout-section
 reviewer-shell-en.txt	README.md	-
 reviewer-shell-zh.txt	README.zh-TW.md	-
+no-model-override.txt	skills/keel-audit/SKILL.md	dispatching-stage
+dispatch-announce.txt	skills/keel-audit/SKILL.md	dispatching-stage
+fanout-audit.txt	skills/keel-audit/SKILL.md	fanout-section

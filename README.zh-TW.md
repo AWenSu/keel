@@ -153,6 +153,7 @@ G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續
 | 計畫寫好了而且直觀好懂 | `keel-execute` |
 | 準備說做完了、要開 PR 了 | `keel-finish` |
 | bug、測試掛掉、行為不如預期 | [`keel-debug`](skills/keel-debug/SKILL.md)——loop 優先：沒有紅燈重現指令就不准開始猜原因 |
+| 你明確要對整個程式碼庫做資安稽核 | [`keel-audit`](skills/keel-audit/SKILL.md)——旁線，主流程絕不會自己走進來；原樣收錄 Cloudflare 的 security-audit 方法（MIT 授權），只讀原始碼、帶覆蓋率帳本，每個候選漏洞配一個全新的驗證者 |
 | UI / 視覺相關工作 | 交給你自己的設計 skill 路由 |
 
 ### 不同專案類型該怎麼配
@@ -187,6 +188,8 @@ G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續
 | `keel-exec-fixer` | 4 執行 | 只修拿到手的那幾條發現，不順手改別的 | sonnet | 完整權限 |
 | `keel-exec-fixer-critical` | 4 執行 | 只在修復迴圈第 4-5 輪出手——標準層卡了兩次才輪到它 | **opus** | 完整權限 |
 | `keel-wayfind-researcher` | 前置階段 | 解一張能靠外部資料查出答案的研究票 | sonnet | 唯讀 + 完整檢索工具 |
+| `keel-audit-hunter` | 旁線 | 整庫稽核：偵察、每隻獵捕一個覆蓋單元、覆蓋評審——只讀原始碼 | sonnet | 唯讀，**不給 shell** |
+| `keel-audit-verifier` | 旁線 | 每個稽核候選一個全新驗證者：confirmed、needs_validation（不給嚴重度）或 rejected | **opus** | 唯讀，**不給 shell** |
 | `keel-auditor` | 後設 | 用突變攻擊這個 repo 自己的檢查機制，找沒人編碼過的缺陷類別 | **opus** | 唯讀 + shell 僅限跑檢查與突變套件；突變只在拋棄式副本做，絕不 commit |
 <!-- /generated:roster -->
 

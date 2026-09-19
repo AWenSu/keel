@@ -340,8 +340,14 @@ else
   diff <(echo "$declared_dispatchers") <(echo "$derived_dispatchers") | sed 's/^/         /'
 fi
 
+# skills/*/upstream/ is third-party text vendored verbatim (keel-audit carries
+# Cloudflare's security-audit skill there). Its headings name vulnerability
+# classes — "concurrency attack classes" — not keel dispatch sections, and a
+# vendored file cannot carry a keel canonical line without ceasing to be
+# verbatim. Every other whole-repo scan below still reads it.
 derived_fanout=$( { git ls-files '*.md'; git ls-files -o --exclude-standard '*.md'; } \
   | sort -u | not_test_data | grep -v '^docs/plans/' | grep -v '^eval-fixtures/' | grep -v '^rules/' \
+  | grep -v '^skills/[^/]*/upstream/' \
   | while IFS= read -r f; do
       # a section that caps or uncaps concurrency is a fan-out section whatever
       # it calls itself: "## Concurrency ceiling" raising the limit to 20 was

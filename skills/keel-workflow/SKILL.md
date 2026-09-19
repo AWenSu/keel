@@ -21,6 +21,7 @@ truth, no inlined copies to go stale).
 | Implementation done, wrapping up / about to claim done / PR time | FINISH | `keel-finish` |
 | Idea too big for one session AND the route is still foggy | WAYFIND | `keel-wayfind` (decision map; exits to keel-discover once clear) |
 | Bug, test failure, unexpected behavior | DEBUG | `keel-debug` (loop-first: no hypothesis without a red repro command) |
+| User explicitly asks to security-audit a whole codebase they name | AUDIT | `keel-audit` (side lane, never entered from the main flow; source-only, coverage-accounted) |
 | Something shipped and you want to know whether it worked | SIGNALS | read the plan's `## Signals` (written at `keel-finish` Part 2d); a negative signal routes to `keel-discover`, a defect routes to `keel-debug` |
 | Frontend/UI task | UI | `frontend-workflow` (own router; don't mix pipelines) |
 | Output should be a GitHub issue / backlog item | ISSUE | gstack `spec` |
@@ -113,6 +114,8 @@ is working. A `general-purpose` dispatch inside this pipeline is a bug.
 | `keel-exec-fixer` | 4 execute | Apply review findings | sonnet |
 | `keel-exec-fixer-critical` | 4 execute | Fix-loop round 4-5 — standard tier stalled | opus |
 | `keel-wayfind-researcher` | pre-stage | Resolve one research ticket | sonnet |
+| `keel-audit-hunter` | side lane | Recon, hunt one coverage unit, or critic — source only | sonnet |
+| `keel-audit-verifier` | side lane | Refute one audit candidate, fresh context | opus |
 | `keel-auditor` | meta | Adversarial audit of this repo's own checks | opus |
 <!-- /generated:roster -->
 

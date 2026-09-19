@@ -233,6 +233,7 @@ frontier is empty.
 | Plan ready and straightforward | `keel-execute` |
 | About to claim done / open a PR | `keel-finish` |
 | Bug, test failure, unexpected behavior | [`keel-debug`](skills/keel-debug/SKILL.md) — loop-first: no hypothesis without a red repro command |
+| You explicitly want a whole codebase security-audited | [`keel-audit`](skills/keel-audit/SKILL.md) — side lane, never started by the main flow; Cloudflare's security-audit method vendored verbatim (MIT), run source-only with a coverage ledger and one fresh verifier per candidate |
 | UI/visual work | your design-skill router |
 
 ### Per-project-type defaults
@@ -289,6 +290,8 @@ reviewing" structural instead of a prompt that can be ignored.
 | `keel-exec-fixer` | 4 execute | Apply only the findings it was given | sonnet | full |
 | `keel-exec-fixer-critical` | 4 execute | Fix-loop rounds 4-5 only, after the standard tier stalls twice | **opus** | full |
 | `keel-wayfind-researcher` | pre-stage | Resolve one externally-answerable research ticket | sonnet | read-only + full search |
+| `keel-audit-hunter` | side lane | Whole-codebase audit: reconnaissance, one coverage unit per hunter, and coverage-critic passes — source only | sonnet | read-only, **no shell** |
+| `keel-audit-verifier` | side lane | One fresh verifier per audit candidate: confirmed, needs_validation (no severity), or rejected | **opus** | read-only, **no shell** |
 | `keel-auditor` | meta | Attacks this repo's own checks by mutation — looks for a defect class nobody has encoded | **opus** | read-only + a shell restricted to running the checkers; mutations only in a throwaway copy, never commits |
 <!-- /generated:roster -->
 
