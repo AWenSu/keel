@@ -1,6 +1,6 @@
 # keel
 
-**給 Claude Code 用的五階段開發流程。每個階段配一個 skill，每個角色都叫得出名字，關鍵地方卡關卡，不讓你亂衝。**
+**給 Claude Code 用的五階段開發流程。每個階段一個 skill，每個角色都叫得出名字，該卡關的地方一定卡住。**
 
 > *龍骨（keel）是造船時第一根立起來的結構樑，之後每一根肋骨都長在它上面。它歪了，整艘船就歪——這正是這條 pipeline 把最硬的關卡放在最前面的理由。*
 
@@ -24,49 +24,19 @@
                                               （是需求錯了，不是程式錯）
 ```
 
-`keel-workflow` 是五個階段之上的總機：判斷這次的請求該進哪個階段、派對應的 skill 去做，還幹了一件大部分路由器懶得做的事——**知道什麼時候該把工作退回去**，因為後面的階段常常會發現，前面那階段其實搞錯了。
+`keel-workflow` 是五個階段上面的總機：判斷這次的請求該進哪個階段、派對應的 skill 去做，還會做一件大部分路由器不做的事——後面的階段發現前面搞錯了，它知道要把工作**退回去**。
 
-## 為什麼要搞這套
+## 你會得到什麼
 
-Claude Code 裝備齊全一點，規劃類的 skill 就會越堆越多：superpowers 一整條生命週期鏈、gstack 重量級審查套件、planning-with-files 的持久化機制、還有各種自訂 planner。每一個單獨拿出來都不錯，但擺在一起就麻煩了：**「做計畫」有四種做法，沒有一條主線，還得背路由規則才知道現在要用哪個。**
-
-這個 repo 只留**每階段一個 skill**。有用的機制才留下——硬性關卡、證據規則、決策分類、進度帳本、驗證鐵律；沒用的就砍（外部 CLI 依賴、遙測、重複的廢話）。每個 skill 就一份自包含的 `SKILL.md`，不用建置、不用掛 hook，除了檔案本身什麼都不用裝。
-
-**跟第一版比，這次改了什麼：** pipeline 不再把工作丟給一個沒名字的 `general-purpose` subagent 打混。implementer、規格審查、品質審查、五種審查視角、兩層懷疑者、fixer、研究票——每個角色都是獨立命名的 agent，模型釘死、工具權限也鎖死，而且名字的前綴就帶著階段——`keel-exec-*` 是第 4 階段、`keel-plan-lens-*` 是第 3 階段。但名字要講出來才有用：正本規則 `rules/dispatch-announce.txt` 要求每個階段**派工前先報名字、結果回來時再用同一個名字播報**，逐字寫進全部八個 skill，位元組比對。細節看下面〈[Subagent 名冊](#subagent-名冊)〉。
-
-## 五個階段在幹嘛
-
-| # | Skill | 做什麼 | 骨幹抄哪來 | 從哪嫁接了什麼 |
-|---|-------|--------|-----------|---------------|
-| 1 | [`keel-discover`](skills/keel-discover/SKILL.md) | 模糊想法 → 使用者點頭認可、有憑有據的 spec。規矩很硬：沒核准就不准動一行程式碼。 | superpowers:brainstorming | gstack spec 那套「先甩證據再問問題」、開場五問、範圍先鎖死、同一個問題在不同限制下平行想兩套做法；**先驗掃描不只查 repo 內、也上網查**——adopt／adapt／build 變成一個有記錄、有具體差異點的決定，就算決定自己造，也會把成熟方案的功能清單撈回來；spec 帶 `Status: draft\|approved` 核准閘門、`Spec Version` 欄位、Success Criteria 改寫成 Given-When-Then；**關鍵流程在這裡就指名，不是拖到最後才決定**——一到三條端到端路徑，每條都必須跨過真實的整合邊界，由 keel-plan 轉成可直接跑的指令，keel-execute 在它第一次跑得動的那個 task 就跑，不等收尾 |
-| 2 | [`keel-plan`](skills/keel-plan/SKILL.md) | spec → 一份就算完全不懂這個 codebase 的工程師也能照做的計畫。分大小的指南、`Interfaces:` 區塊、禁止空話佔位。 | superpowers:writing-plans | planner agent 的風險分級；每個 task 上的 `Skills:` 欄位，先講清楚該叫哪些領域 skill；mattpocock to-tickets 的垂直切片任務框架、拆完票先問粒度/依賴對不對的 quiz；UI 相關的計畫強制多產出一段 `### 2b.` feature matrix |
-| 3 | [`keel-plan-review`](skills/keel-plan-review/SKILL.md) | 五個視角（CEO/Design/Eng/Security/DX）自動輪流審，還會主動上網查有沒有人早就做過或早就撞牆。例行的自己拍板，真的要人判斷的才丟回來問，而且丟出結論前自己先反駁自己一輪。 | gstack autoplan 的決策系統 | 自我懷疑反駁法、Mechanical / Taste / User-Challenge 三分法、6 條自動拍板原則、兩層懷疑者升級機制；Step 5 決策一過自動拍板門檻就當場產出一段式 ADR |
-| 4 | [`keel-execute`](skills/keel-execute/SKILL.md) | 審完的計畫 → 能跑的程式碼。每個 task 都是新開一個 implementer，配二到三個**互相看不到彼此**的審查者（規格對不對、寫得好不好，R4 條件命中時再加一軸資安——二至三軸絕不混成一個裁決）。進度帳本掉線也不會丟資料。subagent 用不了時還有 inline 備援。 | superpowers:subagent-driven-development | executing-plans 的 inline 模式；planning-with-files 那套「檔案系統就是記憶體」；起手前先比對計畫記錄的 `Spec Version` 有沒有跟 spec 現況對不上；G6 plan-conflict 閘門在 INLINE 模式也重申一次；改到本 repo 自己的 skill 檔時，Finish 階段額外回報對照 `eval-fixtures/RULE-INVENTORY.md` 的 `FIXTURE COVERAGE` |
-| 5 | [`keel-finish`](skills/keel-finish/SKILL.md) | 敢說「完成」之前：每個宣稱都要有剛查出來的新鮮證據、真的把整條流程走一遍、把這次過程中散落各處的未決事項全部收攏，最後才合併分支。 | superpowers:verification-before-completion | 宣稱對照證據表、紅燈變綠燈的回歸鐵律、分支整合怎麼選；已有 Step-5 ADR 的宣稱不用重查，Success Criteria 改成請使用者當場核對而非重新推導；Part 2c 的洩密掃描檢查項寫明裝好時該跑的確切指令 `gitleaks detect` |
-
-**內建跳過規則。** 小事（改一個檔、可逆、30 分鐘內搞定）直接跳過 1–3 階段。只有大案或風險高的案子才走完整審查。規劃花的時間不該超過任務本身的兩成。
-
-**回歸測試 pipeline 自己的規則。** [`eval-fixtures/`](eval-fixtures/) 用兩種方式驗證 keel 自己。`check-structure.sh` 是腳本——每隻 agent 都釘死 model 與工具清單、沒有唯讀 agent 拿到寫入權限、每個被派工的名字都找得到定義檔。動本 repo 前先跑：
-
-```bash
-bash eval-fixtures/check-structure.sh    # exit 0 = 全過
-bash eval-fixtures/run-mutations.sh      # 證明上面每條檢查真的會紅
-bash tables/render.sh                    # 重新生成三張重複的表
-```
-
-第二支才是重點。它把五輪獨立稽核跑過的每一個突變逐一注入拋棄式副本，斷言指定的那條檢查變紅。最後一條斷言是**每條檢查都必須至少有一個突變**——沒有人測過的檢查會讓整個 run 失敗。
-
-這段刻意不寫檢查數、突變數、fixture 數與規則數。`check-structure.sh` 的 ratchet 那行每次都會把它們全印出來；寫死在這裡的版本已經過期過兩次，才讓人意識到散文裡的數字沒有任何機制能保持為真。
-
-**出現在一份以上文件裡的規則，只有一份正本。**[`rules/`](rules/) 存每條規則的正本文字，凡是要陳述該規則的檔案都逐字帶那句話，檢查比對的是位元組，不是 pattern。要改規則就三步：改 `rules/<rule>.txt`、跑檢查、把新句子貼進它點名的每個檔案。只改其中一份複本會直接 FAIL——這正是目的，舊的失敗模式就是規則在某份文件改了、另外兩份一個月後才發現。抓不到的部分寫在 `rules/README.md`。
-
-**有三張表各自出現在三份文件裡**——agent 名冊、關卡表、回退路由。原本有六條檢查在盯這九份副本，而五輪稽核在那六條檢查裡找到六個缺陷。現在改成生成：來源是 [`tables/`](tables/) 加上每隻 agent 自己的 frontmatter，`bash tables/render.sh` 重寫結構欄位，只留一條檢查確認沒人手改生成結果。表格裡的敘述文字不生成——三份文件的敘述本來就沒有一句相同，那是刻意的。
-
-`NN-*.md` 則是腳本判斷不了的情境測試（spec 標 `draft` 會不會擋下 `keel-plan`？計畫與現況牴觸會不會退回？），靠走查。`RULE-INVENTORY.md` 列出每一條已宣告規則、各自的執行點與驗證方式。`執行於` 空著的那列表示它現在就是壞的；沒有驗證方式的那列表示它可能無聲壞掉。2026-09-11 起兩種都沒有了——而那份檔案把這件事寫成「關於它自己那張表的事實」，並且刻意**不報覆蓋率百分比**，因為一個令人安心的比例正是它存在的目的所要懷疑的東西。要依賴哪幾列就去讀哪幾列：四個欄位主張的強度各不相同，檔案裡有寫哪個是哪個。
+- **只有一條主線。** 每個階段一個 skill，不用在四種「做計畫」的工具之間挑。小事直接開工，只有大案或高風險的計畫才走審查。
+- **只在該問的地方問你。** 會停下來等你回答的只有九個具名關卡。跑一下就知道答案的事，它自己查，不拿來問你。
+- **「做完了」要拿得出畫面。** 每個宣稱都要剛跑出來的證據；一開始就指名的關鍵流程，要透過 commit 在 repo 裡的驗證工具實際跑一遍，不是 agent 自己說好就好。
+- **審查沒辦法放水。** 每個 task 配二到三個互相看不到彼此結論的審查者；計畫審查裡的高嚴重度發現，還要先撐過一個專門負責反駁的懷疑者。
+- **越用越懂這個專案。** 學到的教訓先想辦法寫成程式結構或 lint 擋住，擋不住才寫進專案規則庫，下一份計畫會讀到。
 
 ## 安裝
 
-把 `skills/` 跟 `agents/` 丟到 Claude Code 會讀的地方：
+把 `skills/` 跟 `agents/` 放到 Claude Code 會讀的地方：
 
 ```bash
 # 只裝這個專案用
@@ -78,9 +48,9 @@ cp -R skills/* ~/.claude/skills/
 cp -R agents/* ~/.claude/agents/
 ```
 
-`agents/` 這包選裝，但強烈建議裝——不裝，pipeline 一樣能跑，只是每次派工都會偷偷降級成內建的 `general-purpose`：模型沒釘死、工具權限沒鎖、進度畫面也看不出現在跑的是誰。
+`agents/` 可以不裝，但強烈建議裝——不裝的話，每次派工都會悄悄退回內建的 `general-purpose`：模型沒釘死、工具權限沒鎖、進度畫面也看不出現在是誰在跑。
 
-裝完重開一次 Claude Code（新的 skill/agent 目錄要重啟才會吃進去）。之後每個 skill 都能直接叫——`/keel-discover`、`/keel-plan`、`/keel-plan-review`、`/keel-execute`、`/keel-finish`，或是交給總機 `/keel-workflow` 自己判斷。
+裝完重開一次 Claude Code（新的 skill／agent 目錄要重啟才會讀到）。不用建置、不用掛 hook、不用裝套件。
 
 ## 怎麼用
 
@@ -94,21 +64,43 @@ cp -R agents/* ~/.claude/agents/
 # 計畫很大，或動到正式環境的資料
 /keel-plan-review
 
-# 東西都準備好了，開工
+# 準備好了，開工
 /keel-execute
 
 # 講「做完了」之前先跑這個
 /keel-finish
 
-# 或懶得判斷，直接講任務，讓總機自己分流
+# 懶得判斷就直接講任務，讓總機自己分流
 /keel-workflow 幫管理後台加 OAuth 登入
 ```
 
-每個階段做完會自己宣告下一站、直接交接——你只在**幾個具名關卡**才會被叫住，不是每走一步都要你點頭。子代理一回來，馬上播報結果（裁決、一條有出處的發現、接下來要幹嘛）——不會讓你盯著一片安靜的畫面猜四個 agent 到底在忙什麼。
+每個階段做完會自己宣告下一站、直接交接。子 agent 一回來就用它的名字播報結果，不會讓你對著一片安靜的畫面猜四個 agent 在幹嘛。
+
+## 五個階段
+
+| # | Skill | 把什麼變成什麼 | 保證什麼 |
+|---|-------|--------------|---------|
+| 1 | [`keel-discover`](skills/keel-discover/SKILL.md) | 模糊想法 → 你核准的 spec | 沒核准不准寫程式。問問題之前先拿 `path:line` 證據；repo 內外都做先驗掃描；在這裡就指名一到三條**關鍵流程**，每條都要跨過真實的整合邊界。 |
+| 2 | [`keel-plan`](skills/keel-plan/SKILL.md) | spec → 不懂這個 codebase 的人也能照做的計畫 | 禁止空話佔位。每個 task 寫明交付什麼、動哪些檔、介面長怎樣、該叫哪些領域 skill。關鍵流程要寫成可執行的 `Drive` 指令，透過 commit 在 repo 裡的驗證工具跑；repo 還沒有這種工具，第一個 task 就先做出來。 |
+| 3 | [`keel-plan-review`](skills/keel-plan-review/SKILL.md) | 粗計畫 → 審過的計畫 | CEO、Eng 一定跑，Design、Security、DX 視情況開。例行的自己拍板，要判斷的才問你，而且按依賴關係分批問；跑個小實驗就能分出高下的，先跑再說。 |
+| 4 | [`keel-execute`](skills/keel-execute/SKILL.md) | 計畫 → 能跑的程式 | 每個 task 一個強制測試先行的 implementer；規格、品質兩軸審查（命中條件再加資安軸），絕不混成一個裁決；斷線也不會掉資料的進度帳本；沒有 subagent 時有 inline 備援。 |
+| 5 | [`keel-finish`](skills/keel-finish/SKILL.md) | 「好像做完了」→ 合併進去 | 每個宣稱都要新鮮證據、每條關鍵流程都要跑過、Success Criteria 由你當場核對、散落的未決事項收攏、教訓回寫，最後照你選的方式整合分支。 |
+
+**旁線**，對得上才會進：
+
+| Skill | 什麼時候用 |
+|-------|----------|
+| [`keel-wayfind`](skills/keel-wayfind/SKILL.md) | 工作大到一個 session 做不完、路線又還看不清楚——先畫一張決策票地圖，一個 session 解一張。 |
+| [`keel-debug`](skills/keel-debug/SKILL.md) | 東西壞了、原因不明——沒有紅燈重現指令之前不准開始猜。 |
+| [`keel-audit`](skills/keel-audit/SKILL.md) | 你明確要求對整個程式碼庫做資安稽核。原樣收錄 Cloudflare 的 security-audit 方法（MIT），只讀原始碼、帶覆蓋率帳本、每個候選配一個全新的驗證者。主流程絕不會自己走進來。 |
+
+web app、API、CLI、MCP server、serverless、文件 repo、爬蟲各該跑哪些階段、開哪些視角，寫在 **[PROJECT-TYPE-GUIDE.md](PROJECT-TYPE-GUIDE.md)**。
+
+## 什麼時候會停下來等你
 
 ### 關卡——唯一會停下來等你回答的地方
 
-除了這些，pipeline 其他地方都不會停下來問你要不要繼續：
+除了這些，其他地方都不會問你要不要繼續：
 
 <!-- generated:gates — structure from tables/gates.tsv; run tables/render.sh after editing -->
 | 關卡 | 在哪個階段 | 問什麼 |
@@ -124,10 +116,7 @@ cp -R agents/* ~/.claude/agents/
 | **G9** | 任何階段 | repo 之外的不可逆操作：部署、對非暫時性資料庫做 migration、刪資料、對外發布、憑證輪替、push/merge 到受保護分支。指名目標與確切指令，在動手當下問，**就算計畫裡已經寫了也要問**。 |
 <!-- /generated:gates -->
 
-G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續，會跳過硬性關卡或做出無法復原的事」的位置——所以這張表反過來也是封閉的：不在表上的「要繼續嗎？」一律禁止。
-
-
-**G4 按依賴前緣分批，不是死板一次一題（借用 mattpocock batch-grill-me 的做法）。** 大部分發現彼此根本不相依賴，死板逐題只是安全但慢。改成先畫出哪個決定要等哪個決定先答（比如「用哪種登入方式」會決定「session 怎麼存」），再分輪處理。**前緣**指所有前提都已解決、現在就答得出來的發現——把整個前緣塞進**一次** `AskUserQuestion` 呼叫（它原生上限一次 4 題；前緣超過 4 條就拆成最少次數的呼叫）。每輪答完先套用到計畫檔再算下一輪前緣——一個答案常常會順便解掉或改變後面的問題。答案還依賴這輪某條未答問題的，就留到下一輪——分批的界線是依賴關係，不是圖方便。前緣清空就結束。
+這張表反過來也是封閉的：不在表上的「要繼續嗎？」一律禁止。G4 會把前提都已經定案的問題一次問完（最多四題），答案套用之後再算下一批——分批看的是依賴關係，不是圖方便。
 
 ### 回退路由——後面發現前面錯了怎麼辦
 
@@ -143,32 +132,30 @@ G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續
 | 某階段的 INPUT 契約無法滿足 | 任何階段 | 欠交那份產物的階段 |
 <!-- /generated:routes -->
 
-### 建議路由（`keel-workflow` 怎麼判斷）
+## 怎麼確保做出來的東西是真的
 
-| 看到什麼訊號 | 走哪 |
-|------------|------|
-| 想法很模糊、需求還沒講清楚 | `keel-discover` |
-| spec 已經有了，後面是好幾步的活 | `keel-plan` |
-| 計畫規模大或風險高（超過 8 個檔案、動新架構、碰正式環境資料） | `keel-plan-review` |
-| 計畫寫好了而且直觀好懂 | `keel-execute` |
-| 準備說做完了、要開 PR 了 | `keel-finish` |
-| bug、測試掛掉、行為不如預期 | [`keel-debug`](skills/keel-debug/SKILL.md)——loop 優先：沒有紅燈重現指令就不准開始猜原因 |
-| 你明確要對整個程式碼庫做資安稽核 | [`keel-audit`](skills/keel-audit/SKILL.md)——旁線，主流程絕不會自己走進來；原樣收錄 Cloudflare 的 security-audit 方法（MIT 授權），只讀原始碼、帶覆蓋率帳本，每個候選漏洞配一個全新的驗證者 |
-| UI / 視覺相關工作 | 交給你自己的設計 skill 路由 |
+- **證據比報告可信。** subagent 說「成功了」、過期的測試結果、「應該沒問題」都不算；diff 跟剛跑出來的指令輸出才算。
+- **關鍵流程提早跑。** 在探索階段指名、規劃階段寫成指令、執行階段一跑得動就跑。指令要透過 commit 在 repo 裡的**啟動器**（一個指令把產品啟動到已知狀態，再把證據存下來）跟**功能地圖**（每個功能怎麼走到、按哪裡、該看到什麼），使用者丟來一張模糊截圖，也找得到地方去查。
+- **審查軸互相獨立。** 規格對不對、寫得好不好分開審；審查者先讀測試再讀實作，而且要講出「會怎麼壞」，不能只指出哪一行。PASS 的意思是這個 diff 讓程式碼更健康，不是完美。
+- **註解要有理由才准留。** diff 新加的註解，只有授權聲明、外部依賴逼出來的怪行為、公開 API 契約、issue 或規格連結、不直觀的演算法這幾種能留。替權宜寫法找藉口的註解，直接當成沒修好的問題處理；只寫在註解裡的限制，要改成型別、測試或 lint。
+- **關卡不能跳，產出物可以縮。** 趕時間就把 spec 寫短，核准絕不跳過。
 
-### 不同專案類型該怎麼配
+## 怎麼越用越聰明
 
-哪些階段要跑、哪些審查視角要開、上面還要疊什麼——**web app、API、CLI、MCP server、serverless、文件 repo、爬蟲**都有講：見 **[PROJECT-TYPE-GUIDE.md](PROJECT-TYPE-GUIDE.md)**。Backend API 型別現在新增 contract-first 的 OpenAPI/AsyncAPI Task 0；有正式部署環節的 Serverless/edge 型別新增 Release Runbook，在 `keel-finish` 階段產出。
+AI 會照它看到的寫法繼續寫，所以程式碼庫本身就是它的記憶。每次糾正 AI，keel 都會問一句：這個教訓該放哪裡？由強到弱：
 
-### 領域 skill 怎麼疊上去
+1. **讓錯的寫法根本寫不出來**——用型別、結構、API 的形狀擋住。
+2. **一跑就會失敗的檢查**——lint、編譯器設定、CI。
+3. **專案規則庫裡的一條規則**——下一份計畫的派工單會讀到。
+4. **靠人在審查時記得**——最弱，最後才用。
 
-要用哪個領域 skill，這件事在**規劃階段**就該定好，因為那時候才看得到全局。`keel-plan` 產出的每個 task 都帶一個 `Skills:` 欄位，寫清楚 implementer 動工前該先叫哪些領域 skill（視覺相關的任務對應 UI 設計 skill、平台相關的任務對應 Cloudflare/MCP 那類平台 skill）。`keel-execute` 會把這欄直接塞進每個 implementer 的工作說明裡，不用臨場現找。
+`keel-finish` 會把 `.keel/findings.md` 裡的教訓照這個順序往下推，前兩層都擋不住的才寫成規則。審查抓到的壞寫法，會到整個 repo 搜一次：別處也有的話，回報數量和位置，先提議擋住不讓它再擴散，再排清理。延後的工作寫進專案 backlog，附一個下一階段查得到的連結。規則庫分兩層：本地的記「這個專案這一行該怎麼寫」，跨專案的記「會改變你怎麼設計」的做法。
 
 ## Subagent 名冊
 
-這條 pipeline 每次派工都指名道姓，指定具體的 `subagent_type`——絕不丟給通用的 `general-purpose` 打混。名字本身就講清楚是哪個階段、哪個角色；模型跟工具權限都寫死在 frontmatter 裡，不會像散文式的提醒（「這裡記得用 opus」）那樣講一講就被忘光。
+每次派工都指名道姓用具體的 `subagent_type`，絕不丟給通用的 `general-purpose`。名字前綴是階段、後半是角色；每隻 agent 的 frontmatter 釘死模型、鎖住工具，不會像散文提醒（「這裡記得用 opus」）那樣講一講就忘了。
 
-**唯讀是靠工具權限卡死的，不是靠散文交代。** 視角、懷疑者、designer、researcher 只拿到 `Read, Grep, Glob`（加上各自需要的檢索工具）——**完全沒有 shell**，所以唯讀是「它手上就沒有那個能力」而不是「它答應不做」。三隻 `keel-exec-reviewer-*` 額外拿到 `Bash`，因為審 diff 非得跑 `git diff` 不可；各自在定義檔裡把 shell 限制成唯讀指令，那是比較弱的保證，也正是權限只放到這裡為止的原因。只有 implementer 跟 fixer 有 `Edit`/`Write`。這樣「審查的人不准動自己在審的程式碼」就是規則卡死的，不是提示詞寫寫就算了。
+**唯讀靠工具權限卡死，不是靠提示詞交代。** 視角、懷疑者、designer、researcher 和兩隻稽核 agent 只有 `Read, Grep, Glob`（加上各自需要的檢索工具），完全沒有 shell。三隻 `keel-exec-reviewer-*` 另外拿到 `Bash`，因為審 diff 一定要跑 `git diff`；各自在定義檔裡把 shell 限制住，這是比較弱的保證，也是權限只放到這裡的原因。只有 implementer 跟 fixer 能改檔。
 
 <!-- generated:roster — structure from tables/agents.tsv; run tables/render.sh after editing -->
 | subagent_type | 階段 | 幹嘛的 | model | 工具權限 |
@@ -193,71 +180,63 @@ G1–G9 不是「檢查點」。每一條都是「沒等到你的答案就繼續
 | `keel-auditor` | 後設 | 用突變攻擊這個 repo 自己的檢查機制，找沒人編碼過的缺陷類別 | **opus** | 唯讀 + shell 僅限跑檢查與突變套件；突變只在拋棄式副本做，絕不 commit |
 <!-- /generated:roster -->
 
-`keel-exec-reviewer-spec` 會依「合約測試證據強度」分級每一條 Interface drift 發現（有既有測試 > 只寫了合約描述 > 未經查證的宣稱），不是照計畫怎麼寫就照單全收。
+另外有五個會依名字派工、但本 repo 不附的 agent，模型跟工具由你的安裝決定：`planner`、`code-reviewer`（收尾的整分支審查，刻意不指定模型，讓它繼承這次 session 最強的那顆）、`test-engineer`、`silent-failure-hunter`、`build-error-resolver`。`security-auditor` 是另一路的專家，pipeline 從不派它；這條 pipeline 自己的資安把關在 `keel-plan-lens-security` 跟 `keel-exec-reviewer-security`。
 
-另外還有六個本 repo 不附、但會依名字派工的 agent（`planner`、`code-reviewer`、`test-engineer`、`silent-failure-hunter`、`build-error-resolver`、`security-auditor`）——它們的模型與工具由你的安裝決定，所以上面那張表釘不住，pipeline 該用的時候會直接用原名派出去：`test-engineer`、`silent-failure-hunter`。`security-auditor` 是另一路的即興專家——只在你手動叫 `/security-review` 或 `/ship` 時才會出場，`keel-plan-review`、`keel-execute` 從來不會自動派它；這兩個階段自己的資安把關現在交給 `keel-plan-lens-security`（第 3 階段）跟 `keel-exec-reviewer-security`（第 4 階段第三軸）。`keel-execute` 收尾時的整分支審查用 `code-reviewer`，而且**故意不去指定它的模型**——讓它自己繼承這次 session 裡最強的那顆模型，因為這是 `keel-finish` 之前的最後一道防線，不能省。
+**分層靠換 agent，不靠 model 參數。** 想讓簡單的發現用便宜模型審，做法是派另一隻 agent（`keel-plan-skeptic`），不是對同一隻傳 `model` 覆寫——這樣用了哪一層在進度畫面上看得到，時間一趕也不會忘。標準層判斷不了就回 `ESCALATE`，不硬撐；拿不準就升級，因為誤殺一條真的 Critical 會讓缺陷一路闖到正式環境，誤放一條弱發現頂多多修一輪。修復迴圈也一樣：第 1–3 輪用 `keel-exec-fixer`，第 4–5 輪換全新的 `keel-exec-fixer-critical`，第 5 輪還沒修好就跳斷路器。
 
-### 分層靠 agent 名字，不是靠 model 參數
-
-想讓懷疑者省點力氣、簡單的發現用便宜模型審，最直覺的做法是照嚴重度在派工時傳個 `model` 參數去覆寫。這條 pipeline 就是刻意不這麼幹——用參數決定模型，這個決定會埋在一行函式呼叫裡，進度畫面上完全看不出來，時間一趕就容易被忘記。（這條 pipeline 早期版本剛好就有過這種「記得要做 X」的散文規則，事後稽核發現根本沒有人真的照做過。）
-
-所以改成讓「用哪一層」直接等於「派哪個 agent」：
-
-- `keel-plan-skeptic`（sonnet）處理單點查一下就能定案的發現——引用的那行到底存不存在、講的是不是真的那回事。
-- `keel-plan-skeptic-critical`（opus）處理 Critical 等級、碰到安全/資料遺失/不可逆操作的發現，或者需要跨檔案推理才能判斷的（追蹤呼叫者、找有沒有既有防護、估影響範圍多大）。
-- 標準層可以直接回一個 `ESCALATE`，不硬撐超出自己能力範圍的判斷——控制器收到就會改派重案層去查。`ESCALATE` 本身絕不算一個裁決。
-- **不確定就升級，別猶豫。** 這裡代價不對等：懷疑者誤殺一條真的很重要的發現，等於讓一個缺陷直接闖過執行階段跑到正式環境；懷疑者誤放過一條弱發現，頂多多花一輪修復再審。pipeline 骨子裡本來就偏向「證據不夠就反駁掉」，model 層級是攔在這個偏向跟真正犯錯之間唯一的防線。
-
-`keel-execute` 的修復迴圈用的是同一套邏輯（從 superpowers 6.2.0 移植過來）：第 1-3 輪都給標準層 `keel-exec-fixer`（sonnet）重試；到第 4-5 輪改派全新一次的 `keel-exec-fixer-critical`（opus）——同樣的脈絡、同樣的模型已經失敗兩次了，第三次照舊做法不會突然成功。撐到第 5 輪還有發現沒修完，斷路器就跳：會壞事的（破壞 Delivers 行為、安全、資料完整性）直接擋下來丟給使用者，無傷大雅的就記進帳本附裁決繼續往下走。這條 pipeline 裡沒有任何一處是靠傳 `model` 參數升級的——要升級，就開一個新名字的 agent。
-
-### 先驗掃描——動工前先查有沒有人早就做過、早就撞過牆
-
-CEO 視角（`keel-plan-lens-ceo`）動任何內部推理之前，先強制上網掃一輪：搜尋看有沒有現成的產品或函式庫、查有沒有人早就踩過這個坑、翻文件確認某個框架是不是本來就內建這功能。輸出分三段——現成方案、已知撞牆、還有一個能講出「即便如此還是值得做」的**具體差異點**。
-
-第三段刻意設成硬性關卡：一條先驗發現如果講不出跟我們情況具體差在哪，信心分數就會被壓低，而且**永遠不能單靠這條就砍掉整個計畫**，也不能升級成 User Challenge。名字聽起來撞衫不代表真的重複，如果只憑一個表面比對就殺掉一個正當的計畫，那會是這個視角能犯的最貴的錯。
-
-Eng 視角（`keel-plan-lens-eng`）跑另一輪平行檢查，對照現行文件確認計畫裡點名的每個框架/函式庫/API，從寫計畫到現在有沒有被棄用或砍掉。
-
-**每條外部發現都要附 URL、查證日期、逐字引用**——跟這條 pipeline 對內部 `file:line` 引用一直以來的要求一樣嚴。抓回來的網頁內容一律當成不可信的東西：裡面藏的任何指令一概不理，只挑事實出來用。
+**動工前先查有沒有人做過。** CEO 視角會上網查現成方案、已知撞牆的例子，以及「即便如此還是值得做」的具體差異點；講不出差異點的比對，不能拿來砍掉計畫。Eng 視角會對照現行文件，確認計畫點名的 API 還在。每條外部發現都要附 URL、日期、逐字引文，抓回來的網頁一律當不可信的輸入。
 
 ### 扇出上限
 
-沒有哪個階段可以無限開 agent。上限是**同時最多 8 個，總量每個 task loop 最多 16 個**（keel-plan-review 是每輪最多 8 隻 skeptic）；真的超過的話，pipeline 會按嚴重度排序，先蓋前面幾條，剩下的**一定要**印出 `SKIPPED: <幾條> — <原因>`。悄悄少做卻不講，這條 pipeline 當成 bug 處理——一個階段偷偷只查了六成卻回報得像查了十成，比一開始就沒跑還糟糕。
+沒有哪個階段可以無限開 agent。超過上限時，pipeline 會按嚴重度排序、先蓋前面幾條，剩下的**一定要**印出 `SKIPPED: <幾條> — <原因>`——偷偷只查了六成卻回報得像查了十成，比一開始就沒跑還糟。
 
 Fan-out ceiling: ≤8 concurrent, ≤16 total per task loop.
 
-## 來源出處與跟上游同步
+## keel 怎麼測它自己
 
-這是**合成出來的東西，不是 fork**——上游還在持續改。每個 SKILL.md 的 frontmatter 都寫了來源跟版本號。合成時的版本快照（2026-07-14 合成；2026-07-30；discover 階段先驗掃描與 design lens 的視覺／路由檢查 2026-08-10 加了 subagent 名冊跟先驗掃描）：
+提示詞沒有編譯器，所以 [`eval-fixtures/`](eval-fixtures/) 用 keel 檢查 keel：
 
-| 上游 | 版本 | Repo |
-|------|------|------|
-| superpowers | 6.1.1 | [obra/superpowers](https://github.com/obra/superpowers) |
-| gstack | 1.60.1.0 | [garrytan/gstack](https://github.com/garrytan/gstack) |
-| planning-with-files | 3.5.0 | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) |
-| mattpocock/skills | 沒版號的 monorepo——照 commit 對，不是照 tag | [mattpocock/skills](https://github.com/mattpocock/skills) |
-| keel-security-review 需求書（2026-08-07） | 內部文件，非 repo | 資料來源：STRIDE 威脅建模、OWASP Top 10:2025、Veracode 2025 GenAI report、slopsquatting 研究 |
-| keel-workflow SDD 元素整合需求書（2026-08-07） | 內部文件，非 repo | 資料來源：外部分享的 SDD/Contract-first/ADR 流程比對 |
+```bash
+bash eval-fixtures/check-structure.sh    # 檢查檔案層面的事實；exit 0 = 全過
+bash eval-fixtures/run-mutations.sh      # 證明上面每條檢查真的會變紅
+bash tables/render.sh                    # 重新生成三張共用的表
+```
 
-要跟上游同步的話：
+- `check-structure.sh` 驗腳本驗得了的事：每隻 agent 都釘了模型和工具清單、沒有唯讀 agent 拿到寫入權限、每個派工名稱都找得到定義、fixture 逐字引用規則原文、安裝版跟 repo 一致。
+- `run-mutations.sh` 把歷次稽核找到的缺陷一個一個塞進拋棄式副本，確認指定的檢查會變紅。沒有任何突變測過的檢查，會讓整輪失敗。
+- **出現在多份檔案裡的規則只有一份正本**，放在 [`rules/`](rules/)，用位元組比對。只改其中一份就會失敗。
+- **名冊、關卡、回退路由三張表是生成的**，來源在 [`tables/`](tables/)，寫進每一份用到它的文件。
+- `NN-*.md` 情境 fixture 涵蓋腳本判斷不了的邊界；`RULE-INVENTORY.md` 列出每條規則在哪裡執行、靠什麼驗證——刻意不給覆蓋率百分比。
 
-1. 對照上表版本號，看上游是不是出新版了。
-2. 讀它們的 changelog，只挑**機制**上的改動來看（新關卡、新流程之類）。純粹改寫文字、或是修這個 repo 本來就刻意丟掉的東西（Codex hook、遙測、mockup board），不用理。
-3. 把機制上的改動搬進受影響的那個階段 skill，順手把它 frontmatter 裡的版本號往上調。
+這份 README 刻意不寫數量；檢查器每次跑都會印出來，寫死的數字已經過期過兩次。
 
-如果你手上同時裝著上游原版，該用重量級原版的時候就用——比如超過 15 個檔案的大計畫，用 gstack `/autoplan`（雙模型互相對照）；要開 GitHub issue 的話用 gstack `spec`。
+## 來源與跟上游同步
+
+這些是**合成出來的，不是 fork**。每份 `SKILL.md` 的 frontmatter 都記了來源跟版本。
+
+| 上游 | 版本 | 貢獻了什麼 |
+|------|------|----------|
+| [obra/superpowers](https://github.com/obra/superpowers) | 6.1.1 | 各階段骨幹：brainstorming、writing-plans、subagent-driven development、verification-before-completion |
+| [garrytan/gstack](https://github.com/garrytan/gstack) | 1.60.1.0 | autoplan 的決策分類、審查視角、證據閘門 |
+| [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) | 3.5.0 | 檔案系統當記憶體、進度帳本 |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | 沒有版號，照 commit 同步 | 垂直切片任務、分批追問、同一問題想兩套、詞彙表紀律 |
+| [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) | `c1c8a8c` | `keel-audit` 整套方法，MIT 授權原樣收錄 |
+| Lauren Tan 在 Cursor Compile 2026 的講題與 [pstack](https://github.com/cursor/plugins/tree/main/pstack) | 2026-10 | 註解規則、先擋住再寫規則、驗證工具、能查就不問、壞寫法擴散檢查 |
+| keel-security-review 需求書（2026-08-07） | 內部文件 | STRIDE、OWASP Top 10:2025、Veracode 2025 GenAI report、slopsquatting 研究 |
+
+同步方式：對照上表版本看上游有沒有新版，只把**機制**上的改動（新關卡、新流程）搬進受影響的 skill，再調高它 frontmatter 裡的版本。純改寫文字、或修這裡本來就刻意丟掉的東西（Codex hook、遙測、mockup board），不用理。超過 15 個檔案的大計畫、又剛好裝了 gstack，就直接用它的 `/autoplan`。
 
 ## 設計原則
 
-- **是蒸餾，不是硬拼在一起**——一個機制能留下來，是因為它真的扛得住重量，不是因為它本來就存在。
-- **關卡是神聖不可侵犯的，產出物可以縮水**——時間趕的時候可以把 spec 寫短一點，但核准這一步絕不能跳過。
-- **證據比報告可信**——subagent 說「成功了」、一次過期的測試結果、「應該沒問題」，這些都不算證據；diff 跟剛跑出來的指令輸出才算。
-- **檔案系統比 context window 靠得住**——只要是要撐過壓縮還在的東西，就寫進檔案裡。
-- **具名 agent 比散文提醒可靠**——規則真的重要的話（「這裡要用強模型」、「這隻不准寫檔」），就寫死在被派工那隻 agent 的 frontmatter 裡，不要只寫一句話指望以後有人會記得。
+- **蒸餾，不是硬拼**——一個機制能留下來，是因為它真的扛重量，不是因為它本來就存在。
+- **關卡不能跳，產出物可以縮**——spec 可以寫短，核准不能跳。
+- **證據比報告可信**——看 diff 跟剛跑出來的輸出，不聽「應該沒問題」。
+- **檔案系統比 context window 靠得住**——要撐過壓縮的東西就寫進檔案。
+- **結構比散文可靠**——規則真的重要，就寫進 agent 的 frontmatter、型別或檢查裡，不要只寫一句話指望有人記得。
 
 ## 想貢獻的話
 
-歡迎開 issue、發 PR——特別是回報這個 repo 還沒跟上的上游機制變化，或是實際用下來發現某個階段/關卡/agent 其實沒撐住的情況。動手前先看一眼上面的設計原則：貢獻應該是蒸餾出更好的東西，不是幫 pipeline 已經有的功能再開一條第四種做法。
+歡迎開 issue、發 PR——特別是這裡還沒跟上的上游機制改動，或實際用下來發現某個階段、關卡、agent 其實沒派上用場。貢獻應該是蒸餾出更好的做法，不是替 pipeline 已經有的功能再開第二條路。
 
 ## 授權
 

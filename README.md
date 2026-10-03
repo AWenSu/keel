@@ -24,106 +24,31 @@
                                                       (the requirement was wrong, not the code)
 ```
 
-`keel-workflow` sits above all five stages as the router: it detects which
-stage a request belongs to, dispatches the matching skill, and — this is the
-part most routers skip — knows how to send work **backward** when a later
-stage discovers the earlier one got something wrong.
+`keel-workflow` sits above the five stages as the router: it detects which
+stage a request belongs to, dispatches the matching skill, and — the part most
+routers skip — sends work **backward** when a later stage finds that an
+earlier one got something wrong.
 
-## Why this exists
+## What you get
 
-A well-equipped Claude Code setup accumulates overlapping planning skills:
-superpowers' lifecycle chain, gstack's heavyweight review suite,
-planning-with-files' persistence layer, custom planner agents. Each is
-excellent — but the overlap costs you: **four ways to "make a plan," no single
-obvious flow, and routing tables to memorize.**
-
-This repo keeps **one skill per stage**. Each absorbs the mechanisms that
-earned their place — hard gates, evidence rules, decision taxonomies, progress
-ledgers, verification laws — and drops what didn't (external CLI dependencies,
-telemetry, duplicated prose). Every skill is a single self-contained
-`SKILL.md`: no build step, no hooks, nothing to install beyond the files
-themselves.
-
-**What changed since the first release:** the pipeline no longer dispatches
-work as anonymous `general-purpose` subagents. Every role — implementer,
-spec reviewer, quality reviewer, five review lenses, two tiers of adversarial
-skeptic, fixer, research ticket — is a named agent definition with its own
-pinned model and its own tool access, and the name carries the stage in its
-prefix — `keel-exec-*` is stage 4, `keel-plan-lens-*` is stage 3. A name only
-helps if it is said out loud, so a canonical rule
-(`rules/dispatch-announce.txt`) requires every stage to announce each dispatch
-before it runs and broadcast each result by that literal name when it lands.
-See [Subagent roster](#subagent-roster).
-
-## The five stages
-
-| # | Skill | What it does | Spine | Key grafts |
-|---|-------|--------------|-------|------------|
-| 1 | [`keel-discover`](skills/keel-discover/SKILL.md) | Vague idea → user-approved, evidence-grounded spec. Hard gate: no code before approval. | superpowers:brainstorming | gstack spec's code-evidence rule (`path:line` before questions), five-question intake, scope lock, parallel "design it twice" exploration under diverging constraints; **a prior-art scan that searches outside the repo, not just inside it** — adopt/adapt/build becomes a recorded decision with a named 差異點, and the feature list of mature solutions is harvested even when the answer is build; spec carries a `Status: draft\|approved` gate, a `Spec Version` field, and Given-When-Then Success Criteria; **critical flows named here, not at the end** — one to three end-to-end paths that each cross a real integration boundary, which keel-plan turns into runnable commands and keel-execute drives at the first task after which they can run |
-| 2 | [`keel-plan`](skills/keel-plan/SKILL.md) | Spec → plan an engineer with zero context could execute. Sizing guide, `Interfaces:` blocks, banned placeholders. | superpowers:writing-plans | planner agent's risk grading; per-task `Skills:` field naming domain skills to invoke; mattpocock to-tickets' vertical-slice task framing and post-breakdown granularity/dependency quiz; UI-heavy plans get a mandatory `### 2b.` feature matrix |
-| 3 | [`keel-plan-review`](skills/keel-plan-review/SKILL.md) | Multi-lens automated review (CEO/Design/Eng/Security/DX) with a mandatory prior-art web scan — auto-decides routine choices, escalates only real judgment calls, adversarially refutes its own findings before trusting them. | gstack autoplan's decision system | doubt-driven refutation; Mechanical / Taste / User-Challenge taxonomy; 6 auto-decision principles; two-tier skeptic escalation; Step 5 auto-emits a one-paragraph ADR when a decision clears the auto-decide bar |
-| 4 | [`keel-execute`](skills/keel-execute/SKILL.md) | Reviewed plan → working code. Fresh implementer + two-to-three **independent** reviewers per task (spec axis, quality axis, plus a conditional security axis when R4 triggers — never merged into one verdict), crash-safe progress ledger. Inline fallback when subagents aren't available. | superpowers:subagent-driven-development | executing-plans inline mode; planning-with-files filesystem-as-memory; pre-flight spec-drift check against a plan's recorded `Spec Version`; G6 plan-conflict gate restated for INLINE mode; Finish step reports `FIXTURE COVERAGE` against `eval-fixtures/RULE-INVENTORY.md` when a plan edits this repo's own skill files |
-| 5 | [`keel-finish`](skills/keel-finish/SKILL.md) | Before any "done" claim: fresh verification evidence for every claim, drive the real flow end-to-end, reconcile every open item scattered across the run, then integrate the branch. | superpowers:verification-before-completion | claim→evidence table; red-green regression rule; branch integration options; skips re-verifying a claim already covered by a Step-5 ADR, and Success Criteria are confirmed live by the user rather than re-derived; Part 2c's secrets-scan check names the exact `gitleaks detect` invocation to run when installed |
-
-**Built-in skip rules.** Small tasks (single file, reversible, <30 min) bypass
-stages 1–3 entirely; only large or risky plans go through review. Planning
-overhead should never exceed ~20% of the task itself.
-
-**Regression-testing this pipeline's own rules.** [`eval-fixtures/`](eval-fixtures/)
-verifies keel against itself two ways. `check-structure.sh` is a script —
-every agent pins a model and a tool list, no read-only agent holds write
-tools, every dispatched name resolves to a definition — run it before
-committing any change to this repo:
-
-```bash
-bash eval-fixtures/check-structure.sh    # exit 0 = all pass
-bash eval-fixtures/run-mutations.sh      # prove each of those checks can fail
-bash tables/render.sh                    # regenerate the three duplicated tables
-```
-
-The second one is the one that matters. It injects every mutation five
-independent audits of this repo ever ran — one at a time in a throwaway copy
-— and asserts the named check goes red. Its final assertion is that **every
-check has at least one mutation**: a check nothing has ever tested fails the
-run.
-
-Counts of checks, mutations, fixtures and rules are deliberately absent from
-this paragraph. `check-structure.sh`'s ratchet line prints all of them on
-every run; hardcoding them here went stale twice before it was worth
-noticing that a number in prose has no way to stay true.
-
-**Rules that appear in more than one file have a single source.**
-[`rules/`](rules/) holds the canonical text of each one; every file that
-states the rule carries that sentence verbatim, and the checker compares
-bytes rather than patterns. To change a rule: edit `rules/<rule>.txt`, run the
-checker, and paste the new sentence into each file it names. Paraphrasing one
-copy is a build failure, which is the point — the old failure mode was
-changing a rule in one document and finding the other two a month later.
-`rules/README.md` states what this does *not* catch.
-
-**Three tables appear in three documents each** — the agent roster, the gate
-list, the backward routes. Six checks used to keep those nine copies honest,
-and five audits found six defects in those six checks. They are generated now,
-from [`tables/`](tables/) plus each agent's own frontmatter: `bash
-tables/render.sh` rewrites the structural columns, and one check confirms
-nobody hand-edited the output. The prose in them is not generated — no
-description is shared across the three documents, by design.
-
-The `NN-*.md` files are scenario fixtures for rules a script can't judge
-(does a spec marked `draft` block `keel-plan`? does a plan-vs-code
-contradiction route back?), graded by walkthrough. `RULE-INVENTORY.md` lists
-every declared rule with where each is enforced and what verifies it. A row
-whose `Enforced at` is empty is a rule that is already broken; a row with no
-verifier is one that can regress silently. As of 2026-09-11 there are none
-of either — which that file reports as a fact about its own table and
-pointedly **not** as a coverage percentage, because a reassuring ratio is
-the kind of claim it exists to distrust. Read the rows you depend on: the
-four columns make four different strengths of claim, and the file says which
-is which.
+- **One obvious path.** One skill per stage instead of four overlapping ways
+  to "make a plan". Small tasks skip straight to building; only large or risky
+  plans go through review.
+- **Stops only where it matters.** Nine named gates are the only points that
+  wait for your answer. Questions a quick check could answer are checked, not
+  asked.
+- **"Done" means shown working.** Every claim needs fresh evidence, and the
+  critical flows named at the start are driven end to end through a
+  verification harness committed to the repo — not an agent's say-so.
+- **Reviews that can't rubber-stamp.** Each task gets two or three independent
+  reviewers who never see each other's verdict, and high-severity plan findings
+  must survive a skeptic whose job is to kill them.
+- **It gets better per project.** Lessons are pushed into the code or a lint
+  rule first, a project rulebook second, and the next plan reads them.
 
 ## Install
 
-Copy `skills/` and `agents/` into any location Claude Code loads them from:
+Copy `skills/` and `agents/` into a location Claude Code loads them from:
 
 ```bash
 # per-project
@@ -135,15 +60,12 @@ cp -R skills/* ~/.claude/skills/
 cp -R agents/* ~/.claude/agents/
 ```
 
-`agents/` is optional but strongly recommended — without it, the pipeline
-still runs, but every subagent dispatch silently falls back to Claude Code's
-generic `general-purpose` agent: no pinned model, no restricted tool access,
-no name in the progress display to tell you which role is running.
+`agents/` is optional but strongly recommended — without it every subagent
+dispatch silently falls back to Claude Code's generic `general-purpose` agent:
+no pinned model, no restricted tool access, no name in the progress display.
 
-Restart Claude Code once after installing (new skill/agent directories are
-only picked up from session start). Each skill is then available directly —
-`/keel-discover`, `/keel-plan`, `/keel-plan-review`, `/keel-execute`,
-`/keel-finish` — or through the router, `/keel-workflow`.
+Restart Claude Code once (new skill/agent directories are picked up at session
+start). No build step, no hooks, no packages.
 
 ## Usage
 
@@ -163,19 +85,41 @@ only picked up from session start). Each skill is then available directly —
 # before you say "done"
 /keel-finish
 
-# or just describe the task and let the router figure out the stage
+# or just describe the task and let the router pick the stage
 /keel-workflow add OAuth login to the admin panel
 ```
 
-Each stage announces its successor and hands off — you intervene at
-**named gates**, not between every step. Every subagent's return is
-broadcast the moment it lands (verdict, one anchored finding, next step) — you
-are never staring at a silent pipeline wondering what four agents are doing.
+Each stage announces its successor and hands off. Every subagent result is
+broadcast by the agent's name the moment it lands, so you are never staring at
+a silent pipeline wondering what four agents are doing.
 
-### The gates — the only points that stop for your answer
+## The five stages
 
-Everything else in the pipeline proceeds without asking permission. These
-never do:
+| # | Skill | Turns | Guarantees |
+|---|-------|-------|------------|
+| 1 | [`keel-discover`](skills/keel-discover/SKILL.md) | a vague idea → an approved spec | No code before you approve the spec. Grounded in `path:line` evidence before any question; a prior-art scan inside and outside the repo; one to three **critical flows** named here, each crossing a real integration boundary. |
+| 2 | [`keel-plan`](skills/keel-plan/SKILL.md) | the spec → a plan a zero-context engineer could execute | No placeholders. Each task names what it delivers, its files, interfaces, and the domain skills to invoke. Critical flows get an executable `Drive` command through a committed harness — built as the first task when the repo has none. |
+| 3 | [`keel-plan-review`](skills/keel-plan-review/SKILL.md) | a rough plan → a reviewed plan | CEO, Eng, and conditional Design, Security, DX lenses. Routine findings are auto-decided; judgment calls come to you, batched by dependency; empirical ones are settled by a throwaway check first. |
+| 4 | [`keel-execute`](skills/keel-execute/SKILL.md) | the plan → working code | Test-first implementer per task; spec and quality reviewers (plus security when triggered), never merged into one verdict; a crash-safe progress ledger; inline fallback without subagents. |
+| 5 | [`keel-finish`](skills/keel-finish/SKILL.md) | "looks done" → integrated | Fresh evidence for every claim, every critical flow driven, Success Criteria confirmed by you, open items reconciled, lessons promoted, then the branch integrated your way. |
+
+**Side lanes**, entered only when they fit:
+
+| Skill | When |
+|-------|------|
+| [`keel-wayfind`](skills/keel-wayfind/SKILL.md) | The work is too big for one session and the route is still foggy — chart a map of decision tickets and resolve them one per session. |
+| [`keel-debug`](skills/keel-debug/SKILL.md) | Something is broken and the cause is unknown — no hypothesis before a red reproduction command. |
+| [`keel-audit`](skills/keel-audit/SKILL.md) | You explicitly ask for a whole-codebase security audit. Cloudflare's security-audit method vendored verbatim (MIT), run source-only with a coverage ledger and one fresh verifier per candidate. Never started by the main flow. |
+
+Which stages and lenses to use for web apps, APIs, CLIs, MCP servers,
+serverless, docs repos, and scrapers is in
+**[PROJECT-TYPE-GUIDE.md](PROJECT-TYPE-GUIDE.md)**.
+
+## Where it stops for you
+
+### The gates — the only points that wait for your answer
+
+Everything else proceeds without asking. These never do:
 
 <!-- generated:gates — structure from tables/gates.tsv; run tables/render.sh after editing -->
 | Gate | Stage | What it asks |
@@ -191,23 +135,10 @@ never do:
 | **G9** | any stage | An irreversible operation outside the repo: deploy, migration against a non-ephemeral database, data deletion, external publication, credential rotation, push/merge to a protected branch. Named target, exact command, asked at the point of action — **even when the plan already says to do it.** |
 <!-- /generated:gates -->
 
-G1–G9 are not checkpoints. Each is a point where continuing without your
-answer would skip a hard gate or do something that can't be undone — which is
-why the list is closed in the other direction too: a generic "shall I
-continue?" that isn't one of these rows is forbidden.
-
-**G4 batches by dependency frontier, not one-at-a-time (from mattpocock
-batch-grill-me).** Strict one-question-serial is safe but slow when most
-findings don't actually depend on each other. Instead: map which findings
-depend on another's answer (choice of auth pattern gates session-storage
-format, say), then work it in rounds. The **frontier** is every finding whose
-prerequisites are already settled — ask the whole frontier in one
-`AskUserQuestion` call (its native cap is 4 questions; a bigger frontier
-splits across the fewest calls needed). Apply every answer before computing
-the next round — an answer often resolves or reshapes what's still open. A
-question whose answer depends on one still open this round waits for the
-next round; the constraint is dependency, never convenience. Done when the
-frontier is empty.
+The list is closed in both directions: a generic "shall I continue?" that is
+not one of these rows is forbidden. G4 asks every question whose prerequisites
+are already settled in one call (up to four), applies the answers, then
+computes the next batch — dependency decides the batches, never convenience.
 
 ### Backward routes — when a later stage finds an earlier mistake
 
@@ -223,54 +154,62 @@ frontier is empty.
 | A stage's INPUT contract cannot be satisfied | any stage | the stage that owes the missing artifact |
 <!-- /generated:routes -->
 
-### Suggested routing (what `keel-workflow` detects)
+## How it keeps the work honest
 
-| Signal | Route |
-|--------|-------|
-| Fuzzy idea, requirements unclear | `keel-discover` |
-| Spec exists, multi-step work ahead | `keel-plan` |
-| Plan is large/risky (>8 files, new architecture, production data) | `keel-plan-review` |
-| Plan ready and straightforward | `keel-execute` |
-| About to claim done / open a PR | `keel-finish` |
-| Bug, test failure, unexpected behavior | [`keel-debug`](skills/keel-debug/SKILL.md) — loop-first: no hypothesis without a red repro command |
-| You explicitly want a whole codebase security-audited | [`keel-audit`](skills/keel-audit/SKILL.md) — side lane, never started by the main flow; Cloudflare's security-audit method vendored verbatim (MIT), run source-only with a coverage ledger and one fresh verifier per candidate |
-| UI/visual work | your design-skill router |
+- **Evidence over reports.** A subagent's "success", a stale test run, and
+  "should work" are not evidence; a diff and fresh command output are.
+- **Critical flows, driven early.** Flows are named at discovery, turned into
+  commands at planning, and driven at the first task after which they can run.
+  The command goes through a committed **runner** — one command that launches
+  the product in a known state and saves the evidence — and a **feature map**
+  listing how to reach each feature, so a vague bug report becomes a place the
+  runner can go.
+- **Independent review axes.** Spec compliance and code quality are graded
+  separately, by reviewers who read the tests before the implementation and
+  must name the failure, not just the line. PASS means the diff improves code
+  health; it does not mean perfect.
+- **Comments need a reason.** A comment the diff adds survives only for a
+  license header, behaviour forced by something the repo cannot change, a
+  public API contract, a link to an issue or spec, or a non-obvious algorithm.
+  A comment that excuses a workaround is graded as the unfixed workaround, and
+  a constraint that lives only in a comment must become a type, a test, or a
+  lint rule.
+- **Gates are sacred, artifacts can shrink.** Under time pressure the spec gets
+  shorter; approval is never skipped.
 
-### Per-project-type defaults
+## How it learns
 
-Which stages to run, which review lenses fire, and what to layer on top for
-**web apps, APIs, CLIs, MCP servers, serverless, docs repos, and scrapers**:
-see **[PROJECT-TYPE-GUIDE.md](PROJECT-TYPE-GUIDE.md)**. Backend API projects
-now get a contract-first OpenAPI/AsyncAPI Task 0; Serverless/edge projects
-with a real deploy step get a Release Runbook produced at `keel-finish`.
+Agents copy the patterns they read, so the codebase is their memory. keel
+treats every correction as a question of where to put it:
 
-### Domain-skill layering
+1. **Code a wrong version cannot be written in** — a type, a structure, an API
+   shape.
+2. **A check that fails** — a linter, compiler setting, or CI step.
+3. **A rule in the project rulebook** — read by the next plan's briefs.
+4. **A human remembering in review** — the weakest place, used last.
 
-Skill selection happens at **plan time**, where there's global context: every
-task in a `keel-plan` artifact carries a `Skills:` field naming the domain
-skills its implementer must invoke (a UI-design skill for visual tasks, a
-platform skill for Workers/MCP idioms). `keel-execute` passes that field into
-each implementer's brief.
+At `keel-finish`, lessons from `.keel/findings.md` are promoted down that
+list, and only what neither code nor a check can enforce becomes a rule.
+A pattern the reviewers caught is searched for across the repo: copies found
+elsewhere are reported with a proposal to stop the spread first and clean up
+second. Deferred work goes to the project backlog with a link the next stage
+can resolve. Rulebooks come in two scopes: a local one for "how this line is
+written here", and a cross-project one for patterns that change how you
+design.
 
 ## Subagent roster
 
-Every dispatch in this pipeline names a specific `subagent_type` — never the
-generic `general-purpose` fallback. The name's prefix tells you the stage and
-its tail the role — and the announce rule above is what puts that name in
-front of you rather than leaving it in the tool call. The frontmatter pins
-the model and locks the tool access, so the
-decision can't quietly drift the way a prose instruction ("remember to use
-opus here") tends to.
+Every dispatch names a specific `subagent_type` — never the generic
+`general-purpose`. The prefix tells you the stage, the tail the role, and each
+agent's frontmatter pins its model and locks its tools, so a decision cannot
+quietly drift the way a prose reminder ("remember to use opus here") does.
 
-**Read-only by tool grant, not by prose.** Lenses, skeptics, the designer,
-and the researcher get `Read, Grep, Glob` (plus search tools where named) —
-no shell at all, so read-only is a property of what they hold rather than a
-promise they make. The three `keel-exec-reviewer-*` agents additionally get
-`Bash`, since reviewing a diff requires `git diff`; each restricts that shell
-to read-only commands in its own definition, a weaker guarantee and the
-reason the grant goes no further. Only implementers and fixers get
-`Edit`/`Write`. This is what makes "the reviewer must not edit the code it's
-reviewing" structural instead of a prompt that can be ignored.
+**Read-only by tool grant, not by prose.** Lenses, skeptics, the designer, the
+researcher, and both audit agents hold `Read, Grep, Glob` (plus named search
+tools) and no shell at all. The three `keel-exec-reviewer-*` agents also hold
+`Bash`, because reviewing a diff needs `git diff`; each restricts it in its own
+definition, a weaker guarantee and the reason the grant goes no further. Only
+implementers and fixers can edit.
 
 <!-- generated:roster — structure from tables/agents.tsv; run tables/render.sh after editing -->
 | subagent_type | Stage | Role | model | Tools |
@@ -295,146 +234,109 @@ reviewing" structural instead of a prompt that can be ignored.
 | `keel-auditor` | meta | Attacks this repo's own checks by mutation — looks for a defect class nobody has encoded | **opus** | read-only + a shell restricted to running the checkers; mutations only in a throwaway copy, never commits |
 <!-- /generated:roster -->
 
-`keel-exec-reviewer-spec` grades every Interface-drift finding by contract-test
-evidence strength (existing test > described contract > unverified claim)
-rather than taking the plan's word for it.
+Also dispatched by name but not shipped here, so their model and tools are
+whatever your install defines: `planner`, `code-reviewer` (the final
+whole-branch review, deliberately with no model override so it inherits the
+strongest model in the session), `test-engineer`, `silent-failure-hunter`,
+and `build-error-resolver`. `security-auditor` is an ad-hoc specialist that
+the pipeline never dispatches; its own security coverage lives in
+`keel-plan-lens-security` and `keel-exec-reviewer-security`.
 
-Plus six agents this pipeline dispatches by name but does not ship — their
-model and tools are whatever your install defines, which is why the roster
-above cannot pin them: `planner` (Medium-task one-shot plan),
-`code-reviewer` (final whole-branch review), `test-engineer`,
-`silent-failure-hunter`, `build-error-resolver` (dispatched by `keel-debug`
-when the symptom is a build error). `security-auditor` is a separate, ad-hoc specialist —
-it is invoked by `/security-review` or `/ship`, never dispatched by
-`keel-plan-review` or `keel-execute`; the pipeline's own security coverage in
-those two stages now lives in `keel-plan-lens-security` (stage 3) and
-`keel-exec-reviewer-security` (stage 4, third axis). A final whole-branch
-review at the end of `keel-execute` uses `code-reviewer` with **no model
-override** — it inherits whatever the strongest model in the session is,
-because it's the last line of defense before `keel-finish`.
+**Tiering is agent selection, not a model parameter.** A cheaper skeptic is a
+different agent (`keel-plan-skeptic`), not a `model` override on the same one:
+the tier then shows in the progress display and cannot be forgotten under time
+pressure. The standard tier returns `ESCALATE` rather than guessing past its
+depth, and when unsure, findings go to the critical tier — wrongly killing a
+real Critical costs a production defect, wrongly sparing a weak one costs one
+fix round. The fix loop works the same way: rounds 1–3 use `keel-exec-fixer`,
+rounds 4–5 a fresh `keel-exec-fixer-critical`, and round 5 trips a circuit
+breaker.
 
-### Tiering by agent identity, not by model parameter
-
-The naive way to make a "skeptic" cheaper on easy findings is to pass a
-`model` override at dispatch time based on severity. This pipeline
-deliberately does **not** do that — routing by model parameter is a decision
-buried in a function call, invisible in the progress display, and easy to
-forget under time pressure (the earlier version of this pipeline had exactly
-that kind of "remember to do X" prose rule, and audits showed it was ignored
-every time).
-
-Instead, tier selection **is** agent selection:
-
-- `keel-plan-skeptic` (sonnet) handles findings a single-point check can settle
-  — does the cited line exist, does it say what's claimed.
-- `keel-plan-skeptic-critical` (opus) handles Critical severity, anything
-  touching security/data-loss/irreversible operations, or anything needing
-  cross-file reasoning (tracing callers, finding existing guards, sizing blast
-  radius).
-- The standard tier can return `ESCALATE` instead of guessing past its depth
-  — the controller re-dispatches to the critical tier. `ESCALATE` is never
-  treated as a verdict.
-- **When unsure, escalate.** The cost asymmetry is real: a skeptic that
-  wrongly kills a genuine Critical finding lets a defect ride straight through
-  execution to surface in production; a skeptic that wrongly spares a weak
-  finding costs one extra fix-review round. The pipeline's default bias
-  ("refute when evidence is weak") already leans toward killing findings — the
-  model tier is the one thing standing between that bias and a real mistake.
-
-The same pattern governs `keel-execute`'s fix loop (ported from superpowers
-6.2.0): rounds 1-3 resume the standard `keel-exec-fixer` (sonnet); rounds 4-5
-switch to a fresh `keel-exec-fixer-critical` (opus) dispatch, because a fixer
-that failed twice with the same context and model isn't going to succeed a
-third time unchanged. At round 5, unresolved findings trip a circuit breaker
-— load-bearing ones block the task and go to the user, cosmetic ones get
-parked in the ledger with a ruling. No stage in this pipeline escalates by
-passing a `model` override; every escalation is a named agent.
-
-### Prior-art scanning — catching "this is already solved" before it's built
-
-The CEO lens (`keel-plan-lens-ceo`) runs a mandatory external scan before any
-internal reasoning: existing products/libraries via web search, known failure
-modes and deprecation notices via deep research, whether a named framework
-already ships the feature via documentation lookup. It reports three sections
-— existing solutions, known dead ends, and a **concrete difference** that
-justifies building this anyway.
-
-That third section is a hard gate deliberately: a prior-art finding that can't
-name a specific difference from our situation is capped at low confidence and
-can never sink a plan or become a User Challenge on its own. Surface-level name
-collision is not duplication, and killing legitimate work on a shallow match
-would be the single most expensive mistake this lens could make.
-
-The Eng lens (`keel-plan-lens-eng`) runs a parallel check on API currency —
-verifying that every framework/library/API the plan names against current
-documentation hasn't been deprecated or removed since the plan was written.
-
-**Every external finding requires a URL, a retrieval date, and a verbatim
-quote** — the same evidence discipline the pipeline already applies to
-internal `file:line` citations. Fetched content is explicitly treated as
-untrusted input: instructions embedded in a search result or a doc page are
-ignored, only factual claims are extracted.
+**Prior art before building.** The CEO lens searches for existing products,
+known dead ends, and a concrete difference that justifies building anyway; a
+match with no named difference cannot sink a plan. The Eng lens checks every
+named API against current docs. Every external finding needs a URL, a date,
+and a verbatim quote, and fetched pages are untrusted input.
 
 ### Fan-out ceiling
 
-No stage dispatches an unbounded number of agents. The cap is **≤8 concurrent,
-≤16 total per task loop**; if the real workload exceeds that, the pipeline sorts
-by severity, covers the top N, and **must** emit a `SKIPPED: <n> — <reason>`
-line. Silent truncation is treated as a bug — a stage that quietly covers 60%
-of the findings and reports as if it covered 100% is worse than one that never
-ran.
+No stage dispatches an unbounded number of agents. Over the cap, the pipeline
+sorts by severity, covers the top N, and **must** print a
+`SKIPPED: <n> — <reason>` line — a stage that quietly covers 60% and reports
+100% is worse than one that never ran.
 
 Fan-out ceiling: ≤8 concurrent, ≤16 total per task loop.
 
+## Testing keel itself
+
+There is no compiler for prompts, so [`eval-fixtures/`](eval-fixtures/) checks
+keel against itself:
+
+```bash
+bash eval-fixtures/check-structure.sh    # facts about the files; exit 0 = all pass
+bash eval-fixtures/run-mutations.sh      # proves every check above can fail
+bash tables/render.sh                    # regenerates the three shared tables
+```
+
+- `check-structure.sh` verifies what a script can: every agent pins a model and
+  a tool list, no read-only agent holds write tools, every dispatched name
+  resolves, fixtures quote their rule source verbatim, the installed copy
+  matches the repo.
+- `run-mutations.sh` injects every defect past audits found, one at a time in a
+  throwaway copy, and asserts the named check goes red. A check no mutation has
+  ever tested fails the run.
+- **Rules stated in more than one file have one source** in [`rules/`](rules/),
+  compared by bytes. Paraphrasing one copy is a build failure.
+- **The roster, gate, and route tables are generated** from
+  [`tables/`](tables/) into every document that carries them.
+- `NN-*.md` scenario fixtures cover boundaries no script can judge, and
+  `RULE-INVENTORY.md` lists every declared rule with where it is enforced and
+  what verifies it — deliberately without a coverage percentage.
+
+Counts are left out of this README on purpose; the checker prints them on every
+run, and hardcoded numbers went stale twice.
+
 ## Provenance & upstream sync
 
-These are **syntheses, not forks** — upstream keeps evolving. Every SKILL.md
-records its sources and their versions in frontmatter. Snapshot at synthesis
-time (2026-07-14; subagent roster 2026-07-30; discovery-stage prior-art scan and the design lens's visual/routing checks 2026-08-10):
+These are **syntheses, not forks**. Every `SKILL.md` records its sources and
+versions in its frontmatter.
 
-| Upstream | Version | Repo |
-|----------|---------|------|
-| superpowers | 6.1.1 | [obra/superpowers](https://github.com/obra/superpowers) |
-| gstack | 1.60.1.0 | [garrytan/gstack](https://github.com/garrytan/gstack) |
-| planning-with-files | 3.5.0 | [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) |
-| mattpocock/skills | unversioned monorepo — synced by commit, not tag | [mattpocock/skills](https://github.com/mattpocock/skills) |
-| keel-security-review requirements (2026-08-07) | internal doc, not a repo | sources: STRIDE threat modeling, OWASP Top 10:2025, Veracode 2025 GenAI report, slopsquatting research |
-| keel-workflow SDD 元素整合需求書 (2026-08-07) | internal doc, not a repo | sources: 外部分享的 SDD/Contract-first/ADR 流程比對 |
+| Upstream | Version | What it contributed |
+|----------|---------|---------------------|
+| [obra/superpowers](https://github.com/obra/superpowers) | 6.1.1 | Stage spines: brainstorming, writing-plans, subagent-driven development, verification-before-completion |
+| [garrytan/gstack](https://github.com/garrytan/gstack) | 1.60.1.0 | autoplan's decision taxonomy, review lenses, evidence gate |
+| [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) | 3.5.0 | Filesystem as memory, the progress ledger |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | unversioned, synced by commit | Vertical-slice tickets, batched grilling, design-it-twice, glossary discipline |
+| [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) | `c1c8a8c` | The whole `keel-audit` method, vendored verbatim under MIT |
+| Lauren Tan, Cursor Compile 2026 talk and [pstack](https://github.com/cursor/plugins/tree/main/pstack) | 2026-10 | Comment rules, enforcement before rules, the verification harness, observe instead of asking, the spread check |
+| keel-security-review requirements (2026-08-07) | internal doc | STRIDE, OWASP Top 10:2025, Veracode 2025 GenAI report, slopsquatting research |
 
-To sync with upstream:
-
-1. Check upstream releases against the versions above.
-2. Read their changelogs for **mechanism** changes (new gates, new protocols).
-   Prose rewrites and fixes to machinery deliberately dropped here (Codex
-   hooks, telemetry, mockup boards) don't apply.
-3. Port mechanism changes into the affected stage skill; bump the version in
-   its frontmatter.
-
-If you run the upstream skills alongside these, prefer the heavyweight
-originals when their extra machinery earns its cost — e.g. gstack `/autoplan`
-for >15-file plans (dual-model consensus), gstack `spec` when the output
-should be a GitHub issue.
+To sync: check upstream releases against the versions above, port
+**mechanism** changes (new gates, new protocols) into the affected skill, and
+bump its frontmatter version. Prose rewrites, and fixes to machinery dropped
+here (Codex hooks, telemetry, mockup boards), don't apply. For very large
+plans (>15 files) where gstack is installed, its `/autoplan` earns its extra
+machinery.
 
 ## Design rules
 
 - **Distill, don't concatenate** — a mechanism gets in by being load-bearing,
   not by existing.
-- **Gates are sacred, artifacts can shrink** — under time pressure, write a
-  smaller spec; never skip approval.
-- **Evidence over reports** — a subagent's "success," a stale test run, and
-  "should work" are not evidence; diffs and fresh command output are.
+- **Gates are sacred, artifacts can shrink** — write a smaller spec; never skip
+  approval.
+- **Evidence over reports** — diffs and fresh command output, not "should
+  work".
 - **Filesystem over context window** — anything that must survive compaction
   goes in a file.
-- **A named agent over a prose reminder** — if a rule matters ("use the strong
-  model here," "don't let this one write files"), encode it in the
-  dispatched agent's frontmatter, not in a sentence hoping to be remembered.
+- **Structure over prose** — if a rule matters, encode it in an agent's
+  frontmatter, a type, or a check, not in a sentence hoping to be remembered.
 
 ## Contributing
 
-Issues and PRs welcome — especially reports of upstream mechanism changes this
-repo hasn't ported yet, or a stage/gate/agent that turned out not to earn its
-keep in real use. Keep the design rules above in mind: a contribution should
-distill, not add a fourth way to do something the pipeline already does once.
+Issues and PRs are welcome — especially upstream mechanism changes not yet
+ported, or a stage, gate, or agent that did not earn its keep in real use. A
+contribution should distill, not add a second way to do something the pipeline
+already does once.
 
 ## License
 
