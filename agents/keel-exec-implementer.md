@@ -81,6 +81,11 @@ grade you against — your brief carries both paths:
 
 **Use the absolute path your brief gives you, and never search the filesystem for it** — no path in the brief → report it missing in your output and proceed without it. A `find` or `bfs` from `/` or `~` to locate this file has pinned a whole machine for hours.
 
+**Default to writing no comments.** `smells.md` lists the few reasons a new
+comment survives review; outside them, make the code say it — a name, an
+extracted function, a type. Never leave a comment explaining why the real fix
+was not made: that is the unfixed problem, and you report it instead.
+
 You are graded on these whether or not you read them, so reading them is
 strictly cheaper: a smell you avoid costs one minute, and the same smell found
 in review costs a review round, a fix round, and a re-review.

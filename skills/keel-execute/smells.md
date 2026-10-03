@@ -61,8 +61,37 @@ concrete input size or state at which it actually hurts. "This is O(n²)" with
 no statement of what n is in this system is a shape observation, not a
 finding.
 
-# Comment smells (Google eng-practices, review/reviewer/looking-for)
+# Comment smells (Google eng-practices, review/reviewer/looking-for; Lauren Tan's Cursor Compile 2026 talk and pstack no-comments skill)
 
+**A comment the diff adds needs a reason from this list, or it is a finding:**
+a license header; behaviour forced by an external dependency, platform, or
+protocol this repo cannot change; a doc comment that defines a public API
+contract; a link to an issue or spec for a constraint the code cannot express;
+a regular expression or non-obvious algorithm. Anything else — narration,
+section banners, commented-out code, notes to the next reader about our own
+code — is deleted, and the surprise it explained is fixed by renaming,
+extracting, or typing until the code says it. This holds even in a repo full of
+comments: agents copy the patterns they read, so a comment habit spreads the way
+a workaround does, and the diff is graded on what it adds, not on matching the
+volume around it. Comments the diff did not touch are out of scope.
+
+- **Comment that justifies a workaround** — "known issue", "fine for now",
+  "too risky to change", "temporary", or a paragraph explaining why the real
+  fix was not made. Grade it as an **unfixed problem, not a comment**: the
+  comment is how the band-aid passed review, and the next agent will read it as
+  permission to add another. The finding is the workaround; deleting the
+  comment alone does not close it.
+- **A constraint that lives only in a comment** — "do not remove", "must stay
+  in this order", "talk to X before changing". Prose is the weakest place a
+  constraint can live: the next agent may not read it, and nothing fails when
+  it is ignored. The finding asks for the cheapest enforcement in scope — a
+  type, a runtime check, a test, a lint rule — and the comment goes once that
+  exists. A constraint nothing in scope can enforce is reported, not kept as
+  the only guard.
+- **Lint or type-check suppression** (eslint-disable, `@ts-ignore`,
+  `# noqa`, `# type: ignore`) — the same test: if the silenced rule catches
+  real bugs, the suppression is the finding and the code under it is what gets
+  fixed. Suppressing a style-only or demonstrably wrong rule is fine.
 - **Comment explains *what*, not *why*** — a comment restating the line below
   it is a signal the line should be simpler, not that the comment is missing.
   The fix is to rewrite the code; adding the comment closes the case at the

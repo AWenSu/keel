@@ -314,6 +314,16 @@ before integrating, if the repo has a `.learned/`
    work (that is auto-memory feedback, not a rule). A finding that is an
    **unfixed problem** rather than a lesson is not a rule either — it is
    work, and it goes through Part 2b's deferral lane (backlog), not here.
+2a. **Before writing any survivor as a rule, try to make it impossible
+   instead.** A rule is advice the next agent may not read; ask, in this
+   order, whether the mistake can be closed by (a) the code itself — a type,
+   a structure, an API shape that cannot express the wrong thing — or (b) a
+   linter, compiler setting, or CI check. Either one in reach → propose it to
+   the user as that change (Part 2b's deferral lane if not done in this
+   branch), and write the rule only as a pointer to it until it lands. Only
+   what neither can enforce becomes a rule on its own: code a wrong version
+   cannot be written in, then a check that fails, then a rule, then a human
+   remembering in review — rules are third of four, not first.
 3. For each survivor: `learned.py search "<kw>"` first — a near-duplicate
    gets a `**補充（date）**` paragraph on the existing rule, not a new ID.
    Otherwise `learned.py add <cat> "<title>"` per the skill's rule-format.
