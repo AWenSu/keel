@@ -95,6 +95,7 @@ proceed with a known regression.
 | `40-positive-learning-capture.md` | the positive question at Part 2e; replace-gate and boundary-gate; reach decides the rulebook | `keel-finish` Part 2e |
 | `41-keel-audit-side-lane.md` | on-request only, user-named target, source-only, absolute paths, untrusted target text, partial-coverage honesty | `keel-audit`, both `keel-audit-*` agents |
 | `42-comments-and-enforcement-order.md` | new comments need a keep-list reason; a comment excusing a workaround is the workaround; enforce a lesson before writing it as a rule | `keel-execute/smells.md`, `keel-exec-implementer`, `keel-finish` Part 2e |
+| `43-harness-observe-before-asking-and-spread-check.md` | drive flows through a committed runner + feature map; observe instead of asking; check whether a caught pattern spread | `keel-plan` 2a-0, `keel-discover` Step 3, `keel-plan-review` Step 5, `keel-finish` Part 2e |
 
 Adding a rule that is a **fact about files**? Add a check to
 `check-structure.sh`, not a fixture — a test nobody runs is worse than no test,

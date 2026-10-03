@@ -164,6 +164,15 @@ step, not after it:
   implementation details)`. CONTEXT.md is a glossary and nothing else — no
   specs, no scratch notes, no implementation decisions.
 
+**Do not ask what you can observe.** Before a question goes to the user,
+classify it: if the answer is a fact running something would show — how the
+current code behaves, how fast a path is, what a layout looks like, whether a
+library does X — it is not the user's to answer. Run the check (read the code,
+run the command, try the library in a scratch file) and bring back the result.
+The user's questions are for intent, priority, and taste that no experiment
+can settle. An observable fact asked as a question costs the user a turn and
+returns an opinion where evidence was available.
+
 If the request spans multiple subsystems, decompose FIRST: each sub-project
 gets its own discover → plan → execute cycle. Don't interrogate details of
 part 3 before part 1 is scoped.
@@ -278,7 +287,8 @@ be something a person can look at and judge, not "no errors": the failures
 this section exists to catch are the ones where nothing throws and the
 output is wrong.
 
-Downstream, `keel-plan` turns each row into an executable drive step,
+Downstream, `keel-plan` turns each row into an executable drive step
+through a committed harness (building one first when the repo has none),
 `keel-execute` drives each flow at the earliest task after which it can run,
 and `keel-finish` treats a flow that was never driven as a gap rather than a
 pass.

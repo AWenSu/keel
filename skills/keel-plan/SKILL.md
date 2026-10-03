@@ -151,6 +151,31 @@ Where a flow cannot be driven until several tasks land, say which task
 unblocks it — `Drive` may read `after T4: <command>`; that is what lets
 `keel-execute` know when to run it rather than waiting for the end.
 
+**Drive through a committed harness, not an improvised one.** Before filling
+`Drive`, look for the repo's own way to run and observe the product — a
+`verify`/`e2e` script, a project-local verification skill, a Playwright or
+CLI-driver suite. Found → every `Drive` cell calls it. None, and any flow
+crosses a boundary an agent cannot observe without launching the product (a
+UI, a running service, a device) → the plan's first task builds one, and
+`Drive` cites its command. Two parts, both committed to the repo:
+
+- **A runner** — one command that starts the product in a known state, performs
+  a named action, and prints or saves the evidence (screenshot, trace, response
+  body, log excerpt). The point is that every agent in every session drives it
+  the same way; a script each agent writes for itself differs every time, and a
+  result nobody can rerun is not evidence.
+- **A feature map** — a plain file listing each user-reachable feature with how
+  to reach it: route or screen, keyboard shortcut, the stable selector or
+  control name to act on, and what it should show. It is what turns a vague
+  report ("this button is broken", a cropped screenshot) into a place the
+  runner can go, and it is maintained like code: a task that moves or renames a
+  feature updates its entry in the same commit.
+
+Without either, every later "driven and it works" is the agent's say-so, which
+is exactly the claim the flows exist to replace. A flow whose boundary needs no
+launch (a CLI command, a single HTTP call with curl) already has its harness:
+the command is the runner.
+
 **Spec has no `## Critical flows` section** (it predates 5c, or the work is
 a pure refactor with no boundary crossing): write the section anyway with a
 single row reading `none — <why>`. A missing section and an explicit "none"

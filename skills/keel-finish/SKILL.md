@@ -324,6 +324,19 @@ before integrating, if the repo has a `.learned/`
    what neither can enforce becomes a rule on its own: code a wrong version
    cannot be written in, then a check that fails, then a rule, then a human
    remembering in review — rules are third of four, not first.
+2b. **Check whether a bad pattern has already spread.** For each Critical or
+   Important review finding on this branch that names a *pattern* — a smell,
+   a workaround shape, an anti-pattern — rather than a one-line slip, search
+   the repo for the same shape outside the diff. Agents copy what they read,
+   so a pattern the reviewer caught here was often copied from somewhere, and
+   every surviving copy is a template the next agent will extend. Found
+   elsewhere → report the count and paths, propose stopping the spread first
+   (step 2a's lint rule or structural change, so no new copy can land), then
+   the cleanup as Part 2b deferred work. Do not clean up the copies on this
+   branch: they are outside its scope, and a sweep belongs in its own
+   reviewed change. Found nowhere else → one line saying so. This step reads
+   the ledger's adjudicated findings, not the rulebook, so it runs whether or
+   not the repo has a `.learned/`.
 3. For each survivor: `learned.py search "<kw>"` first — a near-duplicate
    gets a `**補充（date）**` paragraph on the existing rule, not a new ID.
    Otherwise `learned.py add <cat> "<title>"` per the skill's rule-format.
@@ -358,6 +371,7 @@ before integrating, if the repo has a `.learned/`
    a pattern invented to fill this step is worse than an empty one.
 
 No `.learned/` → one line offering `learned.py init`; do not block on it.
+Step 2b still runs.
 Rules are the only artifact from this stage that the *next* plan reads —
 `keel-plan-review` and `keel-execute` inject them into every brief — so this
 step closes the loop the whole pipeline otherwise leaves open.

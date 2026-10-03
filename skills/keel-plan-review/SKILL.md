@@ -249,6 +249,19 @@ enough to just evaluate inline.
 
 Apply surviving **Mechanical** edits directly to the plan file.
 
+**Settle empirical Taste findings before asking.** A Taste finding whose
+options differ in something running a check would show — which of two
+queries is faster on the repo's data, whether a layout fits at the target
+width, whether a library call behaves as the plan assumes — is not a judgment
+call yet. Settle it with the smallest throwaway check (a scratch file, a
+one-off command, a sketch on a branch that is then deleted), write the result
+into the finding as its evidence, and reclassify: one option now clearly wins
+→ Mechanical; the options still differ only in priority or preference → Taste,
+asked with the result attached. A check that would need production data,
+real accounts, or a cost the plan has not approved stays a question. The user's
+turn is the slowest step in this stage; a result to react to is faster to
+answer than a decision to make.
+
 Then work every surviving **Taste** finding and **User Challenge** as a
 **decision tree, in batches** (from mattpocock batch-grill-me): map which
 findings depend on another's answer (e.g. "which auth pattern" gates "session
